@@ -32,7 +32,7 @@ npm start
 | File | Description |
 | --- | --- |
 | [Default](transform/default.jsonata) | This transform attempts to flatten all supplied data. Where the source is an array of objects, the transform outputs multiple columns with a numeric suffix. The object is a | delimited string |
-| [Default](transform/moodle.jsonata) | This transform outputs the data formatted to be used by [Moodle Upload Tool](https://github.com/martinholden-skillsoft/moodle-tool_uploadpercipio) |
+| [Moodle](transform/moodle.jsonata) | This transform outputs the data formatted to be used by [Moodle Upload Tool](https://github.com/martinholden-skillsoft/moodle-tool_uploadpercipio) |
 
 
 ## Changelog
