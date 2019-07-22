@@ -14,9 +14,7 @@ const logger = require('./lib/logger');
 const myutil = require('./lib/util');
 const configuration = require('./config');
 
-const jsonatatransform = require('./lib/streams/transform.jsonata');
 const bpjsonatatransform = require('./lib/streams/backpressuretransform.jsonata');
-const csvtransform = require('./lib/streams/transform.csv');
 const bpcsvtransform = require('./lib/streams/backpressuretransform.csv');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
