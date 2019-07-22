@@ -1,0 +1,51 @@
+{
+	"name": "node-percipio-transformexample",
+	"version": "0.0.0",
+	"description": "Retrieve and transform content data from Percipio, using Node Streams.",
+	"main": "app.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node ./app.js",
+		"lint": "eslint **/*.js",
+		"preversion": "npm run lint",
+		"postversion": "git push && git push --tags && npm run changelog && git push ",
+		"postinstall": "",
+		"changelog": "rimraf CHANGELOG.md && auto-changelog --template keepachangelog && git add . && git commit . -m changelog && git push",
+		"changelog2": "rimraf CHANGELOG.md && auto-changelog --template keepachangelog"
+	},
+	"keywords": [
+		"skillsoft",
+		"percipio",
+		"jsonata",
+		"streams"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+ssh://git@github.com/martinholden-skillsoft/node-percipio-transformexample.git"
+	},
+	"author": "Martin Holden <martin.holden@skillsoft.com>",
+	"license": "MIT",
+	"dependencies": {
+		"axios": "^0.19.0",
+		"global-tunnel-ng": "^2.7.1",
+		"json-stringify-safe": "^5.0.1",
+		"jsonata": "^1.6.5",
+		"lodash": "^4.17.15",
+		"moment": "^2.24.0",
+		"papaparse": "^5.0.0",
+		"pkginfo": "^0.4.1",
+		"promise-retry": "^1.1.1",
+		"winston": "^3.2.1"
+	},
+	"devDependencies": {
+		"auto-changelog": "^1.14.1",
+		"babel-eslint": "^10.0.2",
+		"eslint": "^6.1.0",
+		"eslint-config-airbnb-base": "^13.2.0",
+		"eslint-config-prettier": "^6.0.0",
+		"eslint-plugin-import": "^2.18.2",
+		"eslint-plugin-prettier": "^3.1.0",
+		"prettier": "^1.18.2",
+		"rimraf": "^2.6.3"
+	}
+}

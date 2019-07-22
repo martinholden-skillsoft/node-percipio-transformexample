@@ -1,0 +1,257 @@
+$.(
+	$globalMaxCount := 5;
+
+    $guardnullstring := function ($source){(
+            $source ? $trim($source) : '';
+    )};
+
+    $plainstring := function ($source) {(
+        $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
+        $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
+        $apos := /&(#8217;|apos;|rsquo;)/;
+        $copy := /[\u00A9]|&(#169;|copy;)/;
+        $tm := /[\u2122]|&(#8482;|trade;)/;
+        $registered := /[\u00AE]|&(#174;|reg;)/;
+        $curylydoublequotes := /[\u201C\u201D\u201E\u201F\u2033\u2036]|&(ldquo;|rdquo;)/;
+        $pipe := /[\u007c]|&(verbar;|vert;|VerticalLine;)/;
+        $nbsp := /[\u00A0]|&(#160;|#xA0;|nbsp;)/;
+        $otherentities := /&(#?[\w\d]+;)/;
+
+        $result := $source ? $trim($source) : '';
+        $result := $replace($result, $pipe, '-');
+        $result := $replace($result, $htmltags, '');
+        $result := $replace($result, $dash, '-');
+        $result := $replace($result, $copy, '(c)');
+        $result := $replace($result, $registered, '(r)');
+        $result := $replace($result, $tm, '(tm)');
+        $result := $replace($result, $apos, $base64decode('Jw=='));
+        $result := $replace($result, $curylydoublequotes, '"');
+        $result := $replace($result, $nbsp, ' ');
+        $result := $replace($result, $otherentities, '');
+        $result; 
+    )};
+
+    $ellipsis := function ($source, $maxlength, $ellipsisString) {(
+        $wordboundary := /\s(\w+)$/;
+        $trimlength := $maxlength - $length($ellipsisString);
+
+        $needtrim := ($length($source) > $maxlength);
+        $trimmedSource := $needtrim ? $trim($substring($source, 0, $trimlength));
+
+        $trimmedSource := $replace($trimmedSource, $wordboundary, '') & $ellipsisString;
+        $needtrim ? $trimmedSource : $source;
+    )};
+
+    $isodurationtoseconds := function ($isoduration) {(
+        $input := $isoduration = null ? '' : $isoduration;
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '0';
+        $remainder := $substringAfter($time, 'H');
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '0';
+        $remainder := $substringAfter($remainder, 'M');
+        $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '0';
+
+        $result := (($number($hours) * 3600) + ($number($minutes) * 60) + $number($seconds));
+        $result;
+    )};
+
+    $isodurationtominutes := function ($isoduration, $precision) {(
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 60, $prec);
+        $result;
+    )};
+
+    $isodurationtohours := function ($isoduration, $precision) {(
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 3600, $prec);
+        $result;
+    )};
+
+    $isodurationtohhmmss := function ($isoduration) {(
+        $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
+		$time := $substringAfter($input, 'T');
+		$hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
+		$remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
+		$minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
+		$remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
+		$result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0') & ':' & $pad($seconds, -2, '0');
+        $result;
+    )};
+
+    $locale := function ($source, $default) {(
+            $result:= $lookup([{
+                    'en-us': 'English',
+                    'en': 'English',
+                    'fr': 'French',
+                    'fr-fr': 'French',
+                    'de': 'German',
+                    'de-de': 'German',
+                    'es': 'Spanish',
+                    'es-do': 'Spanish'
+                }
+            ], $lowercase($trim($source)));
+
+            $result ? $result : $default;
+    )};
+
+    $localizeddata := function ($source, $default, $preferred ) {(
+        $preferredLocale := $preferred ? $preferred : $default;
+        
+        $result := $filter($source, function($v, $i, $a) {
+            $v.localeCode = $preferredLocale
+        });
+        
+        $count($result) > 0 ? $result[0] : $source[0]
+    )};
+
+	$flattenArrayAndObject := function($source, $columnprefix, $maxCount) {(
+    	$maxCount := $maxCount ? $maxCount : $globalMaxCount ? $globalMaxCount : 10;
+    
+		$padarray := [1..$maxCount].('');
+		$sourceArray := $count($source)=0 ? [] : [];
+        $result := '';
+        
+		$sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
+        		$model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
+                $delimiter:= $count($keys($v)) > 0 ? '|' : '';
+                $trimend:= $count($keys($v)) > 0;
+        		$kv := $spread($model);
+               	$result:= $reduce($kv, function($accum, $val) {(
+                	$accum & $each($val, function($val, $key) {$val}) & $delimiter;
+                )}, '');
+                $trimend ? $substring($result,0,$length($result)-1) : $result;
+        )})
+        );
+
+		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+				$v != ''
+		});
+
+		$sourceArray := $append($sourceArray, $padarray);
+	
+		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+				$i < $maxCount
+		});
+
+		$sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
+				$columnprefix & ($i + 1) & '~|~' & $v
+		});
+
+		$sourceArrayDelimited.{
+				$substringBefore('~|~'): $substringAfter('~|~')
+		}
+    )};
+
+    $localeCodes := function(){(
+        $flattenArrayAndObject(localeCodes,'localeCodes');
+    )};
+    
+    $keywords := function(){(
+        $flattenArrayAndObject(keywords,'keywords');
+    )};
+	
+    $localizedMetadata := function(){(
+        $flattenArrayAndObject(localizedMetadata,'localizedMetadata');
+    )};
+	
+    $by := function(){(
+        $flattenArrayAndObject(by,'by');
+    )};
+	
+    $expertiseLevels := function(){(
+        $flattenArrayAndObject(expertiseLevels,'expertiseLevels');
+    )};
+
+	$modalities := function(){(
+        $flattenArrayAndObject(modalities,'modalities');
+    )};
+	
+    $associationsAreas := function(){(
+        $flattenArrayAndObject(associations.areas,'associations.areas');
+    )};
+
+    $associationsSubjects := function(){(
+        $flattenArrayAndObject(associations.subjects,'associations.subjects');
+    )};
+
+    $associationsChannels := function(){(
+        $flattenArrayAndObject(associations.channels,'associations.channels');
+    )};
+
+	$associationsParent := function(){(
+        $flattenArrayAndObject(associations.parent,'associations.parent');
+    )};
+
+	$moodletags := function(){(
+    	$keywords := keywords ? keywords : [];
+		$keywords := $append($keywords, $map(associations.areas, function($v, $i, $a) {
+        	$v ? $trim($v) : ''
+		}));
+        
+        $keywords := $append($keywords, $map(associations.subjects, function($v, $i, $a) {
+        	$v ? $trim($v) : ''
+		}));
+
+		$keywords := $append($keywords, $map(associations.channels, function($v, $i, $a) {
+        	$v.title ? $trim($v.title) : ''
+		}));
+        
+        $keywords := $map($sort($keywords),function($v, $i, $a){
+        	$i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
+        );
+        
+        $keywords := $filter($keywords, function($v, $i, $a) {
+          $v != ''
+        });
+        
+        $count($keywords) = 0 ? '' : $join($keywords,'|')
+    )};
+
+    $moodlechannel := function(){(
+        $channelTitle := $lookup([{
+				'audiobook': associations.channels[0].title,
+				'book': associations.channels[0].title,
+				'channel': localizedMetadata[0].title,
+				'course': associations.channels[0].title,
+				'linked_content': associations.channels[0].title,
+				'video': associations.channels[0].title
+			}
+		], $lowercase(contentType.percipioType));
+
+        $channelUUID := $lookup([{
+				'audiobook': associations.channels[0].id,
+				'book': associations.channels[0].id,
+				'channel': id,
+				'course': associations.channels[0].id,
+				'linked_content': associations.channels[0].id,
+				'video': associations.channels[0].id
+			}
+		], $lowercase(contentType.percipioType));
+
+        $result:= { 'title': $channelTitle ? $channelTitle: '', 'id': $channelUUID ? $channelUUID : '', 'locale' : localizedMetadata[0].localeCode };
+        $result;
+    )};
+    
+    $moodleChannelInfo := $moodlechannel();
+
+    $transformed_data := (
+    	$.{
+            'ContentUUID': id ? id : '',
+            'Title': localizedMetadata[0].title ? $plainstring(localizedMetadata[0].title & ' (' & $locale(localizedMetadata[0].localeCode,'English') & ')') : '',
+            'Description': localizedMetadata[0].description ? $plainstring(localizedMetadata[0].description) : '',
+            'ShareLinkURL': link ? link : '',
+            'ThumbnailImageURL' : imageUrl ? imageUrl : '',
+            'PercipioType' : contentType ? contentType.displayLabel : '',
+            'Duration': duration ? $isodurationtohhmmss(duration) : '00:00:00',
+            'Tags': $moodletags(),
+            'Visible': lifecycle.status = 'ACTIVE' ? 1 : 0,
+            'Channel': $moodleChannelInfo.title & ' (' & $locale($moodleChannelInfo.locale,'English') & ')',
+            'ChannelUUID': $locale($moodleChannelInfo.locale,'English') = 'English' ? $moodleChannelInfo.id : $moodleChannelInfo.id & '_' & $moodleChannelInfo.locale
+          }
+    );
+        
+    $results := $transformed_data;
+    $results;
+)

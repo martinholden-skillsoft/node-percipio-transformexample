@@ -1,0 +1,75 @@
+$.(
+	$globalMaxCount := 5;
+
+	$flattenArrayAndObject := function($source, $columnprefix, $maxCount) {(
+    	$maxCount := $maxCount ? $maxCount : $globalMaxCount ? $globalMaxCount : 10;
+    
+		$padarray := [1..$maxCount].('');
+		$sourceArray := $count($source)=0 ? [] : [];
+        $result := '';
+        
+		$sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
+        		
+        
+        		$model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
+                $delimiter:= $count($keys($v)) > 0 ? '|' : '';
+                $trimend:= $count($keys($v)) > 0;
+        		$kv := $spread($model);
+               	$result:= $reduce($kv, function($accum, $val) {(
+                	$accum & $each($val, function($val, $key) {$val}) & $delimiter;
+                )}, '');
+                $trimend ? $substring($result,0,$length($result)-1) : $result;
+        )})
+        );
+
+		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+				$v != ''
+		});
+
+		$sourceArray := $append($sourceArray, $padarray);
+	
+		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+				$i < $maxCount
+		});
+
+		$sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
+				$columnprefix & ($i + 1) & '~|~' & $v
+		});
+
+		$sourceArrayDelimited.{
+				$substringBefore('~|~'): $substringAfter('~|~')
+		}
+     )
+	};
+
+
+    $localeCodes := ($flattenArrayAndObject(localeCodes,'localeCodes'));
+    $keywords := ($flattenArrayAndObject(keywords,'keywords'));
+	$localizedMetadata := ($flattenArrayAndObject(localizedMetadata,'localizedMetadata'));
+	$by := ($flattenArrayAndObject(by,'by'));
+	$expertiseLevels := ($flattenArrayAndObject(expertiseLevels,'expertiseLevels'));
+	$modalities := ($flattenArrayAndObject(modalities,'modalities'));
+	$associationsAreas := ($flattenArrayAndObject(associations.areas,'associations.areas'));
+    $associationsSubjects := ($flattenArrayAndObject(associations.subjects,'associations.subjects'));
+    $associationsChannels := ($flattenArrayAndObject(associations.channels,'associations.channels'));
+	$associationsParent := ($flattenArrayAndObject(associations.parent,'associations.parent'));
+
+
+	$transformed_data := (
+		$.{
+		'id': id,
+		'xapiActivityId': xapiActivityId,
+		'contentType.percipioType': contentType.percipioType,
+        'contentType.category': contentType.category,
+        'contentType.displayLabel': contentType.displayLabel,
+        'lifecycle.status': lifecycle.status,
+        'lifecycle.publishDate': lifecycle.publishDate,
+        'lifecycle.lastUpdatedDate':lifecycle.lastUpdatedDate,
+        'link':link,
+        'imageUrl':imageUrl,
+        'duration': duration
+	});
+    
+	$results := $merge([$transformed_data, $localeCodes, $localizedMetadata, $keywords, $by, $expertiseLevels, $modalities, $associationsAreas, $associationsSubjects, $associationsChannels, $associationsParent]);
+	$results;
+)
