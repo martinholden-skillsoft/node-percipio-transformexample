@@ -82,14 +82,14 @@ $.(
 
     $locale := function ($source, $default) {(
             $result:= $lookup([{
-                    'en-us': 'English',
-                    'en': 'English',
-                    'fr': 'French',
-                    'fr-fr': 'French',
-                    'de': 'German',
-                    'de-de': 'German',
-                    'es': 'Spanish',
-                    'es-do': 'Spanish'
+                    'en-us': '',
+                    'en': '',
+                    'fr': ' (Français)',
+                    'fr-fr': ' (Français)',
+                    'de': ' (Deutsch)',
+                    'de-de': ' (Deutsch)',
+                    'es': ' (Español)',
+                    'es-do': ' (Español)'
                 }
             ], $lowercase($trim($source)));
 
@@ -184,7 +184,7 @@ $.(
         $flattenArrayAndObject(associations.parent,'associations.parent');
     )};
 
-	$moodletags := function(){(
+	$moodletags := function($otherKeyword){(
     	$keywords := keywords ? keywords : [];
 		$keywords := $append($keywords, $map(associations.areas, function($v, $i, $a) {
         	$v ? $trim($v) : ''
@@ -197,6 +197,8 @@ $.(
 		$keywords := $append($keywords, $map(associations.channels, function($v, $i, $a) {
         	$v.title ? $trim($v.title) : ''
 		}));
+
+        $keywords := $otherKeyword ? $append($keywords, [ $otherKeyword]) : $keywords;
         
         $keywords := $map($sort($keywords),function($v, $i, $a){
         	$i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
@@ -239,16 +241,17 @@ $.(
     $transformed_data := (
     	$.{
             'ContentUUID': id ? id : '',
-            'Title': localizedMetadata[0].title ? $plainstring(localizedMetadata[0].title & ' (' & $locale(localizedMetadata[0].localeCode,'English') & ')') : '',
+            'Title':  localizedMetadata[0].title ? '('& contentType.displayLabel & ') ' & $plainstring(localizedMetadata[0].title & $locale(localizedMetadata[0].localeCode,'')) : '',
             'Description': localizedMetadata[0].description ? $plainstring(localizedMetadata[0].description) : '',
             'ShareLinkURL': link ? link : '',
             'ThumbnailImageURL' : imageUrl ? imageUrl : '',
             'PercipioType' : contentType ? contentType.displayLabel : '',
             'Duration': duration ? $isodurationtohhmmss(duration) : '00:00:00',
-            'Tags': $moodletags(),
+            'Tags': $moodletags($moodleChannelInfo.title),
             'Visible': lifecycle.status = 'ACTIVE' ? 1 : 0,
-            'Channel': $moodleChannelInfo.title & ' (' & $locale($moodleChannelInfo.locale,'English') & ')',
-            'ChannelUUID': $locale($moodleChannelInfo.locale,'English') = 'English' ? $moodleChannelInfo.id : $moodleChannelInfo.id & '_' & $moodleChannelInfo.locale
+            'Channel': $moodleChannelInfo.title,
+            'ChannelUUID': $moodleChannelInfo.id,
+            'INCREMENT':  $number($millis() - ($floor($toMillis($now())/10000)*10000))
           }
     );
         
