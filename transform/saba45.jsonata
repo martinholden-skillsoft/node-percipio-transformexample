@@ -1,0 +1,389 @@
+$.(
+	$globalMaxCount := 5;
+
+    $guardnullstring := function ($source){(
+            $source ? $trim($source) : '';
+    )};
+
+    $plainstring := function ($source) {(
+        $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
+        $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
+        $apos := /&(#8217;|apos;|rsquo;)/;
+        $copy := /[\u00A9]|&(#169;|copy;)/;
+        $tm := /[\u2122]|&(#8482;|trade;)/;
+        $registered := /[\u00AE]|&(#174;|reg;)/;
+        $curylydoublequotes := /[\u201C\u201D\u201E\u201F\u2033\u2036]|&(ldquo;|rdquo;)/;
+        $pipe := /[\u007c]|&(verbar;|vert;|VerticalLine;)/;
+        $nbsp := /[\u00A0]|&(#160;|#xA0;|nbsp;)/;
+        $otherentities := /&(#?[\w\d]+;)/;
+
+        $result := $source ? $trim($source) : '';
+        $result := $replace($result, $pipe, '-');
+        $result := $replace($result, $htmltags, '');
+        $result := $replace($result, $dash, '-');
+        $result := $replace($result, $copy, '(c)');
+        $result := $replace($result, $registered, '(r)');
+        $result := $replace($result, $tm, '(tm)');
+        $result := $replace($result, $apos, $base64decode('Jw=='));
+        $result := $replace($result, $curylydoublequotes, '"');
+        $result := $replace($result, $nbsp, ' ');
+        $result := $replace($result, $otherentities, '');
+        $result; 
+    )};
+
+    $ellipsis := function ($source, $maxlength, $ellipsisString) {(
+        $wordboundary := /\s(\w+)$/;
+        $trimlength := $maxlength - $length($ellipsisString);
+
+        $needtrim := ($length($source) > $maxlength);
+        $trimmedSource := $needtrim ? $trim($substring($source, 0, $trimlength));
+
+        $trimmedSource := $replace($trimmedSource, $wordboundary, '') & $ellipsisString;
+        $needtrim ? $trimmedSource : $source;
+    )};
+
+    $isodurationtoseconds := function ($isoduration) {(
+        $input := $isoduration = null ? '' : $isoduration;
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '0';
+        $remainder := $substringAfter($time, 'H');
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '0';
+        $remainder := $substringAfter($remainder, 'M');
+        $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '0';
+
+        $result := (($number($hours) * 3600) + ($number($minutes) * 60) + $number($seconds));
+        $result;
+    )};
+
+    $isodurationtominutes := function ($isoduration, $precision) {(
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 60, $prec);
+        $result;
+    )};
+
+    $isodurationtohours := function ($isoduration, $precision) {(
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 3600, $prec);
+        $result;
+    )};
+
+    $isodurationtohhmm := function ($isoduration) {(
+        $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
+		    $time := $substringAfter($input, 'T');
+		    $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
+		    $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
+		    $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
+		    $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
+		    $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0');
+        $result;
+    )};
+
+    $isodurationtohhmmss := function ($isoduration) {(
+        $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
+		    $time := $substringAfter($input, 'T');
+		    $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
+		    $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
+		    $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
+		    $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
+		    $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0') & ':' & $pad($seconds, -2, '0');
+        $result;
+    )};
+
+    $locale := function ($source, $default) {(
+            $result:= $lookup([{
+                    'en-us': '',
+                    'en': '',
+                    'fr': ' (Français)',
+                    'fr-fr': ' (Français)',
+                    'de': ' (Deutsch)',
+                    'de-de': ' (Deutsch)',
+                    'es': ' (Español)',
+                    'es-do': ' (Español)'
+                }
+            ], $lowercase($trim($source)));
+
+            $result ? $result : $default;
+    )};
+
+    $localizeddata := function ($source, $default, $preferred ) {(
+        $preferredLocale := $preferred ? $preferred : $default;
+        
+        $result := $filter($source, function($v, $i, $a) {
+            $v.localeCode = $preferredLocale
+        });
+        
+        $count($result) > 0 ? $result[0] : $source[0]
+    )};
+
+	$flattenArrayAndObject := function($source, $columnprefix, $maxCount) {(
+    	$maxCount := $maxCount ? $maxCount : $globalMaxCount ? $globalMaxCount : 10;
+    
+		$padarray := [1..$maxCount].('');
+		$sourceArray := $count($source)=0 ? [] : [];
+        $result := '';
+        
+		$sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
+        		$model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
+                $delimiter:= $count($keys($v)) > 0 ? '|' : '';
+                $trimend:= $count($keys($v)) > 0;
+        		$kv := $spread($model);
+               	$result:= $reduce($kv, function($accum, $val) {(
+                	$accum & $each($val, function($val, $key) {$val}) & $delimiter;
+                )}, '');
+                $trimend ? $substring($result,0,$length($result)-1) : $result;
+        )})
+        );
+
+		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+				$v != ''
+		});
+
+		$sourceArray := $append($sourceArray, $padarray);
+	
+		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+				$i < $maxCount
+		});
+
+		$sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
+				$columnprefix & ($i + 1) & '~|~' & $v
+		});
+
+		$sourceArrayDelimited.{
+				$substringBefore('~|~'): $substringAfter('~|~')
+		}
+    )};
+
+    $localeCodes := function(){(
+        $flattenArrayAndObject(localeCodes,'localeCodes');
+    )};
+    
+    $keywords := function(){(
+        $flattenArrayAndObject(keywords,'keywords');
+    )};
+	
+    $localizedMetadata := function(){(
+        $flattenArrayAndObject(localizedMetadata,'localizedMetadata');
+    )};
+	
+    $by := function(){(
+        $flattenArrayAndObject(by,'by');
+    )};
+	
+    $expertiseLevels := function(){(
+        $flattenArrayAndObject(expertiseLevels,'expertiseLevels');
+    )};
+
+	  $modalities := function(){(
+        $flattenArrayAndObject(modalities,'modalities');
+    )};
+	
+    $associationsAreas := function(){(
+        $flattenArrayAndObject(associations.areas,'associations.areas');
+    )};
+
+    $associationsSubjects := function(){(
+        $flattenArrayAndObject(associations.subjects,'associations.subjects');
+    )};
+
+    $associationsChannels := function(){(
+        $flattenArrayAndObject(associations.channels,'associations.channels');
+    )};
+
+	  $associationsParent := function(){(
+        $flattenArrayAndObject(associations.parent,'associations.parent');
+    )};
+
+    $sabakeywords := function($otherKeyword){(
+    	$keywords := keywords ? keywords : [];
+      $keywords := $append($keywords, $map(associations.areas, function($v, $i, $a) {
+            $v ? $trim($v) : ''
+      }));
+          
+      $keywords := $append($keywords, $map(associations.subjects, function($v, $i, $a) {
+        	$v ? $trim($v) : ''
+		  }));
+
+      $keywords := $append($keywords, $map(associations.channels, function($v, $i, $a) {
+            $v.title ? $trim($v.title) : ''
+      }));
+
+      $keywords := $otherKeyword ? $append($keywords, [ $otherKeyword]) : $keywords;
+      
+      $keywords := $map($sort($keywords),function($v, $i, $a){
+        $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
+      );
+      
+      $keywords := $filter($keywords, function($v, $i, $a) {
+        $v != ''
+      });
+      
+      $count($keywords) = 0 ? '' : $join($keywords,',')
+    )};
+
+    $sabatitle := function($length){(
+        $maxlength:= $length ? $length : 255;
+        $ellipsis('(' & contentType.displayLabel & ') ' & $plainstring(localizedMetadata[0].title), $maxlength, ' ...');
+    )};
+
+    $sabadescription := function($length){(
+        $maxlength:= $length ? $length : 2000;
+        $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
+    )};
+
+
+    $sabatags := function(){(
+        (
+            $tagmaxlength:= 25;
+			$maxkeywords:= $globalMaxCount ? $globalMaxCount : 10;
+			$padarray := [1..$maxkeywords].('');
+			$keywords := keywords ? keywords : [];
+			
+			$keywords := $append($keywords, $map(associations.areas, function ($v, $i, $a) {
+				$v ? $ellipsis($v,$tagmaxlength,'') : ''
+			}));
+			
+			$keywords := $append($keywords, $map(associations.subjects, function ($v, $i, $a) {
+				$v ? $ellipsis($v,$tagmaxlength,'') : ''
+			}));
+			
+			$keywords := $append($keywords, $map(associations.channels, function ($v, $i, $a) {
+				$v.title ? $ellipsis($v.title,$tagmaxlength,'') : ''
+			}));
+			
+			$keywords := $map($sort($keywords), function ($v, $i, $a) {
+				$i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
+			});
+			
+			$keywords := $filter($keywords, function ($v, $i, $a) {
+				$v != ''
+			});
+			$keywords := $append($keywords, $padarray);
+			
+			$keywords := $filter($keywords, function ($v, $i, $a) {
+				$i < $maxkeywords
+			});
+			
+			$topic_key_value_string_combined := $map($keywords, function ($v, $i, $a) {
+				'TAG' & ($i + 1) & '~|~' & $v
+			});
+			
+			$convert_to_topicn_values := $topic_key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
+			
+			$convert_to_topicn_values
+		);
+    )};
+
+    $sabacategories := function($category){(
+        (
+            $basecategory:= $category ? $category: 'Skillsoft';
+			$maxkeywords:= $globalMaxCount ? $globalMaxCount : 10;
+			$padarray := [1..$maxkeywords].('');
+	
+            $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? [$basecategory &'\\'&localizedMetadata[0].title] : $count(associations.channels) = 0 ? [$basecategory] : [];
+            
+			$keywords := $append($keywords, $map(associations.channels, function ($v, $i, $a) {
+				$v.title ? $trim('SkillSoft\\'&$v.title) : ''
+			}));
+			
+			$keywords := $map($sort($keywords), function ($v, $i, $a) {
+				$i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
+			});
+			
+			$keywords := $filter($keywords, function ($v, $i, $a) {
+				$v != ''
+			});
+			$keywords := $append($keywords, $padarray);
+			
+			$keywords := $filter($keywords, function ($v, $i, $a) {
+				$i < $maxkeywords
+			});
+
+			$key_value_string_combined := $map($keywords, function ($v, $i, $a) {
+				'CATEGORY' & ($i + 1) & '~|~' & $v
+			});
+			
+			$convert_to_values := $key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
+			
+			$convert_to_values
+		);
+    )};
+
+   	$transformed_data := (
+    	$.{
+        'ID': '',
+        'CONTENTTITLE': $sabatitle(),
+        'NEW_CONTENTTITLE': $sabatitle(),
+        'NEW_COURSETITLE': $sabatitle(),
+        'CONTENTFORMAT': 'URL',
+        'SPLIT': lifecycle.status = 'ACTIVE' ? 'World' : 'Archive',
+        'PLAYERTEMPLATE': 'Percipio',
+        'ZIPFILENAME': '',
+        'CSFILESTITLE': '',
+        'CSFILESRELATIVEPATH': '',
+        'CREATEWBTCOURSE': 'TRUE',
+        'MOBILECOMPATIBILITY': 'allDevices-responsive',
+        'CONTENTFOLDER': 'PERCIPIO_CONTENT',
+        'CONTENTTYPE': 'Website',
+        'EXTERNALID': xapiActivityId,
+        'COURSE_NO': id,
+        'AVAILABLEOFFLINE': '',
+        'VERSION': '',
+        'CONTENTPROVIDER': 'Percipio_URL_Vendor',
+        'DELIVERYVENDOR': 'Saba',
+        'SECURECONTEXT': '',
+        'CONTENTSERVER': 'Saba Default Content Server',
+        'LOCATIONORURL': link,
+        'LAUNCHURL': link,
+        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $sabadescription() : '',
+        'COURSE_ABSTRACT': localizedMetadata[0].description ? $sabadescription(1000) : '',
+        'OWNER': 'SSADMIN',
+        'SUREVALMRA': '',
+        'ISSCORING': 'FALSE',
+        'ESIGNATURE': '',
+        'USEAICCBRIDGE': '',
+        'ISSECURE': '',
+        'AUTHOR': $count(by) = 0 ? 'Skillsoft' : $trim($substring($join(by, ', '), 0, 255)),
+        'LANGUAGE': (
+            $locale := $lookup([{
+              'en': 'English',
+              'fr': 'French',
+              'de': 'German',
+              'es': 'Spanish'
+            }
+          ], ($lowercase(localeCodes[0] ? $split(localeCodes[0],'-')[0] : 'en')));
+            $locale ? $locale : 'English'
+        ),
+        'KEYWORDS' :  $sabakeywords(),
+        'CONTENT_STATUS': lifecycle.status = 'ACTIVE' ? 'PUBLISHED' : 'ON_HOLD',
+        'COURSE_IMAGE_URL': imageUrl,
+        'DESCRIPTION': localizedMetadata[0].description ? $sabadescription() : '',
+        'DISPLAY_CALL_CENTER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
+        'DISPLAY_LEARNER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
+        'WBT_DURATION': $isodurationtohhmm(duration),
+        'MARK_COMPLETE_EXTERNALLY': (
+            $markComplete := $lookup([{
+                'audiobook': 'TRUE',
+                'book': 'TRUE',
+                'channel': 'FALSE',
+                'course': 'TRUE',
+                'linked_content': 'TRUE',
+                'video': 'TRUE'
+              }
+            ], $lowercase(contentType.percipioType)); $markComplete ? $markComplete : 'FALSE';
+        ),
+        'DELIVERY_TYPE': 'Skillsoft ' & contentType.displayLabel,
+        'DISCONTINUE_FROM' : lifecycle.status = 'ACTIVE' ? '' : $substringBefore($now(),'T'),
+        'EXPIRATIONDATE' : lifecycle.status = 'ACTIVE' ? '' : $substringBefore($now(),'T'),
+        'DROP_REGISTRATIONS' : lifecycle.status = 'ACTIVE' ? '' : 'TRUE',
+        'DISCONTINUE_ALL_ENROLLMENTS' : lifecycle.status = 'ACTIVE' ? '' : 'TRUE',
+        'REMOVE_COURSE_FROM_ALL_PLANS': lifecycle.status = 'ACTIVE' ? '' : 'TRUE',
+        'COURSE_HIDE_CLASSMATES': 'FALSE',
+        'COURSE_TARGET_DAYS': 0
+      }
+    );
+        
+    $results := $merge([$transformed_data, $sabatags(), $sabacategories()]);
+    $results;
+)
