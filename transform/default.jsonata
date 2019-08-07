@@ -1,75 +1,152 @@
 $.(
-	$globalMaxCount := 5;
+    $globalMaxCount := 5;
 
-	$flattenArrayAndObject := function($source, $columnprefix, $maxCount) {(
-    	$maxCount := $maxCount ? $maxCount : $globalMaxCount ? $globalMaxCount : 10;
-    
-		$padarray := [1..$maxCount].('');
-		$sourceArray := $count($source)=0 ? [] : [];
+    $plainstring := function ($source) {
+    (
+        $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
+        $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
+        $apos := /&(#8217;|apos;|rsquo;)/;
+        $copy := /[\u00A9]|&(#169;|copy;)/;
+        $tm := /[\u2122]|&(#8482;|trade;)/;
+        $registered := /[\u00AE]|&(#174;|reg;)/;
+        $curylydoublequotes := /[\u201C\u201D\u201E\u201F\u2033\u2036]|&(ldquo;|rdquo;)/;
+        $pipe := /[\u007c]|&(verbar;|vert;|VerticalLine;)/;
+        $nbsp := /[\u00A0]|&(#160;|#xA0;|nbsp;)/;
+        $otherentities := /&(#?[\w\d]+;)/;
+
+        $result := $source ? $trim($source) : '';
+        $result := $replace($result, $pipe, '-');
+        $result := $replace($result, $htmltags, '');
+        $result := $replace($result, $dash, '-');
+        $result := $replace($result, $copy, '(c)');
+        $result := $replace($result, $registered, '(r)');
+        $result := $replace($result, $tm, '(tm)');
+        $result := $replace($result, $apos, $base64decode('Jw=='));
+        $result := $replace($result, $curylydoublequotes, '"');
+        $result := $replace($result, $nbsp, ' ');
+        $result := $replace($result, $otherentities, '');
+        $result; )
+};
+
+    $ellipsis := function ($source, $maxlength, $ellipsisString) {
+    (
+        $wordboundary := /\s(\w+)$/;
+        $trimlength := $maxlength - $length($ellipsisString);
+
+        $needtrim := ($length($source) > $maxlength);
+        $trimmedSource := $needtrim ? $trim($substring($source, 0, $trimlength));
+
+        $trimmedSource := $replace($trimmedSource, $wordboundary, '') & $ellipsisString;
+        $needtrim ? $trimmedSource : $source; )
+};
+
+    $isodurationtoseconds := function ($isoduration) {
+    (
+        $input := $isoduration = null ? '' : $isoduration;
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '0';
+        $remainder := $substringAfter($time, 'H');
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '0';
+        $remainder := $substringAfter($remainder, 'M');
+        $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '0';
+
+        $result := (($number($hours) * 3600) + ($number($minutes) * 60) + $number($seconds));
+        $result; )
+};
+
+    $isodurationtominutes := function ($isoduration, $precision) {
+    (
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 60, $prec);
+        $result; )
+};
+
+    $isodurationtohours := function ($isoduration, $precision) {
+    (
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 3600, $prec);
+        $result; )
+};
+
+    $title300 := (
+        $ellipsis($plainstring(localizedMetadata[0].title), 300, ' ...'); );
+
+    $description2000 := (
+        $ellipsis($plainstring(localizedMetadata[0].description), 2000, ' ...'); );
+
+    $flattenArrayAndObject := function ($source, $columnprefix, $maxCount) {
+    (
+        $maxCount := $maxCount ? $maxCount : $globalMaxCount ? $globalMaxCount : 10;
+
+        $padarray := [1..$maxCount].('');
+        $sourceArray := $count($source) = 0 ? [] : [];
         $result := '';
-        
-		$sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
-        		
-        
-        		$model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
-                $delimiter:= $count($keys($v)) > 0 ? '|' : '';
-                $trimend:= $count($keys($v)) > 0;
-        		$kv := $spread($model);
-               	$result:= $reduce($kv, function($accum, $val) {(
-                	$accum & $each($val, function($val, $key) {$val}) & $delimiter;
-                )}, '');
-                $trimend ? $substring($result,0,$length($result)-1) : $result;
-        )})
-        );
 
-		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
-				$v != ''
-		});
+        $sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {
+                (
 
-		$sourceArray := $append($sourceArray, $padarray);
-	
-		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
-				$i < $maxCount
-		});
+                    $model := $count($keys($v)) > 0 ? $v : {
+                    'key': $v ? $v : ''
+                };
+                    $delimiter := $count($keys($v)) > 0 ? '|' : '';
+                    $trimend := $count($keys($v)) > 0;
+                    $kv := $spread($model);
+                    $result := $reduce($kv, function ($accum, $val) {
+                        (
+                            $accum & $each($val, function ($val, $key) {
+                                $val
+                            }) & $delimiter; )
+                    }, '');
+                    $trimend ? $substring($result, 0, $length($result) - 1) : $result; )
+            }));
 
-		$sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
-				$columnprefix & ($i + 1) & '~|~' & $v
-		});
+        $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+            $v != ''
+        });
 
-		$sourceArrayDelimited.{
-				$substringBefore('~|~'): $substringAfter('~|~')
-		}
-     )
-	};
+        $sourceArray := $append($sourceArray, $padarray);
 
+        $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+            $i < $maxCount
+        });
 
-    $localeCodes := ($flattenArrayAndObject(localeCodes,'localeCodes'));
-    $keywords := ($flattenArrayAndObject(keywords,'keywords'));
-	$localizedMetadata := ($flattenArrayAndObject(localizedMetadata,'localizedMetadata'));
-	$by := ($flattenArrayAndObject(by,'by'));
-	$expertiseLevels := ($flattenArrayAndObject(expertiseLevels,'expertiseLevels'));
-	$modalities := ($flattenArrayAndObject(modalities,'modalities'));
-	$associationsAreas := ($flattenArrayAndObject(associations.areas,'associations.areas'));
-    $associationsSubjects := ($flattenArrayAndObject(associations.subjects,'associations.subjects'));
-    $associationsChannels := ($flattenArrayAndObject(associations.channels,'associations.channels'));
-	$associationsParent := ($flattenArrayAndObject(associations.parent,'associations.parent'));
+        $sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
+            $columnprefix & ($i + 1) & '~|~' & $v
+        });
 
+        $sourceArrayDelimited.{
+        $substringBefore('~|~'): $substringAfter('~|~')
+    })
+};
 
-	$transformed_data := (
-		$.{
-		'id': id,
-		'xapiActivityId': xapiActivityId,
-		'contentType.percipioType': contentType.percipioType,
+    $localeCodes := ($flattenArrayAndObject(localeCodes, 'localeCodes'));
+    $keywords := ($flattenArrayAndObject(keywords, 'keywords'));
+    $localizedMetadata := ($flattenArrayAndObject(localizedMetadata, 'localizedMetadata'));
+    $by := ($flattenArrayAndObject(by, 'by'));
+    $expertiseLevels := ($flattenArrayAndObject(expertiseLevels, 'expertiseLevels'));
+    $modalities := ($flattenArrayAndObject(modalities, 'modalities'));
+    $associationsAreas := ($flattenArrayAndObject(associations.areas, 'associations.areas'));
+    $associationsSubjects := ($flattenArrayAndObject(associations.subjects, 'associations.subjects'));
+    $associationsChannels := ($flattenArrayAndObject(associations.channels, 'associations.channels'));
+    $associationsParent := ($flattenArrayAndObject(associations.parent, 'associations.parent'));
+
+    $transformed_data := (
+        $.{
+        'id' : id,
+        'xapiActivityId': xapiActivityId,
+        'contentType.percipioType': contentType.percipioType,
         'contentType.category': contentType.category,
         'contentType.displayLabel': contentType.displayLabel,
         'lifecycle.status': lifecycle.status,
         'lifecycle.publishDate': lifecycle.publishDate,
-        'lifecycle.lastUpdatedDate':lifecycle.lastUpdatedDate,
-        'link':link,
-        'imageUrl':imageUrl,
+        'lifecycle.lastUpdatedDate': lifecycle.lastUpdatedDate,
+        'link': link,
+        'imageUrl': imageUrl,
         'duration': duration
-	});
-    
-	$results := $merge([$transformed_data, $localeCodes, $localizedMetadata, $keywords, $by, $expertiseLevels, $modalities, $associationsAreas, $associationsSubjects, $associationsChannels, $associationsParent]);
-	$results;
+    });
+
+    $results := $merge([$transformed_data, $localeCodes, $localizedMetadata, $keywords, $by, $expertiseLevels, $modalities, $associationsAreas, $associationsSubjects, $associationsChannels, $associationsParent]);
+    $results;
 )
