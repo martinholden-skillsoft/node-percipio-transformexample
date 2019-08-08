@@ -1,10 +1,33 @@
 $.(
-	$globalMaxCount := 5;
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'TRANSFORM FOR SABA RELEASE 45';
+    $comment := 'Author: Martin Holden';
+    $comment := 'Date: 08-AUG-2019';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
 
-    $guardnullstring := function ($source){(
-            $source ? $trim($source) : '';
-    )};
 
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Global Constants';
+	
+    $globalMaxCount := 5;
+    
+    $comment := 'End of Global Constants';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Generic Function Library';
+
+    $comment := '*******************************************************';
+    $comment := '* Converts a string such as description to plain string,by stripping out';
+    $comment := '* HTML tags and HTML Entities';
+    $comment := '* @param {string} $source';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
     $plainstring := function ($source) {(
         $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
         $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
@@ -31,6 +54,15 @@ $.(
         $result; 
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Shortens a string at a word boundary to the specified length, option to';
+    $comment := '* define suffix to show this such as ...';
+    $comment := '* @param {string} $source';
+    $comment := '* @param {number} $maxlength - The maximum length, if $ellipsisString is';
+    $comment := '*                                 the overall length allows for this';
+    $comment := '* @param {string} $ellipsisString - The suffix to use';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
     $ellipsis := function ($source, $maxlength, $ellipsisString) {(
         $wordboundary := /\s(\w+)$/;
         $trimlength := $maxlength - $length($ellipsisString);
@@ -42,6 +74,12 @@ $.(
         $needtrim ? $trimmedSource : $source;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total seconds';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';    
     $isodurationtoseconds := function ($isoduration) {(
         $input := $isoduration = null ? '' : $isoduration;
         $time := $substringAfter($input, 'T');
@@ -55,6 +93,13 @@ $.(
         $result;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total minutes, to the specified precision';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @param {number} [$precision=2] - The precision';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';  
     $isodurationtominutes := function ($isoduration, $precision) {(
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
@@ -62,6 +107,13 @@ $.(
         $result;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total hours, to the specified precision';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @param {number} [$precision=2] - The precision';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';  
     $isodurationtohours := function ($isoduration, $precision) {(
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
@@ -69,6 +121,13 @@ $.(
         $result;
     )};
 
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a string in format hh:mm. No rounding so example would be 01:34';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
     $isodurationtohhmm := function ($isoduration) {(
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
 		    $time := $substringAfter($input, 'T');
@@ -80,6 +139,12 @@ $.(
         $result;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a string in format hh:mm:ss. So example would be 01:34:56';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
     $isodurationtohhmmss := function ($isoduration) {(
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
 		    $time := $substringAfter($input, 'T');
@@ -91,46 +156,33 @@ $.(
         $result;
     )};
 
-    $locale := function ($source, $default) {(
-            $result:= $lookup([{
-                    'en-us': '',
-                    'en': '',
-                    'fr': ' (Français)',
-                    'fr-fr': ' (Français)',
-                    'de': ' (Deutsch)',
-                    'de-de': ' (Deutsch)',
-                    'es': ' (Español)',
-                    'es-do': ' (Español)'
-                }
-            ], $lowercase($trim($source)));
 
-            $result ? $result : $default;
-    )};
-
-    $localizeddata := function ($source, $default, $preferred ) {(
-        $preferredLocale := $preferred ? $preferred : $default;
-        
-        $result := $filter($source, function($v, $i, $a) {
-            $v.localeCode = $preferredLocale
-        });
-        
-        $count($result) > 0 ? $result[0] : $source[0]
-    )};
-
-	$flattenArrayAndObject := function($source, $columnprefix, $maxCount) {(
+    $comment := '*******************************************************';
+    $comment := '* Take an array of objects, and return a JSON object where:';
+    $comment := '*      JSON Key is $prefix with incrementing value e.g. KEY1, KEY2';
+    $comment := '*      JSON Value is the value e.g. en-us, or if array of objects a';
+    $comment := '*        $delimiter delimited string. e.g. en-us|Title1|Description1';
+    $comment := '* @param {string} $source - The array';
+    $comment := '* @param {string} $prefix - The prefix to use as the JSON Key';
+    $comment := '* @param {number} [$maxCount=$globalMaxCount|10] - The number of Keys';
+    $comment := '* @param {string} [$delimiter=|] - The delimiter for Object strings';
+    $comment := '* @returns {Object}';
+    $comment := '*******************************************************';  
+	$flattenArrayAndObject := function($source, $prefix, $maxCount, $delimiter) {(
     	$maxCount := $maxCount ? $maxCount : $globalMaxCount ? $globalMaxCount : 10;
-    
+        $delimiter := $delimiter ? $delimiter : '|';
+
 		$padarray := [1..$maxCount].('');
 		$sourceArray := $count($source)=0 ? [] : [];
         $result := '';
         
 		$sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
         		$model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
-                $delimiter:= $count($keys($v)) > 0 ? '|' : '';
+                $needdelimiter:= $count($keys($v)) > 0 ? $delimiter : '';
                 $trimend:= $count($keys($v)) > 0;
         		$kv := $spread($model);
                	$result:= $reduce($kv, function($accum, $val) {(
-                	$accum & $each($val, function($val, $key) {$val}) & $delimiter;
+                	$accum & $each($val, function($val, $key) {$val}) & $needdelimiter;
                 )}, '');
                 $trimend ? $substring($result,0,$length($result)-1) : $result;
         )})
@@ -147,7 +199,7 @@ $.(
 		});
 
 		$sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
-				$columnprefix & ($i + 1) & '~|~' & $v
+				$prefix & ($i + 1) & '~|~' & $v
 		});
 
 		$sourceArrayDelimited.{
@@ -155,57 +207,49 @@ $.(
 		}
     )};
 
-    $localeCodes := function(){(
-        $flattenArrayAndObject(localeCodes,'localeCodes');
-    )};
-    
-    $keywords := function(){(
-        $flattenArrayAndObject(keywords,'keywords');
-    )};
-	
-    $localizedMetadata := function(){(
-        $flattenArrayAndObject(localizedMetadata,'localizedMetadata');
-    )};
-	
-    $by := function(){(
-        $flattenArrayAndObject(by,'by');
-    )};
-	
-    $expertiseLevels := function(){(
-        $flattenArrayAndObject(expertiseLevels,'expertiseLevels');
-    )};
+    $comment := 'End of Generic Function Library';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
 
-	$modalities := function(){(
-        $flattenArrayAndObject(modalities,'modalities');
-    )};
-	
-    $associationsAreas := function(){(
-        $flattenArrayAndObject(associations.areas,'associations.areas');
-    )};
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Saba Release 45 Specific Functions for use in transform';
 
-    $associationsSubjects := function(){(
-        $flattenArrayAndObject(associations.subjects,'associations.subjects');
-    )};
-
-    $associationsChannels := function(){(
-        $flattenArrayAndObject(associations.channels,'associations.channels');
-    )};
-
-    $associationsParent := function(){(
-        $flattenArrayAndObject(associations.parent,'associations.parent');
-    )};
-
-
+    $comment := '*******************************************************';
+    $comment := '* Combine the the contentType.display and plain text version of the';
+    $comment := '* localizedMetadata[0].title. Shortened to $length with ellipsis string';
+    $comment := '* of ...';
+    $comment := '* @param {number} [$length=255] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
     $sabatitle := function($length){(
         $maxlength:= $length ? $length : 255;
         $ellipsis('(' & contentType.displayLabel & ') ' & $plainstring(localizedMetadata[0].title), $maxlength, ' ...');
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Plain text version of the localizedMetadata[0].title. Shortened to';
+    $comment := '* $length with ellipsis string of ...';
+    $comment := '* @param {number} [$length=200] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
     $sabadescription := function($length){(
         $maxlength:= $length ? $length : 2000;
         $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Create a string[] that is deduplicated of values that combines these';
+    $comment := '* data values:';
+    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel';
+    $comment := '*   keywords';
+    $comment := '*   associations.areas';
+    $comment := '*   associations.subjects';
+    $comment := '*   associations.channels[*].title';
+    $comment := '*   $otherKeyword variable';
+    $comment := '* @param {string} [$otherKeyword=] - Additional Keyword to include';
+    $comment := '* @returns {string[]}';
+    $comment := '*******************************************************';
     $sabakeywordsarray := function($otherKeyword){(
         $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? [localizedMetadata[0].title] : [];
 
@@ -236,6 +280,13 @@ $.(
         $keywords
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Create JSON object with TAGn keys for populating TAGS in Saba';
+    $comment := '* the values are derived from $sabakeywordsarray() function.';
+    $comment := '* The values are shortened to maximum 25 characters as per Saba spec';
+    $comment := '* The shortened value if it ends with &:- or open bracket is trimmed.';
+    $comment := '* @returns {Object}';
+    $comment := '*******************************************************';
     $sabatagsobject := function(){(
         (
             $tagmaxlength:= 25;
@@ -267,6 +318,13 @@ $.(
 		);
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Create JSON object with CATEGORYn keys for populating CATEGORIES';
+    $comment := '* in Saba the values are derived from this data:';
+    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel';
+    $comment := '*   associations.channels[*].title';
+    $comment := '* @returns {Object}';
+    $comment := '*******************************************************';
     $sabacategoriesobject := function($category){(
         (
             $basecategory:= $category ? $category: 'Skillsoft';
@@ -301,6 +359,17 @@ $.(
             $convert_to_values
         );
     )};
+
+    $comment := 'End of Saba Release 45  of Saba Specific Functions for use in transform';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'START OF TRANSFORM';
+
+    $comment := '*******************************************************';
+    $comment := 'Trasnsform the basic data';
 
    	$transformed_data := (
     	$.{
@@ -379,7 +448,13 @@ $.(
         'COURSE_TARGET_DAYS': 0
       }
     );
-        
+
+    $comment := '*******************************************************';
+    $comment := 'Combine the :';
+    $comment := '   $transformed_data - Basic transfomed data';
+    $comment := '   $sabatagsobject - The TAGSn data derived from the function';
+    $comment := '   $sabacategoriesobject - The CATEGORYn data derived from the function';
+
     $results := $merge([$transformed_data, $sabatagsobject(), $sabacategoriesobject()]);
     $results;
 )
