@@ -175,7 +175,7 @@ $.(
         $flattenArrayAndObject(expertiseLevels,'expertiseLevels');
     )};
 
-	  $modalities := function(){(
+	$modalities := function(){(
         $flattenArrayAndObject(modalities,'modalities');
     )};
 	
@@ -191,36 +191,10 @@ $.(
         $flattenArrayAndObject(associations.channels,'associations.channels');
     )};
 
-	  $associationsParent := function(){(
+    $associationsParent := function(){(
         $flattenArrayAndObject(associations.parent,'associations.parent');
     )};
 
-    $sabakeywords := function($otherKeyword){(
-    	$keywords := keywords ? keywords : [];
-      $keywords := $append($keywords, $map(associations.areas, function($v, $i, $a) {
-            $v ? $trim($v) : ''
-      }));
-          
-      $keywords := $append($keywords, $map(associations.subjects, function($v, $i, $a) {
-        	$v ? $trim($v) : ''
-		  }));
-
-      $keywords := $append($keywords, $map(associations.channels, function($v, $i, $a) {
-            $v.title ? $trim($v.title) : ''
-      }));
-
-      $keywords := $otherKeyword ? $append($keywords, [ $otherKeyword]) : $keywords;
-      
-      $keywords := $map($sort($keywords),function($v, $i, $a){
-        $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
-      );
-      
-      $keywords := $filter($keywords, function($v, $i, $a) {
-        $v != ''
-      });
-      
-      $count($keywords) = 0 ? '' : $join($keywords,',')
-    )};
 
     $sabatitle := function($length){(
         $maxlength:= $length ? $length : 255;
@@ -232,82 +206,100 @@ $.(
         $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
     )};
 
+    $sabakeywordsarray := function($otherKeyword){(
+        $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? [localizedMetadata[0].title] : [];
 
-    $sabatags := function(){(
+        $keywords := keywords ? $append($keywords,keywords) : $keywords;
+
+        $keywords := $append($keywords, $map(associations.areas, function($v, $i, $a) {
+                $v ? $trim($v) : ''
+        }));
+          
+        $keywords := $append($keywords, $map(associations.subjects, function($v, $i, $a) {
+        	$v ? $trim($v) : ''
+		}));
+
+        $keywords := $append($keywords, $map(associations.channels, function($v, $i, $a) {
+                $v.title ? $trim($v.title) : ''
+        }));
+
+        $keywords := $otherKeyword ? $append($keywords, [ $otherKeyword]) : $keywords;
+        
+        $keywords := $map($sort($keywords),function($v, $i, $a){
+            $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
+        );
+      
+        $keywords := $filter($keywords, function($v, $i, $a) {
+            $v != ''
+        });
+
+        $keywords
+    )};
+
+    $sabatagsobject := function(){(
         (
             $tagmaxlength:= 25;
-			$maxkeywords:= $globalMaxCount ? $globalMaxCount : 10;
-			$padarray := [1..$maxkeywords].('');
-			$keywords := keywords ? keywords : [];
-			
-			$keywords := $append($keywords, $map(associations.areas, function ($v, $i, $a) {
-				$v ? $ellipsis($v,$tagmaxlength,'') : ''
-			}));
-			
-			$keywords := $append($keywords, $map(associations.subjects, function ($v, $i, $a) {
-				$v ? $ellipsis($v,$tagmaxlength,'') : ''
-			}));
-			
-			$keywords := $append($keywords, $map(associations.channels, function ($v, $i, $a) {
-				$v.title ? $ellipsis($v.title,$tagmaxlength,'') : ''
-			}));
-			
-			$keywords := $map($sort($keywords), function ($v, $i, $a) {
-				$i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
+			$maxtags := $globalMaxCount ? $globalMaxCount : 10;
+			$padarray := [1..$maxtags].('');
+
+			$tags := $sabakeywordsarray();
+
+            $tags := $map($tags, function ($v, $i, $a) {(
+				$badendofline:= /(([&:-]|[\x28])$)/;
+                $result := $v ? $ellipsis($v,$tagmaxlength,'') : '';
+                $result := $replace($result, $badendofline, '');
+                $trim($result)
+            )});
+
+			$tags := $append($tags, $padarray);
+
+			$tags := $filter($tags, function ($v, $i, $a) {
+				$i < $maxtags
 			});
 			
-			$keywords := $filter($keywords, function ($v, $i, $a) {
-				$v != ''
-			});
-			$keywords := $append($keywords, $padarray);
-			
-			$keywords := $filter($keywords, function ($v, $i, $a) {
-				$i < $maxkeywords
-			});
-			
-			$topic_key_value_string_combined := $map($keywords, function ($v, $i, $a) {
+			$tag_key_value_string_combined := $map($tags, function ($v, $i, $a) {
 				'TAG' & ($i + 1) & '~|~' & $v
 			});
 			
-			$convert_to_topicn_values := $topic_key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
+			$convert_to_TAGn_values := $tag_key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
 			
-			$convert_to_topicn_values
+			$convert_to_TAGn_values
 		);
     )};
 
-    $sabacategories := function($category){(
+    $sabacategoriesobject := function($category){(
         (
             $basecategory:= $category ? $category: 'Skillsoft';
-			$maxkeywords:= $globalMaxCount ? $globalMaxCount : 10;
-			$padarray := [1..$maxkeywords].('');
-	
-            $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? [$basecategory &'\\'&localizedMetadata[0].title] : $count(associations.channels) = 0 ? [$basecategory] : [];
-            
-			$keywords := $append($keywords, $map(associations.channels, function ($v, $i, $a) {
-				$v.title ? $trim('SkillSoft\\'&$v.title) : ''
-			}));
-			
-			$keywords := $map($sort($keywords), function ($v, $i, $a) {
-				$i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
-			});
-			
-			$keywords := $filter($keywords, function ($v, $i, $a) {
-				$v != ''
-			});
-			$keywords := $append($keywords, $padarray);
-			
-			$keywords := $filter($keywords, function ($v, $i, $a) {
-				$i < $maxkeywords
-			});
+            $maxcategories := $globalMaxCount ? $globalMaxCount : 10;
+            $padarray := [1..$maxcategories].('');
 
-			$key_value_string_combined := $map($keywords, function ($v, $i, $a) {
-				'CATEGORY' & ($i + 1) & '~|~' & $v
-			});
-			
-			$convert_to_values := $key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
-			
-			$convert_to_values
-		);
+            $categories :=  $lowercase(contentType.percipioType) = 'channel' ? [$basecategory &'\\'&localizedMetadata[0].title] : $count(associations.channels) = 0 ? [$basecategory] : [];
+
+            $categories := $append($categories, $map(associations.channels, function ($v, $i, $a) {
+                $v.title ? $trim('SkillSoft\\'&$v.title) : ''
+            }));
+            
+            $categories := $map($sort($categories), function ($v, $i, $a) {
+                $i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
+            });
+            
+            $categories := $filter($categories, function ($v, $i, $a) {
+                $v != ''
+            });
+            $categories := $append($categories, $padarray);
+            
+            $categories := $filter($categories, function ($v, $i, $a) {
+                $i < $maxcategories
+            });
+
+            $key_value_string_combined := $map($categories, function ($v, $i, $a) {
+                'CATEGORY' & ($i + 1) & '~|~' & $v
+            });
+            
+            $convert_to_values := $key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
+            
+            $convert_to_values
+        );
     )};
 
    	$transformed_data := (
@@ -336,7 +328,7 @@ $.(
         'CONTENTSERVER': 'Saba Default Content Server',
         'LOCATIONORURL': link,
         'LAUNCHURL': link,
-        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $sabadescription() : '',
+        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
         'COURSE_ABSTRACT': localizedMetadata[0].description ? $sabadescription(1000) : '',
         'OWNER': 'SSADMIN',
         'SUREVALMRA': '',
@@ -355,13 +347,17 @@ $.(
           ], ($lowercase(localeCodes[0] ? $split(localeCodes[0],'-')[0] : 'en')));
             $locale ? $locale : 'English'
         ),
-        'KEYWORDS' :  $sabakeywords(),
+        'KEYWORDS' :  (
+            $keywordsarray := $sabakeywordsarray();
+            $count($keywordsarray) = 0 ? '' : $join($keywordsarray,',')
+        ),
         'CONTENT_STATUS': lifecycle.status = 'ACTIVE' ? 'PUBLISHED' : 'ON_HOLD',
         'COURSE_IMAGE_URL': imageUrl,
-        'DESCRIPTION': localizedMetadata[0].description ? $sabadescription() : '',
+        'DESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
         'DISPLAY_CALL_CENTER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
         'DISPLAY_LEARNER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
         'WBT_DURATION': $isodurationtohhmm(duration),
+        'WBT_DESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
         'MARK_COMPLETE_EXTERNALLY': (
             $markComplete := $lookup([{
                 'audiobook': 'TRUE',
@@ -384,6 +380,6 @@ $.(
       }
     );
         
-    $results := $merge([$transformed_data, $sabatags(), $sabacategories()]);
+    $results := $merge([$transformed_data, $sabatagsobject(), $sabacategoriesobject()]);
     $results;
 )
