@@ -426,6 +426,19 @@ $.(
     $comment := '* in the Percipio data';
 	$saba_DEFAULTAUTHOR := 'Skillsoft';
 
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $comment := '* so to set chromeless you would use ?chromeless';
+    $saba_LINKPARAMETERMAP := [{
+        'audiobook': '',
+        'book': '',
+        'channel': '',
+        'course': '',
+        'linked_content': '',
+        'video': ''
+    }];
+
 	$comment := '* The number of TAGSn values to include set to 0 to not return any';
     $comment := '* For more information see the $sabatagsobject function above';
     $saba_MAXTAGS := 5;
@@ -473,8 +486,14 @@ $.(
         'DELIVERYVENDOR': $saba_DELIVERYVENDOR,
         'SECURECONTEXT': '',
         'CONTENTSERVER': $saba_CONTENTSERVER,
-        'LOCATIONORURL': link,
-        'LAUNCHURL': link,
+        'LOCATIONORURL': (
+                $urlparameter := $lookup($saba_LINKPARAMETERMAP, $lowercase(contentType.percipioType));
+                link & $urlparameter
+        ),
+        'LAUNCHURL': (
+                $urlparameter := $lookup($saba_LINKPARAMETERMAP, $lowercase(contentType.percipioType));
+                link & $urlparameter
+        ),
         'CONTENTDESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
         'COURSE_ABSTRACT': localizedMetadata[0].description ? $sabadescription(1000) : '',
         'OWNER': $saba_OWNER,
