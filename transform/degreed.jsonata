@@ -1,0 +1,393 @@
+$.(
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'TRANSFORM FOR DEGREED METADATA';
+    $comment := 'Author: Martin Holden';
+    $comment := 'Date: 09-AUG-2019';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Generic Function Library';
+
+    $comment := '*******************************************************';
+    $comment := '* Converts a string such as description to plain string,by stripping out';
+    $comment := '* HTML tags and HTML Entities';
+    $comment := '* @param {string} $source';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $plainstring := function ($source) {(
+        $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
+        $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
+        $apos := /&(#8217;|apos;|rsquo;)/;
+        $copy := /[\u00A9]|&(#169;|copy;)/;
+        $tm := /[\u2122]|&(#8482;|trade;)/;
+        $registered := /[\u00AE]|&(#174;|reg;)/;
+        $curylydoublequotes := /[\u201C\u201D\u201E\u201F\u2033\u2036]|&(ldquo;|rdquo;)/;
+        $pipe := /[\u007c]|&(verbar;|vert;|VerticalLine;)/;
+        $nbsp := /[\u00A0]|&(#160;|#xA0;|nbsp;)/;
+        $otherentities := /&(#?[\w\d]+;)/;
+
+        $result := $source ? $trim($source) : '';
+        $result := $replace($result, $pipe, '-');
+        $result := $replace($result, $htmltags, '');
+        $result := $replace($result, $dash, '-');
+        $result := $replace($result, $copy, '(c)');
+        $result := $replace($result, $registered, '(r)');
+        $result := $replace($result, $tm, '(tm)');
+        $result := $replace($result, $apos, $base64decode('Jw=='));
+        $result := $replace($result, $curylydoublequotes, '"');
+        $result := $replace($result, $nbsp, ' ');
+        $result := $replace($result, $otherentities, '');
+        $result; 
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Shortens a string at a word boundary to the specified length, option to';
+    $comment := '* define suffix to show this such as ...';
+    $comment := '* @param {string} $source';
+    $comment := '* @param {number} $maxlength - The maximum length, if $ellipsisString is';
+    $comment := '*                                 the overall length allows for this';
+    $comment := '* @param {string} $ellipsisString - The suffix to use';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $ellipsis := function ($source, $maxlength, $ellipsisString) {(
+        $wordboundary := /\s(\w+)$/;
+        $trimlength := $maxlength - $length($ellipsisString);
+
+        $needtrim := ($length($source) > $maxlength);
+        $trimmedSource := $needtrim ? $trim($substring($source, 0, $trimlength));
+
+        $trimmedSource := $replace($trimmedSource, $wordboundary, '') & $ellipsisString;
+        $needtrim ? $trimmedSource : $source;
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total seconds';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';    
+    $isodurationtoseconds := function ($isoduration) {(
+        $input := $isoduration = null ? '' : $isoduration;
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '0';
+        $remainder := $substringAfter($time, 'H');
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '0';
+        $remainder := $substringAfter($remainder, 'M');
+        $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '0';
+        $result := (($number($hours) * 3600) + ($number($minutes) * 60) + $number($seconds));
+        $result;
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total minutes, to the specified precision';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @param {number} [$precision=2] - The precision';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';  
+    $isodurationtominutes := function ($isoduration, $precision) {(
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 60, $prec);
+        $result;
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total hours, to the specified precision';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @param {number} [$precision=2] - The precision';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';  
+    $isodurationtohours := function ($isoduration, $precision) {(
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 3600, $prec);
+        $result;
+    )};
+
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a string in format hh:mm. No rounding so example would be 01:34';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $isodurationtohhmm := function ($isoduration) {(
+        $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
+        $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
+        $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
+        $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0');
+        $result;
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a string in format hh:mm:ss. So example would be 01:34:56';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $isodurationtohhmmss := function ($isoduration) {(
+        $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
+        $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
+        $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
+        $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0') & ':' & $pad($seconds, -2, '0');
+        $result;
+    )};
+
+
+    $comment := '*******************************************************';
+    $comment := '* Take an array of objects, and return a JSON object where:';
+    $comment := '*      JSON Key is $prefix with incrementing value e.g. KEY1, KEY2';
+    $comment := '*      JSON Value is the value e.g. en-us, or if array of objects a';
+    $comment := '*        $delimiter delimited string. e.g. en-us|Title1|Description1';
+    $comment := '* @param {string} $source - The array';
+    $comment := '* @param {string} $prefix - The prefix to use as the JSON Key';
+    $comment := '* @param {number} [$maxCount=10] - The number of Keys';
+    $comment := '* @param {string} [$delimiter=|] - The delimiter for Object strings';
+    $comment := '* @returns {Object}';
+    $comment := '*******************************************************';  
+    $flattenArrayAndObject := function($source, $prefix, $maxCount, $delimiter) {(
+        $maxCount := $maxCount ? $maxCount : 10;
+        $delimiter := $delimiter ? $delimiter : '|';
+
+        $padarray := [1..$maxCount].('');
+        $sourceArray := $count($source)=0 ? [] : [];
+        $result := '';
+        
+        $sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
+            $model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
+            $needdelimiter:= $count($keys($v)) > 0 ? $delimiter : '';
+            $trimend:= $count($keys($v)) > 0;
+            $kv := $spread($model);
+            $result:= $reduce($kv, function($accum, $val) {(
+                $accum & $each($val, function($val, $key) {$val}) & $needdelimiter;
+            )}, '');
+                $trimend ? $substring($result,0,$length($result)-1) : $result;
+        )})
+        );
+
+        $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+            $v != ''
+        });
+
+        $sourceArray := $append($sourceArray, $padarray);
+    
+        $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+            $i < $maxCount
+        });
+
+        $sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
+            $prefix & ($i + 1) & '~|~' & $v
+        });
+
+        $sourceArrayDelimited.{
+            $substringBefore('~|~'): $substringAfter('~|~')
+        }
+    )};
+
+    $comment := 'End of Generic Function Library';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Degreed Specific Functions for use in transform';
+
+    $comment := '*******************************************************';
+    $comment := '* The plain text version of the localizedMetadata[0].title';
+    $comment := '* Shortened to $length with ellipsis string of ...';
+    $comment := '* @param {number} [$length=254] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $degreedtitle := function($length){(
+        $maxlength:= $length ? $length : 254;
+        $ellipsis($plainstring(localizedMetadata[0].title), $maxlength, ' ...');
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Plain text version of the localizedMetadata[0].title. Shortened to';
+    $comment := '* $length with ellipsis string of ...';
+    $comment := '* @param {number} [$length=2000] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $degreeddescription := function($length){(
+        $maxlength:= $length ? $length : 2000;
+        $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Create a string[] that is deduplicated of values that combines these';
+    $comment := '* data values:';
+    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel';
+    $comment := '*   keywords';
+    $comment := '*   associations.areas';
+    $comment := '*   associations.subjects';
+    $comment := '*   associations.channels[*].title';
+    $comment := '*   $otherKeyword variable';
+    $comment := '* @param {string} [$otherKeyword=] - Additional Keyword to include';
+    $comment := '* @returns {string[]}';
+    $comment := '*******************************************************';
+    $degreedkeywordsarray := function($otherKeyword){(
+        $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? [localizedMetadata[0].title] : [];
+
+        $keywords := keywords ? $append($keywords,keywords) : $keywords;
+
+        $keywords := $append($keywords, $map(associations.areas, function($v, $i, $a) {
+            $v ? $trim($v) : ''
+        }));
+          
+        $keywords := $append($keywords, $map(associations.subjects, function($v, $i, $a) {
+            $v ? $trim($v) : ''
+        }));
+
+        $keywords := $append($keywords, $map(associations.channels, function($v, $i, $a) {
+            $v.title ? $trim($v.title) : ''
+        }));
+
+        $keywords := $otherKeyword ? $append($keywords, [ $otherKeyword]) : $keywords;
+        
+        $keywords := $map($sort($keywords),function($v, $i, $a){
+            $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
+        );
+      
+        $keywords := $filter($keywords, function($v, $i, $a) {
+            $v != ''
+        });
+
+        $keywords
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Create JSON object with TOPICn keys for populating TOPICS in Degreed';
+    $comment := '* the values are derived from $degreedkeywordsarray() function.';
+    $comment := '* The values are shortened to maximum 255 characters as per Degreed spec';
+    $comment := '* The shortened value if it ends with &:- or open bracket is trimmed.';
+    $comment := '* @param {number} [$maxCount=10] - The max number of TAGn keys';
+    $comment := '* @returns {Object}';
+    $comment := '*******************************************************';
+    $degreedtopicsobject := function($maxCount){(
+        $topicmaxlength:= 255;
+        $maxtopics := $maxCount ? $maxCount : 10;
+        $padarray := [1..$maxtopics].('');
+
+        $topics := $degreedkeywordsarray();
+
+        $topics := $map($topics, function ($v, $i, $a) {(
+            $badendofline:= /(([&:-]|[\x28])$)/;
+            $result := $v ? $ellipsis($v,$topicmaxlength,'') : '';
+            $result := $replace($result, $badendofline, '');
+            $trim($result)
+        )});
+
+        $topics := $append($topics, $padarray);
+
+        $topics := $filter($topics, function ($v, $i, $a) {
+            $i < $maxtopics
+        });
+        
+        $topic_key_value_string_combined := $map($topics, function ($v, $i, $a) {
+            'TOPIC' & ($i + 1) & '~|~' & $v
+        });
+        
+        $convert_to_TOPICn_values := $topic_key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
+        
+        $convert_to_TOPICn_values
+    )};
+
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to the relevant numeric value needed for the different Degreed content';
+    $comment := '* types.';
+    $comment := '* @returns {number|string}';
+    $comment := '*******************************************************';  
+    $degreedduration := function () {(
+        $seconds := $isodurationtoseconds(duration);
+        $prec := 1;
+
+        $degreedType := $lookup($degreed_CONTENTTYPEMAP, $lowercase(contentType.percipioType));
+
+        $result := $lookup([{
+                'course': $round($seconds / 3600, $prec),
+                'video': $round($seconds / 60, $prec)
+        }], $lowercase($degreedType));
+        $result ? $result : ''
+    )};
+
+
+    $comment := 'End of Degreed Specific Functions for use in transform';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Degreed Constants';
+    $comment := 'These are the values that can be changed per customer';
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and the DEGREED content type.';
+    $degreed_CONTENTTYPEMAP := [{
+        'audiobook': 'Book',
+        'book': 'Book',
+        'channel': 'Article',
+        'course': 'Course',
+        'linked_content': 'Article',
+        'video': 'Video'
+    }];
+
+    $comment := '* The number of TOPICn values to include set to 0 to not return any';
+    $comment := '* For more information see the $sabatagsobject function above';
+    $degreed_MAXTOPICS := 10;
+    
+    $comment := 'End of Degreed Constants';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'START OF TRANSFORM';
+
+    $comment := '*******************************************************';
+    $comment := 'Transform the basic data, uses the CONSTANTS specified above';
+
+    $transformed_data := (
+        $.{
+            'ContentType': (
+                $localType := $lookup($degreed_CONTENTTYPEMAP, $lowercase(contentType.percipioType));
+                $localType ? $localType : ''
+            ),
+            'ContentID': xapiActivityId,
+            'URL': link,
+            'Delete': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
+            'Title': localizedMetadata[0].title ? $degreedtitle() : '',
+            'Summary': localizedMetadata[0].description ? $degreeddescription() : '',
+            'ImageURL': imageUrl ? imageUrl : '',
+            'Duration' : $degreedduration(),
+            'Language': localeCodes[0] ? $substringBefore(localeCodes[0], '-') : 'en',
+            'Provider': ''
+        }
+    );
+
+$comment := '*******************************************************';
+    $comment := 'Combine the :';
+    $comment := '   $transformed_data - Basic transfomed data';
+    $comment := '   $degreedtopicsobject - The TOPICn data derived from the function';
+    $comment := '                        if $degreed_MAXTOPICS != 0';
+
+    $topics :=  $degreed_MAXTOPICS  = 0 ? [] : $degreedtopicsobject($degreed_MAXTOPICS);
+
+    $results := $merge([$transformed_data, $topics]);
+    $results;
+)
