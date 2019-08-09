@@ -1,10 +1,22 @@
 $.(
-	$globalMaxCount := 5;
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'TRANSFORM FOR SABA RELEASE 45';
+    $comment := 'Author: Martin Holden';
+    $comment := 'Date: 09-AUG-2019';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
 
-    $guardnullstring := function ($source){(
-            $source ? $trim($source) : '';
-    )};
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Generic Function Library';
 
+    $comment := '*******************************************************';
+    $comment := '* Converts a string such as description to plain string,by stripping out';
+    $comment := '* HTML tags and HTML Entities';
+    $comment := '* @param {string} $source';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
     $plainstring := function ($source) {(
         $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
         $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
@@ -31,6 +43,15 @@ $.(
         $result; 
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Shortens a string at a word boundary to the specified length, option to';
+    $comment := '* define suffix to show this such as ...';
+    $comment := '* @param {string} $source';
+    $comment := '* @param {number} $maxlength - The maximum length, if $ellipsisString is';
+    $comment := '*                                 the overall length allows for this';
+    $comment := '* @param {string} $ellipsisString - The suffix to use';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
     $ellipsis := function ($source, $maxlength, $ellipsisString) {(
         $wordboundary := /\s(\w+)$/;
         $trimlength := $maxlength - $length($ellipsisString);
@@ -42,6 +63,12 @@ $.(
         $needtrim ? $trimmedSource : $source;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total seconds';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';    
     $isodurationtoseconds := function ($isoduration) {(
         $input := $isoduration = null ? '' : $isoduration;
         $time := $substringAfter($input, 'T');
@@ -50,11 +77,17 @@ $.(
         $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '0';
         $remainder := $substringAfter($remainder, 'M');
         $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '0';
-
         $result := (($number($hours) * 3600) + ($number($minutes) * 60) + $number($seconds));
         $result;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total minutes, to the specified precision';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @param {number} [$precision=2] - The precision';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';  
     $isodurationtominutes := function ($isoduration, $precision) {(
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
@@ -62,6 +95,13 @@ $.(
         $result;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total hours, to the specified precision';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @param {number} [$precision=2] - The precision';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';  
     $isodurationtohours := function ($isoduration, $precision) {(
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
@@ -69,301 +109,304 @@ $.(
         $result;
     )};
 
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a string in format hh:mm. No rounding so example would be 01:34';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
     $isodurationtohhmm := function ($isoduration) {(
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
-		    $time := $substringAfter($input, 'T');
-		    $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
-		    $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
-		    $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
-		    $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
-		    $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0');
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
+        $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
+        $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
+        $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0');
         $result;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a string in format hh:mm:ss. So example would be 01:34:56';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
     $isodurationtohhmmss := function ($isoduration) {(
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
-		    $time := $substringAfter($input, 'T');
-		    $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
-		    $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
-		    $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
-		    $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
-		    $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0') & ':' & $pad($seconds, -2, '0');
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
+        $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
+        $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
+        $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0') & ':' & $pad($seconds, -2, '0');
         $result;
     )};
 
-    $locale := function ($source, $default) {(
-            $result:= $lookup([{
-                    'en-us': '',
-                    'en': '',
-                    'fr': ' (Français)',
-                    'fr-fr': ' (Français)',
-                    'de': ' (Deutsch)',
-                    'de-de': ' (Deutsch)',
-                    'es': ' (Español)',
-                    'es-do': ' (Español)'
-                }
-            ], $lowercase($trim($source)));
 
-            $result ? $result : $default;
-    )};
+    $comment := '*******************************************************';
+    $comment := '* Take an array of objects, and return a JSON object where:';
+    $comment := '*      JSON Key is $prefix with incrementing value e.g. KEY1, KEY2';
+    $comment := '*      JSON Value is the value e.g. en-us, or if array of objects a';
+    $comment := '*        $delimiter delimited string. e.g. en-us|Title1|Description1';
+    $comment := '* @param {string} $source - The array';
+    $comment := '* @param {string} $prefix - The prefix to use as the JSON Key';
+    $comment := '* @param {number} [$maxCount=10] - The number of Keys';
+    $comment := '* @param {string} [$delimiter=|] - The delimiter for Object strings';
+    $comment := '* @returns {Object}';
+    $comment := '*******************************************************';  
+    $flattenArrayAndObject := function($source, $prefix, $maxCount, $delimiter) {(
+        $maxCount := $maxCount ? $maxCount : 10;
+        $delimiter := $delimiter ? $delimiter : '|';
 
-    $localizeddata := function ($source, $default, $preferred ) {(
-        $preferredLocale := $preferred ? $preferred : $default;
-        
-        $result := $filter($source, function($v, $i, $a) {
-            $v.localeCode = $preferredLocale
-        });
-        
-        $count($result) > 0 ? $result[0] : $source[0]
-    )};
-
-	$flattenArrayAndObject := function($source, $columnprefix, $maxCount) {(
-    	$maxCount := $maxCount ? $maxCount : $globalMaxCount ? $globalMaxCount : 10;
-    
-		$padarray := [1..$maxCount].('');
-		$sourceArray := $count($source)=0 ? [] : [];
+        $padarray := [1..$maxCount].('');
+        $sourceArray := $count($source)=0 ? [] : [];
         $result := '';
         
-		$sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
-        		$model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
-                $delimiter:= $count($keys($v)) > 0 ? '|' : '';
-                $trimend:= $count($keys($v)) > 0;
-        		$kv := $spread($model);
-               	$result:= $reduce($kv, function($accum, $val) {(
-                	$accum & $each($val, function($val, $key) {$val}) & $delimiter;
-                )}, '');
+        $sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
+            $model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
+            $needdelimiter:= $count($keys($v)) > 0 ? $delimiter : '';
+            $trimend:= $count($keys($v)) > 0;
+            $kv := $spread($model);
+            $result:= $reduce($kv, function($accum, $val) {(
+                $accum & $each($val, function($val, $key) {$val}) & $needdelimiter;
+            )}, '');
                 $trimend ? $substring($result,0,$length($result)-1) : $result;
         )})
         );
 
-		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
-				$v != ''
-		});
+        $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+            $v != ''
+        });
 
-		$sourceArray := $append($sourceArray, $padarray);
-	
-		$sourceArray := $filter($sourceArray, function ($v, $i, $a) {
-				$i < $maxCount
-		});
-
-		$sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
-				$columnprefix & ($i + 1) & '~|~' & $v
-		});
-
-		$sourceArrayDelimited.{
-				$substringBefore('~|~'): $substringAfter('~|~')
-		}
-    )};
-
-    $localeCodes := function(){(
-        $flattenArrayAndObject(localeCodes,'localeCodes');
-    )};
+        $sourceArray := $append($sourceArray, $padarray);
     
-    $keywords := function(){(
-        $flattenArrayAndObject(keywords,'keywords');
-    )};
-	
-    $localizedMetadata := function(){(
-        $flattenArrayAndObject(localizedMetadata,'localizedMetadata');
-    )};
-	
-    $by := function(){(
-        $flattenArrayAndObject(by,'by');
-    )};
-	
-    $expertiseLevels := function(){(
-        $flattenArrayAndObject(expertiseLevels,'expertiseLevels');
+        $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+            $i < $maxCount
+        });
+
+        $sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
+            $prefix & ($i + 1) & '~|~' & $v
+        });
+
+        $sourceArrayDelimited.{
+            $substringBefore('~|~'): $substringAfter('~|~')
+        }
     )};
 
-	  $modalities := function(){(
-        $flattenArrayAndObject(modalities,'modalities');
-    )};
-	
-    $associationsAreas := function(){(
-        $flattenArrayAndObject(associations.areas,'associations.areas');
-    )};
+    $comment := 'End of Generic Function Library';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
 
-    $associationsSubjects := function(){(
-        $flattenArrayAndObject(associations.subjects,'associations.subjects');
-    )};
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Saba Release 45 Specific Functions for use in transform';
 
-    $associationsChannels := function(){(
-        $flattenArrayAndObject(associations.channels,'associations.channels');
-    )};
-
-	  $associationsParent := function(){(
-        $flattenArrayAndObject(associations.parent,'associations.parent');
-    )};
-
-    $sabakeywords := function($otherKeyword){(
-    	$keywords := keywords ? keywords : [];
-      $keywords := $append($keywords, $map(associations.areas, function($v, $i, $a) {
-            $v ? $trim($v) : ''
-      }));
-          
-      $keywords := $append($keywords, $map(associations.subjects, function($v, $i, $a) {
-        	$v ? $trim($v) : ''
-		  }));
-
-      $keywords := $append($keywords, $map(associations.channels, function($v, $i, $a) {
-            $v.title ? $trim($v.title) : ''
-      }));
-
-      $keywords := $otherKeyword ? $append($keywords, [ $otherKeyword]) : $keywords;
-      
-      $keywords := $map($sort($keywords),function($v, $i, $a){
-        $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
-      );
-      
-      $keywords := $filter($keywords, function($v, $i, $a) {
-        $v != ''
-      });
-      
-      $count($keywords) = 0 ? '' : $join($keywords,',')
-    )};
-
+    $comment := '*******************************************************';
+    $comment := '* Combine the the contentType.display and plain text version of the';
+    $comment := '* localizedMetadata[0].title. Shortened to $length with ellipsis string';
+    $comment := '* of ...';
+    $comment := '* @param {number} [$length=255] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
     $sabatitle := function($length){(
         $maxlength:= $length ? $length : 255;
         $ellipsis('(' & contentType.displayLabel & ') ' & $plainstring(localizedMetadata[0].title), $maxlength, ' ...');
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Plain text version of the localizedMetadata[0].title. Shortened to';
+    $comment := '* $length with ellipsis string of ...';
+    $comment := '* @param {number} [$length=200] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
     $sabadescription := function($length){(
         $maxlength:= $length ? $length : 2000;
         $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Create a string[] that is deduplicated of values that combines these';
+    $comment := '* data values:';
+    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel';
+    $comment := '*   keywords';
+    $comment := '*   associations.areas';
+    $comment := '*   associations.subjects';
+    $comment := '*   associations.channels[*].title';
+    $comment := '*   $otherKeyword variable';
+    $comment := '* @param {string} [$otherKeyword=] - Additional Keyword to include';
+    $comment := '* @returns {string[]}';
+    $comment := '*******************************************************';
+    $sabakeywordsarray := function($otherKeyword){(
+        $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? [localizedMetadata[0].title] : [];
 
-    $sabatags := function(){(
-        (
-            $tagmaxlength:= 25;
-			$maxkeywords:= $globalMaxCount ? $globalMaxCount : 10;
-			$padarray := [1..$maxkeywords].('');
-			$keywords := keywords ? keywords : [];
-			
-			$keywords := $append($keywords, $map(associations.areas, function ($v, $i, $a) {
-				$v ? $ellipsis($v,$tagmaxlength,'') : ''
-			}));
-			
-			$keywords := $append($keywords, $map(associations.subjects, function ($v, $i, $a) {
-				$v ? $ellipsis($v,$tagmaxlength,'') : ''
-			}));
-			
-			$keywords := $append($keywords, $map(associations.channels, function ($v, $i, $a) {
-				$v.title ? $ellipsis($v.title,$tagmaxlength,'') : ''
-			}));
-			
-			$keywords := $map($sort($keywords), function ($v, $i, $a) {
-				$i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
-			});
-			
-			$keywords := $filter($keywords, function ($v, $i, $a) {
-				$v != ''
-			});
-			$keywords := $append($keywords, $padarray);
-			
-			$keywords := $filter($keywords, function ($v, $i, $a) {
-				$i < $maxkeywords
-			});
-			
-			$topic_key_value_string_combined := $map($keywords, function ($v, $i, $a) {
-				'TAG' & ($i + 1) & '~|~' & $v
-			});
-			
-			$convert_to_topicn_values := $topic_key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
-			
-			$convert_to_topicn_values
-		);
+        $keywords := keywords ? $append($keywords,keywords) : $keywords;
+
+        $keywords := $append($keywords, $map(associations.areas, function($v, $i, $a) {
+            $v ? $trim($v) : ''
+        }));
+          
+        $keywords := $append($keywords, $map(associations.subjects, function($v, $i, $a) {
+            $v ? $trim($v) : ''
+        }));
+
+        $keywords := $append($keywords, $map(associations.channels, function($v, $i, $a) {
+            $v.title ? $trim($v.title) : ''
+        }));
+
+        $keywords := $otherKeyword ? $append($keywords, [ $otherKeyword]) : $keywords;
+        
+        $keywords := $map($sort($keywords),function($v, $i, $a){
+            $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
+        );
+      
+        $keywords := $filter($keywords, function($v, $i, $a) {
+            $v != ''
+        });
+
+        $keywords
     )};
 
-    $sabacategories := function($category){(
-        (
-            $basecategory:= $category ? $category: 'Skillsoft';
-			$maxkeywords:= $globalMaxCount ? $globalMaxCount : 10;
-			$padarray := [1..$maxkeywords].('');
-	
-            $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? [$basecategory &'\\'&localizedMetadata[0].title] : $count(associations.channels) = 0 ? [$basecategory] : [];
-            
-			$keywords := $append($keywords, $map(associations.channels, function ($v, $i, $a) {
-				$v.title ? $trim('SkillSoft\\'&$v.title) : ''
-			}));
-			
-			$keywords := $map($sort($keywords), function ($v, $i, $a) {
-				$i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
-			});
-			
-			$keywords := $filter($keywords, function ($v, $i, $a) {
-				$v != ''
-			});
-			$keywords := $append($keywords, $padarray);
-			
-			$keywords := $filter($keywords, function ($v, $i, $a) {
-				$i < $maxkeywords
-			});
+    $comment := '*******************************************************';
+    $comment := '* Create JSON object with TAGn keys for populating TAGS in Saba';
+    $comment := '* the values are derived from $sabakeywordsarray() function.';
+    $comment := '* The values are shortened to maximum 25 characters as per Saba spec';
+    $comment := '* The shortened value if it ends with &:- or open bracket is trimmed.';
+    $comment := '* @param {number} [$maxCount=10] - The max number of TAGn keys';
+    $comment := '* @returns {Object}';
+    $comment := '*******************************************************';
+    $sabatagsobject := function($maxCount){(
+        $tagmaxlength:= 25;
+        $maxtags := $maxCount ? $maxCount : 10;
+        $padarray := [1..$maxtags].('');
 
-			$key_value_string_combined := $map($keywords, function ($v, $i, $a) {
-				'CATEGORY' & ($i + 1) & '~|~' & $v
-			});
-			
-			$convert_to_values := $key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
-			
-			$convert_to_values
-		);
+        $tags := $sabakeywordsarray();
+
+        $tags := $map($tags, function ($v, $i, $a) {(
+            $badendofline:= /(([&:-]|[\x28])$)/;
+            $result := $v ? $ellipsis($v,$tagmaxlength,'') : '';
+            $result := $replace($result, $badendofline, '');
+            $trim($result)
+        )});
+
+        $tags := $append($tags, $padarray);
+
+        $tags := $filter($tags, function ($v, $i, $a) {
+            $i < $maxtags
+        });
+        
+        $tag_key_value_string_combined := $map($tags, function ($v, $i, $a) {
+            'TAG' & ($i + 1) & '~|~' & $v
+        });
+        
+        $convert_to_TAGn_values := $tag_key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
+        
+        $convert_to_TAGn_values
     )};
 
-   	$transformed_data := (
-    	$.{
-        'ID': '',
-        'CONTENTTITLE': $sabatitle(),
-        'NEW_CONTENTTITLE': $sabatitle(),
-        'NEW_COURSETITLE': $sabatitle(),
-        'CONTENTFORMAT': 'URL',
-        'SPLIT': lifecycle.status = 'ACTIVE' ? 'World' : 'Archive',
-        'PLAYERTEMPLATE': 'Percipio',
-        'ZIPFILENAME': '',
-        'CSFILESTITLE': '',
-        'CSFILESRELATIVEPATH': '',
-        'CREATEWBTCOURSE': 'TRUE',
-        'MOBILECOMPATIBILITY': 'allDevices-responsive',
-        'CONTENTFOLDER': 'PERCIPIO_CONTENT',
-        'CONTENTTYPE': 'Website',
-        'EXTERNALID': xapiActivityId,
-        'COURSE_NO': id,
-        'AVAILABLEOFFLINE': '',
-        'VERSION': '',
-        'CONTENTPROVIDER': 'Percipio_URL_Vendor',
-        'DELIVERYVENDOR': 'Saba',
-        'SECURECONTEXT': '',
-        'CONTENTSERVER': 'Saba Default Content Server',
-        'LOCATIONORURL': link,
-        'LAUNCHURL': link,
-        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $sabadescription() : '',
-        'COURSE_ABSTRACT': localizedMetadata[0].description ? $sabadescription(1000) : '',
-        'OWNER': 'SSADMIN',
-        'SUREVALMRA': '',
-        'ISSCORING': 'FALSE',
-        'ESIGNATURE': '',
-        'USEAICCBRIDGE': '',
-        'ISSECURE': '',
-        'AUTHOR': $count(by) = 0 ? 'Skillsoft' : $trim($substring($join(by, ', '), 0, 255)),
-        'LANGUAGE': (
-            $locale := $lookup([{
+    $comment := '*******************************************************';
+    $comment := '* Create JSON object with CATEGORYn keys for populating CATEGORIES';
+    $comment := '* in Saba the values are derived from this data:';
+    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel';
+    $comment := '*   associations.channels[*].title';
+    $comment := '* @param {string} [$category=Skillsoft] The base category name to use';
+    $comment := '*   used as prefix to channel title';
+    $comment := '* @param {number} [$maxCount=10] - The max number of CATEGORYn keys';    
+    $comment := '* @returns {Object}';
+    $comment := '*******************************************************';
+    $sabacategoriesobject := function($category, $maxCount){(
+        $basecategory:= $category ? $category: 'Skillsoft';
+        $maxcategories := $maxCount ? $maxCount : 10;
+        $padarray := [1..$maxcategories].('');
+
+        $categories :=  $lowercase(contentType.percipioType) = 'channel' ? [$basecategory &'\\'&localizedMetadata[0].title] : $count(associations.channels) = 0 ? [$basecategory] : [];
+
+        $categories := $append($categories, $map(associations.channels, function ($v, $i, $a) {
+            $v.title ? $trim($basecategory &'\\'&$v.title) : ''
+        }));
+        
+        $categories := $map($sort($categories), function ($v, $i, $a) {
+            $i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
+        });
+        
+        $categories := $filter($categories, function ($v, $i, $a) {
+            $v != ''
+        });
+        $categories := $append($categories, $padarray);
+        
+        $categories := $filter($categories, function ($v, $i, $a) {
+            $i < $maxcategories
+        });
+
+        $key_value_string_combined := $map($categories, function ($v, $i, $a) {
+            'CATEGORY' & ($i + 1) & '~|~' & $v
+        });
+        
+        $convert_to_values := $key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
+        
+        $convert_to_values
+    )};
+
+    $comment := 'End of Saba Release 45  of Saba Specific Functions for use in transform';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Saba Constants';
+    $comment := 'These are the values that can be changed per customer';
+    $comment := 'Refer to SABA PERCIPIO IMPLEMENTATION GUIDE';
+
+
+    $comment := '* The DOMAIN that must exist in Saba where the active Percipio Content';
+    $comment := '* should be';
+    $saba_ACTIVEDOMAIN := 'World';
+
+    $comment := '* The DOMAIN that must exist in Saba where the inactive Percipio Content';
+    $comment := '* should be';
+    $saba_ARCHIVEDOMAIN := 'Archive';
+
+    $comment := '* The CONTENT PROVIDER this value must exist in Saba, and must be a';
+    $comment := '* URL Vendor so xAPI works';
+    $saba_CONTENTPROVIDER := 'Percipio_URL_Vendor';
+    
+    $comment := '* The DELIVERY VENDOR this value must exist in Saba';
+    $saba_DELIVERYVENDOR := 'Saba';
+ 
+    $comment := '* The CONTENT folder where content is added that must exist in Saba content';
+    $comment := '* library';
+    $saba_CONTENTFOLDER := 'PERCIPIO_CONTENT';
+
+    $comment := '* The PLAYER TEMPLATE that must exist in Saba';
+    $saba_PLAYERTEMPLATE := 'Percipio';
+
+    $comment := '* The CONTENT SERVER where content is added that must exist in Saba content';
+    $saba_CONTENTSERVER := 'Saba Default Content Server';
+
+    $comment := '* The SABA Account that must exist in Saba that owns this content';
+    $saba_OWNER := 'SSADMIN';
+
+    $comment := '* The MAPPING between Percipio localeCode to SABA language string';
+    $comment := '* The PERCIPIO (left side) value is the lower case value before the';
+    $comment := '* hyphen in the locale i.e. en-us -> en; fr-FR -> fr';
+    $saba_LANGUAGEMAP := [{
               'en': 'English',
               'fr': 'French',
               'de': 'German',
               'es': 'Spanish'
             }
-          ], ($lowercase(localeCodes[0] ? $split(localeCodes[0],'-')[0] : 'en')));
-            $locale ? $locale : 'English'
-        ),
-        'KEYWORDS' :  $sabakeywords(),
-        'CONTENT_STATUS': lifecycle.status = 'ACTIVE' ? 'PUBLISHED' : 'ON_HOLD',
-        'COURSE_IMAGE_URL': imageUrl,
-        'DESCRIPTION': localizedMetadata[0].description ? $sabadescription() : '',
-        'DISPLAY_CALL_CENTER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
-        'DISPLAY_LEARNER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
-        'WBT_DURATION': $isodurationtohhmm(duration),
-        'MARK_COMPLETE_EXTERNALLY': (
-            $markComplete := $lookup([{
+          ];
+
+    $comment := '* The default SABA language string to use if the map does not succeed';
+    $saba_DEFAULTLANGUAGE := 'English';
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* that controls whether type can be marked COMPLETED thru receipt';
+    $comment := '* of a COMPLETED xAPI statement from Percipio';
+    $saba_MARKCOMPLETEEXTERNALMAP := [{
                 'audiobook': 'TRUE',
                 'book': 'TRUE',
                 'channel': 'FALSE',
@@ -371,9 +414,96 @@ $.(
                 'linked_content': 'TRUE',
                 'video': 'TRUE'
               }
-            ], $lowercase(contentType.percipioType)); $markComplete ? $markComplete : 'FALSE';
+            ];
+
+	$comment := '* The PREFIX combined with contentType.displayLabel that is used';
+    $comment := '* for SABA Delivery types. The Delivery types must exist in SABA';
+    $comment := '* If no prefix needed set to empty string, make sure to include';
+    $comment := '* trailing space if defined';
+    $saba_DELIVERYTYPEPREFIX := 'Skillsoft ';
+
+	$comment := '* The default SABA Author string to use if the by array is empty';
+    $comment := '* in the Percipio data';
+	$saba_DEFAULTAUTHOR := 'Skillsoft';
+
+	$comment := '* The number of TAGSn values to include set to 0 to not return any';
+    $comment := '* For more information see the $sabatagsobject function above';
+    $saba_MAXTAGS := 5;
+    
+    $comment := '* The number of CATEGORYn values to include set to 0 to not return any';
+    $comment := '* For more information see the $sabacategoriesobject function above';
+    $saba_MAXCATEGORIES := 5;
+    
+    $comment := '* The base Category value to use in the $sabacategoriesobject function above';
+    $saba_BASECATEGORY := 'Skillsoft';
+    
+    $comment := 'End of Saba Constants';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'START OF TRANSFORM';
+
+    $comment := '*******************************************************';
+    $comment := 'Transform the basic data, uses the CONSTANTS specified above';
+
+    $transformed_data := (
+        $.{
+        'ID': '',
+        'CONTENTTITLE': $sabatitle(),
+        'NEW_CONTENTTITLE': $sabatitle(),
+        'NEW_COURSETITLE': $sabatitle(),
+        'CONTENTFORMAT': 'URL',
+        'SPLIT': lifecycle.status = 'ACTIVE' ? $saba_ACTIVEDOMAIN : $saba_ARCHIVEDOMAIN,
+        'PLAYERTEMPLATE': $saba_PLAYERTEMPLATE,
+        'ZIPFILENAME': '',
+        'CSFILESTITLE': '',
+        'CSFILESRELATIVEPATH': '',
+        'CREATEWBTCOURSE': 'TRUE',
+        'MOBILECOMPATIBILITY': 'allDevices-responsive',
+        'CONTENTFOLDER': $saba_CONTENTFOLDER,
+        'CONTENTTYPE': 'Website',
+        'EXTERNALID': xapiActivityId,
+        'COURSE_NO': id,
+        'AVAILABLEOFFLINE': '',
+        'VERSION': '',
+        'CONTENTPROVIDER': $saba_CONTENTPROVIDER,
+        'DELIVERYVENDOR': $saba_DELIVERYVENDOR,
+        'SECURECONTEXT': '',
+        'CONTENTSERVER': $saba_CONTENTSERVER,
+        'LOCATIONORURL': link,
+        'LAUNCHURL': link,
+        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
+        'COURSE_ABSTRACT': localizedMetadata[0].description ? $sabadescription(1000) : '',
+        'OWNER': $saba_OWNER,
+        'SUREVALMRA': '',
+        'ISSCORING': 'FALSE',
+        'ESIGNATURE': '',
+        'USEAICCBRIDGE': '',
+        'ISSECURE': '',
+        'AUTHOR': $count(by) = 0 ? $saba_DEFAULTAUTHOR : $trim($substring($join(by, ', '), 0, 255)),
+        'LANGUAGE': (
+                $language := $lookup($saba_LANGUAGEMAP, ($lowercase(localeCodes[0] ? $split(localeCodes[0],'-')[0] : 'en')));
+                $language ? $language : $saba_DEFAULTLANGUAGE
         ),
-        'DELIVERY_TYPE': 'Skillsoft ' & contentType.displayLabel,
+        'KEYWORDS' :  (
+            $keywordsarray := $sabakeywordsarray();
+            $count($keywordsarray) = 0 ? '' : $join($keywordsarray,',')
+        ),
+        'CONTENT_STATUS': lifecycle.status = 'ACTIVE' ? 'PUBLISHED' : 'ON_HOLD',
+        'COURSE_IMAGE_URL': imageUrl,
+        'DESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
+        'DISPLAY_CALL_CENTER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
+        'DISPLAY_LEARNER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
+        'WBT_DURATION': $isodurationtohhmm(duration),
+        'WBT_DESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
+        'MARK_COMPLETE_EXTERNALLY': (
+            $markComplete := $lookup($saba_MARKCOMPLETEEXTERNALMAP, $lowercase(contentType.percipioType));
+            $markComplete ? $markComplete : 'FALSE';
+        ),
+        'DELIVERY_TYPE': $trim($saba_DELIVERYTYPEPREFIX & contentType.displayLabel),
         'DISCONTINUE_FROM' : lifecycle.status = 'ACTIVE' ? '' : $substringBefore($now(),'T'),
         'EXPIRATIONDATE' : lifecycle.status = 'ACTIVE' ? '' : $substringBefore($now(),'T'),
         'DROP_REGISTRATIONS' : lifecycle.status = 'ACTIVE' ? '' : 'TRUE',
@@ -383,7 +513,18 @@ $.(
         'COURSE_TARGET_DAYS': 0
       }
     );
-        
-    $results := $merge([$transformed_data, $sabatags(), $sabacategories()]);
+
+    $comment := '*******************************************************';
+    $comment := 'Combine the :';
+    $comment := '   $transformed_data - Basic transfomed data';
+    $comment := '   $sabatagsobject - The TAGSn data derived from the function';
+    $comment := '                        if $saba_MAXTAGS != 0';
+    $comment := '   $sabacategoriesobject - The CATEGORYn data derived from the function';
+    $comment := '                        if $saba_MAXCATEGORIES != 0';
+
+	$tags :=  $saba_MAXTAGS = 0 ? [] : $sabatagsobject($saba_MAXTAGS);
+    $categories :=  $saba_MAXCATEGORIES = 0 ? [] : $sabacategoriesobject($saba_BASECATEGORY, $saba_MAXTAGS);
+
+    $results := $merge([$transformed_data, $tags,  $categories]);
     $results;
 )
