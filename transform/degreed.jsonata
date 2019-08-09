@@ -346,6 +346,18 @@ $.(
         'video': 'Video'
     }];
 
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $degreed_LINKPARAMETERMAP := [{
+        'audiobook': '?chromeless',
+        'book': '?chromeless',
+        'channel': '',
+        'course': '?chromeless',
+        'linked_content': '?chromeless',
+        'video': '?chromeless'
+    }];
+
     $comment := '* The number of TOPICn values to include set to 0 to not return any';
     $comment := '* For more information see the $sabatagsobject function above';
     $degreed_MAXTOPICS := 10;
@@ -369,7 +381,10 @@ $.(
                 $localType ? $localType : ''
             ),
             'ContentID': xapiActivityId,
-            'URL': link,
+            'URL': (
+                $urlparameter := $lookup($degreed_LINKPARAMETERMAP, $lowercase(contentType.percipioType));
+                link & $urlparameter
+            ),
             'Delete': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
             'Title': localizedMetadata[0].title ? $degreedtitle() : '',
             'Summary': localizedMetadata[0].description ? $degreeddescription() : '',
@@ -380,7 +395,7 @@ $.(
         }
     );
 
-$comment := '*******************************************************';
+    $comment := '*******************************************************';
     $comment := 'Combine the :';
     $comment := '   $transformed_data - Basic transfomed data';
     $comment := '   $degreedtopicsobject - The TOPICn data derived from the function';
