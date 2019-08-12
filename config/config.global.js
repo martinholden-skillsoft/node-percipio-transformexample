@@ -24,6 +24,8 @@ config.debug.logFile = `app_${config.startTimestamp}.log`;
 
 // Output path
 config.outputpath = 'results/output';
+// File Extension
+config.outputextension = 'csv';
 
 // Formatting options for the flat file exported using papaparse
 // See https://github.com/mholt/PapaParse
