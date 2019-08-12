@@ -1,11 +1,10 @@
 $.(
     $globalMaxCount := 5;
 
-    $plainstring := function ($source) {
-    (
+    $plainstring := function ($source) {(
         $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
         $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
-        $apos := /&(#8217;|apos;|rsquo;)/;
+        $apos := /&(#8217;|apos;|rsquo;)|[\u2019|\u8217]/;
         $copy := /[\u00A9]|&(#169;|copy;)/;
         $tm := /[\u2122]|&(#8482;|trade;)/;
         $registered := /[\u00AE]|&(#174;|reg;)/;
@@ -21,12 +20,12 @@ $.(
         $result := $replace($result, $copy, '(c)');
         $result := $replace($result, $registered, '(r)');
         $result := $replace($result, $tm, '(tm)');
-        $result := $replace($result, $apos, $base64decode('Jw=='));
+        $result := $replace($result, $apos, '\u0027');
         $result := $replace($result, $curylydoublequotes, '"');
         $result := $replace($result, $nbsp, ' ');
         $result := $replace($result, $otherentities, '');
-        $result; )
-};
+        $result; 
+    )};
 
     $ellipsis := function ($source, $maxlength, $ellipsisString) {
     (
