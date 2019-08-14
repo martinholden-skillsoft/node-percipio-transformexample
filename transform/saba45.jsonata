@@ -226,6 +226,25 @@ $.(
         $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
     )};
 
+
+    $comment := '*******************************************************';
+    $comment := '* Plain text version of the localizedMetadata[0].title. Shortened to';
+    $comment := '* $length with ellipsis string of ...';
+    $comment := '* @param {number} [$length=200] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $sabaextendeddescription := function($length){(
+        $maxlength:= $length ? $length : 2000;
+		$by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ');
+        $copyright := publication ? $join(['Copyright:', publication.publisher, '(c)', $string(publication.copyrightYear)],' ') : '';
+        $isbn := publication ? $join(['ISBN:', publication.isbn],' ') : '';
+
+        $publication := publication ? $join([$by,$copyright,$isbn],'\r\n') : '';
+
+        $ellipsis($join([$publication,$plainstring(localizedMetadata[0].description)],'\r\n'), $maxlength, ' ...');
+    )};
+
+
     $comment := '*******************************************************';
     $comment := '* Create a string[] that is deduplicated of values that combines these';
     $comment := '* data values:';
@@ -494,8 +513,8 @@ $.(
                 $urlparameter := $lookup($saba_LINKPARAMETERMAP, $lowercase(contentType.percipioType));
                 link & $urlparameter
         ),
-        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
-        'COURSE_ABSTRACT': localizedMetadata[0].description ? $sabadescription(1000) : '',
+        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $sabaextendeddescription(2000) : '',
+        'COURSE_ABSTRACT': localizedMetadata[0].description ? $sabaextendeddescription(1000) : '',
         'OWNER': $saba_OWNER,
         'SUREVALMRA': '',
         'ISSCORING': 'FALSE',
@@ -513,11 +532,11 @@ $.(
         ),
         'CONTENT_STATUS': lifecycle.status = 'ACTIVE' ? 'PUBLISHED' : 'ON_HOLD',
         'COURSE_IMAGE_URL': imageUrl,
-        'DESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
+        'DESCRIPTION': localizedMetadata[0].description ? $sabaextendeddescription(2000) : '',
         'DISPLAY_CALL_CENTER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
         'DISPLAY_LEARNER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
         'WBT_DURATION': $isodurationtohhmm(duration),
-        'WBT_DESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
+        'WBT_DESCRIPTION': localizedMetadata[0].description ? $sabaextendeddescription(2000) : '',
         'MARK_COMPLETE_EXTERNALLY': (
             $markComplete := $lookup($saba_MARKCOMPLETEEXTERNALMAP, $lowercase(contentType.percipioType));
             $markComplete ? $markComplete : 'FALSE';
