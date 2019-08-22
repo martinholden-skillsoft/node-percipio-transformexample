@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR DEGREED METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 12-AUG-2019';
+    $comment := 'Date: 22-AUG-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -201,22 +201,41 @@ $.(
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-    $comment := 'Start of Degreed Specific Functions for use in transform';
+    $comment := 'Start of Degreed/Customer Specific Functions';
 
     $comment := '*******************************************************';
     $comment := '* The plain text version of the localizedMetadata[0].title';
+    $comment := '* Prefixed with contentType.displayLabel in () and ';
+    $comment := '* including the technologies[0].title and';
+    $comment := '* technologies[0].version';
     $comment := '* Shortened to $length with ellipsis string of ...';
+    $comment := '* @param {boolean} [$includecontenttype=true] - Include';
+    $comment := '*                  the contentype :';        
+    $comment := '* @param {boolean} [$includetechnology=true] - Include';
+    $comment := '*                  the technology and version in title';
+    $comment := '*                  if title does not contain :';
     $comment := '* @param {number} [$length=254] - Maximum length';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';  
-    $degreedtitle := function($length){(
-        $maxlength:= $length ? $length : 254;
-        $ellipsis($plainstring(localizedMetadata[0].title), $maxlength, ' ...');
+    $degreedtitle := function($includecontenttype, $includetechnology,$length){(
+        $maxlength := $exists($length) ? $length : 254;
+        $addtechnology := $exists($includetechnology) ? $boolean($includetechnology) : true;
+        $addtechnology := $addtechnology ? ($contains(localizedMetadata[0].title, ':') ? false : true) : $addtechnology;
+
+        $addcontenttype := $exists($includecontenttype) ? $boolean($includecontenttype) : true;
+
+        $contenttypestring := $addcontenttype ? '(' & contentType.displayLabel & ') ' : '';
+
+        $technologystring := $addtechnology ? (technologies[0].title ? $plainstring(technologies[0].title) & (technologies[0].version? ' ' & $plainstring(technologies[0].version))& ': ');
+
+        $fulltitle := $contenttypestring & $technologystring & $plainstring(localizedMetadata[0].title);
+
+        $ellipsis($fulltitle, $maxlength, ' ...');
     )};
 
     $comment := '*******************************************************';
-    $comment := '* Plain text version of the localizedMetadata[0].title. Shortened to';
-    $comment := '* $length with ellipsis string of ...';
+    $comment := '* Plain text version of the localizedMetadata[0].description.';
+    $comment := '*  Shortened to $length with ellipsis string of ...';
     $comment := '* @param {number} [$length=2000] - Maximum length';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
@@ -224,6 +243,33 @@ $.(
         $maxlength:= $length ? $length : 2000;
         $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
     )};
+
+
+    $comment := '*******************************************************';
+    $comment := '* Plain text version of the localizedMetadata[0].title.';
+    $comment := '* and if defined add, delimited by \r\n:';
+    $comment := '*     Comma Delimited list of Authors from by';
+    $comment := '*     Copyright Publisher and date from publication.publisher';
+    $comment := '*     and publication.copyrightYear';
+    $comment := '*     ISBN from publication.isbn';
+    $comment := '* Shortened to $length with ellipsis string of ...';
+    $comment := '* @param {number} [$length=2000] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $degreedextendeddescription := function($length){(
+        $maxlength:= $length ? $length : 2000;
+        $by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & '\r\n';
+        
+        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ') : '' : '';
+        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
+        $copyright := publication ? $join([$publisher, $year],' ') & '\r\n' : '';
+        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn],' ') & '\r\n' : '' : '';
+
+        $publication := publication ? $join([$copyright,$isbn]) : '';
+
+        $ellipsis($join([$by,$publication,$plainstring(localizedMetadata[0].description)]), $maxlength, ' ...');
+    )};
+
 
     $comment := '*******************************************************';
     $comment := '* Create a string[] that is deduplicated of values that combines these';
@@ -325,14 +371,14 @@ $.(
     )};
 
 
-    $comment := 'End of Degreed Specific Functions for use in transform';
+    $comment := 'End of Degreed/Customer Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-    $comment := 'Start of Degreed Constants';
+    $comment := 'Start of Degreed/Customer Specific Variables';
     $comment := 'These are the values that can be changed per customer';
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
@@ -350,19 +396,33 @@ $.(
     $comment := '* and any additions to the link';
     $comment := '* Returned value (right side) is the string to append to the link';
     $degreed_LINKPARAMETERMAP := [{
-        'audiobook': '?chromeless',
-        'book': '?chromeless',
+        'audiobook': '',
+        'book': '',
         'channel': '',
-        'course': '?chromeless',
-        'linked_content': '?chromeless',
-        'video': '?chromeless'
+        'course': '',
+        'linked_content': '',
+        'video': ''
     }];
 
     $comment := '* The number of TOPICn values to include set to 0 to not return any';
-    $comment := '* For more information see the $sabatagsobject function above';
+    $comment := '* For more information see the $degreedtopicsobject function above';
     $degreed_MAXTOPICS := 10;
+
+
+    $comment := '* Whether to use the extended description option';
+    $comment := '* This combines the descripion and publication data';
+    $comment := '* See the $degreedextendeddescription function above';
+    $degreed_USEEXTENDEDDESCRIPTION := true;
+
+    $comment := '* Whether to include contentType.displayLabel as prefix to title';
+    $comment := '* See the $successfactorstitle function above';
+    $degreed_INCLUDECONTENTYPE := true;
+
+    $comment := '* Whether to include technologies[0].title and version as prefix to title';
+    $comment := '* See the $successfactorstitle function above';
+    $degreed_INCLUDETECHNOLOGY := true;
     
-    $comment := 'End of Degreed Constants';
+    $comment := 'End of Degreed/Customer Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -386,8 +446,8 @@ $.(
                 link & $urlparameter
             ),
             'Delete': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
-            'Title': localizedMetadata[0].title ? $degreedtitle() : '',
-            'Summary': localizedMetadata[0].description ? $degreeddescription() : '',
+            'Title': localizedMetadata[0].title ? $degreedtitle($degreed_INCLUDECONTENTYPE, $degreed_INCLUDETECHNOLOGY) : '',
+            'Summary': localizedMetadata[0].description ? $degreed_USEEXTENDEDDESCRIPTION ? $degreedextendeddescription() : $degreeddescription() : '',
             'ImageURL': imageUrl ? imageUrl : '',
             'Duration' : $degreedduration(),
             'Language': localeCodes[0] ? $substringBefore(localeCodes[0], '-') : 'en',

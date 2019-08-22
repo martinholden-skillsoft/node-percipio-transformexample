@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SABA RELEASE 44';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 12-AUG-2019';
+    $comment := 'Date: 22-AUG-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -201,7 +201,7 @@ $.(
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-    $comment := 'Start of Saba Release 44 Specific Functions for use in transform';
+    $comment := 'Start of Saba Release 44/Customer Specific Functions';
 
     $comment := '*******************************************************';
     $comment := '* Combine the the contentType.display and plain text version of the';
@@ -216,15 +216,72 @@ $.(
     )};
 
     $comment := '*******************************************************';
+    $comment := '* The plain text version of the localizedMetadata[0].title';
+    $comment := '* Prefixed with contentType.displayLabel in () and ';
+    $comment := '* including the technologies[0].title and';
+    $comment := '* technologies[0].version';
+    $comment := '* Shortened to $length with ellipsis string of ...';
+    $comment := '* @param {boolean} [$includecontenttype=true] - Include';
+    $comment := '*                  the contentype :';        
+    $comment := '* @param {boolean} [$includetechnology=true] - Include';
+    $comment := '*                  the technology and version in title';
+    $comment := '*                  if title does not contain :';
+    $comment := '* @param {number} [$length=254] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $sabatitle := function($includecontenttype, $includetechnology,$length){(
+        $maxlength := $exists($length) ? $length : 254;
+        $addtechnology := $exists($includetechnology) ? $boolean($includetechnology) : true;
+        $addtechnology := $addtechnology ? ($contains(localizedMetadata[0].title, ':') ? false : true) : $addtechnology;
+
+        $addcontenttype := $exists($includecontenttype) ? $boolean($includecontenttype) : true;
+
+        $contenttypestring := $addcontenttype ? '(' & contentType.displayLabel & ') ' : '';
+
+        $technologystring := $addtechnology ? (technologies[0].title ? $plainstring(technologies[0].title) & (technologies[0].version? ' ' & $plainstring(technologies[0].version))& ': ');
+
+        $fulltitle := $contenttypestring & $technologystring & $plainstring(localizedMetadata[0].title);
+
+        $ellipsis($fulltitle, $maxlength, ' ...');
+    )};
+
+
+    $comment := '*******************************************************';
     $comment := '* Plain text version of the localizedMetadata[0].title. Shortened to';
     $comment := '* $length with ellipsis string of ...';
-    $comment := '* @param {number} [$length=200] - Maximum length';
+    $comment := '* @param {number} [$length=2000] - Maximum length';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
     $sabadescription := function($length){(
         $maxlength:= $length ? $length : 2000;
         $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
     )};
+
+    $comment := '*******************************************************';
+    $comment := '* Plain text version of the localizedMetadata[0].title.';
+    $comment := '* and if defined add, delimited by \r\n:';
+    $comment := '*     Comma Delimited list of Authors from by';
+    $comment := '*     Copyright Publisher and date from publication.publisher';
+    $comment := '*     and publication.copyrightYear';
+    $comment := '*     ISBN from publication.isbn';
+    $comment := '* Shortened to $length with ellipsis string of ...';
+    $comment := '* @param {number} [$length=2000] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $sabaextendeddescription := function($length){(
+        $maxlength:= $length ? $length : 2000;
+        $by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & '\r\n';
+        
+        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ') : '' : '';
+        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
+        $copyright := publication ? $join([$publisher, $year],' ') & '\r\n' : '';
+        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn],' ') & '\r\n' : '' : '';
+
+        $publication := publication ? $join([$copyright,$isbn]) : '';
+
+        $ellipsis($join([$by,$publication,$plainstring(localizedMetadata[0].description)]), $maxlength, ' ...');
+    )};
+
 
     $comment := '*******************************************************';
     $comment := '* Create a string[] that is deduplicated of values that combines these';
@@ -348,7 +405,7 @@ $.(
         $convert_to_values
     )};
 
-    $comment := 'End of Saba Release 44  of Saba Specific Functions for use in transform';
+    $comment := 'End Saba Release 44/Customer Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -356,7 +413,7 @@ $.(
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-    $comment := 'Start of Saba Constants';
+    $comment := 'Start of Saba Release 44/Customer Specific Variables';
     $comment := 'These are the values that can be changed per customer';
     $comment := 'Refer to SABA PERCIPIO IMPLEMENTATION GUIDE';
 
@@ -416,15 +473,15 @@ $.(
               }
             ];
 
-	$comment := '* The PREFIX combined with contentType.displayLabel that is used';
+    $comment := '* The PREFIX combined with contentType.displayLabel that is used';
     $comment := '* for SABA Delivery types. The Delivery types must exist in SABA';
     $comment := '* If no prefix needed set to empty string, make sure to include';
     $comment := '* trailing space if defined';
     $saba_DELIVERYTYPEPREFIX := 'Skillsoft ';
 
-	$comment := '* The default SABA Author string to use if the by array is empty';
+    $comment := '* The default SABA Author string to use if the by array is empty';
     $comment := '* in the Percipio data';
-	$saba_DEFAULTAUTHOR := 'Skillsoft';
+    $saba_DEFAULTAUTHOR := 'Skillsoft';
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
     $comment := '* and any additions to the link';
@@ -439,7 +496,7 @@ $.(
         'video': ''
     }];
 
-	$comment := '* The number of TAGSn values to include set to 0 to not return any';
+    $comment := '* The number of TAGSn values to include set to 0 to not return any';
     $comment := '* For more information see the $sabatagsobject function above';
     $saba_MAXTAGS := 5;
     
@@ -450,7 +507,20 @@ $.(
     $comment := '* The base Category value to use in the $sabacategoriesobject function above';
     $saba_BASECATEGORY := 'Skillsoft';
     
-    $comment := 'End of Saba Constants';
+    $comment := '* Whether to use the extended description option';
+    $comment := '* This combines the descripion and publication data';
+    $comment := '* See the $sabaextendeddescription function above';
+    $saba_USEEXTENDEDDESCRIPTION := true;
+
+    $comment := '* Whether to include contentType.displayLabel as prefix to title';
+    $comment := '* See the $successfactorstitle function above';
+    $saba_INCLUDECONTENTYPE := true;
+
+    $comment := '* Whether to include technologies[0].title and version as prefix to title';
+    $comment := '* See the $successfactorstitle function above';
+    $saba_INCLUDETECHNOLOGY := true;
+
+    $comment := 'End of Saba Release 44/Customer Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -465,9 +535,9 @@ $.(
     $transformed_data := (
         $.{
         'ID': '',
-        'CONTENTTITLE': $sabatitle(),
-        'NEW_CONTENTTITLE': $sabatitle(),
-        'NEW_COURSETITLE': $sabatitle(),
+        'CONTENTTITLE': localizedMetadata[0].title ? $sabatitle($saba_INCLUDECONTENTYPE, $saba_INCLUDETECHNOLOGY) : '',
+        'NEW_CONTENTTITLE': localizedMetadata[0].title ? $sabatitle($saba_INCLUDECONTENTYPE, $saba_INCLUDETECHNOLOGY) : '',
+        'NEW_COURSETITLE': localizedMetadata[0].title ? $sabatitle($saba_INCLUDECONTENTYPE, $saba_INCLUDETECHNOLOGY) : '',
         'CONTENTFORMAT': 'URL',
         'SPLIT': lifecycle.status = 'ACTIVE' ? $saba_ACTIVEDOMAIN : $saba_ARCHIVEDOMAIN,
         'PLAYERTEMPLATE': $saba_PLAYERTEMPLATE,
@@ -493,7 +563,7 @@ $.(
                 $urlparameter := $lookup($saba_LINKPARAMETERMAP, $lowercase(contentType.percipioType));
                 link & $urlparameter
         ),
-        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
+        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $saba_USEEXTENDEDDESCRIPTION ? $sabaextendeddescription(2000) :$sabadescription(2000) : '',
         'OWNER': $saba_OWNER,
         'SUREVALMRA': '',
         'ISSCORING': 'FALSE',
@@ -511,7 +581,7 @@ $.(
         ),
         'CONTENT_STATUS': lifecycle.status = 'ACTIVE' ? 'PUBLISHED' : 'ON_HOLD',
         'COURSE_IMAGE': id & '.' & $reverse($split(imageUrl, '.'))[0], 
-        'DESCRIPTION': localizedMetadata[0].description ? $sabadescription(2000) : '',
+        'DESCRIPTION': localizedMetadata[0].description ? $saba_USEEXTENDEDDESCRIPTION ? $sabaextendeddescription(2000) :$sabadescription(2000) : '',
         'DISPLAY_CALL_CENTER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
         'DISPLAY_LEARNER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
         'WBT_DURATION': $isodurationtohhmm(duration),
