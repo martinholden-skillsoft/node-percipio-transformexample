@@ -98,6 +98,7 @@ const callPercipio = async options => {
  * @returns {string} ndjson file path
  */
 const getAllMetadataAndTransformAndExportToCSV = async options => {
+  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     const loggingOptions = {
       label: 'getAllMetadata'
