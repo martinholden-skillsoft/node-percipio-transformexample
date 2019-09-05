@@ -196,17 +196,8 @@ $.(
         }
     )};
 
-    $comment := 'End of Generic Function Library';
     $comment := '*******************************************************';
-    $comment := '*******************************************************';
-
-    $comment := '*******************************************************';
-    $comment := '*******************************************************';
-    $comment := 'Start of Moodle Specific Functions for use in transform';
-
-
-    $comment := '*******************************************************';
-    $comment := '* Get the language from a RFC5646 locale';
+    $comment := '* Get the language string from a RFC5646 locale';
     $comment := '* @param {string} $locale - RFC 5646 language tag, consisting of';
     $comment := '*                    2-character language code and optional variant/region';
     $comment := '*                    code, with hyphen delimiter (e.g. en, en-US';
@@ -214,7 +205,7 @@ $.(
     $comment := '* @param {string} [$default=] - Default when no match.';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';  
-    $moodlelanguage := function ($locale, $languageonly, $default) {(
+    $rfc5646language := function ($locale, $languageonly, $default) {(
             $defaultLanguage := $default ? $default : '';
             $checkLanguageOnly := $languageonly ? $languageonly : false;
 
@@ -460,6 +451,19 @@ $.(
             $result ? $result : $defaultLanguage;
     )};
 
+
+    $comment := 'End of Generic Function Library';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Metadata Specific Functions';
+    $comment := 'These are the functions common for metadata transforms';
+    $comment := 'Source JSON object to be processed is one returned by:';
+    $comment := ' - Scheduled Task - CONTENT_EXPORT';
+    $comment := ' - API Call - content-discovery/v1/organizations/{orgId}/catalog-content';
+
     $comment := '*******************************************************';
     $comment := '* The plain text version of the localizedMetadata[0].title';
     $comment := '* Prefixed with contentType.displayLabel in () and ';
@@ -471,11 +475,11 @@ $.(
     $comment := '* @param {boolean} [$includetechnology=true] - Include';
     $comment := '*                  the technology and version in title';
     $comment := '*                  if title does not contain :';
-    $comment := '* @param {number} [$length=254] - Maximum length';
+    $comment := '* @param {number} [$length=255] - Maximum length';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';  
-    $moodletitle := function($includecontenttype, $includetechnology,$length){(
-        $maxlength := $exists($length) ? $length : 254;
+    $metadatatitle := function($includecontenttype, $includetechnology,$length){(
+        $maxlength := $exists($length) ? $length : 255;
         $addtechnology := $exists($includetechnology) ? $boolean($includetechnology) : true;
         $addtechnology := $addtechnology ? ($contains(localizedMetadata[0].title, ':') ? false : true) : $addtechnology;
 
@@ -491,12 +495,12 @@ $.(
     )};
 
     $comment := '*******************************************************';
-    $comment := '* Plain text version of the localizedMetadata[0].title. Shortened to';
-    $comment := '* $length with ellipsis string of ...';
+    $comment := '* Plain text version of the localizedMetadata[0].description.';
+    $comment := '*  Shortened to $length with ellipsis string of ...';
     $comment := '* @param {number} [$length=2000] - Maximum length';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $moodledescription := function($length){(
+    $metadatadescription := function($length){(
         $maxlength:= $length ? $length : 2000;
         $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
     )};
@@ -504,28 +508,94 @@ $.(
 
     $comment := '*******************************************************';
     $comment := '* Plain text version of the localizedMetadata[0].title.';
-    $comment := '* and if defined add, delimited by \r\n:';
+    $comment := '* and if defined add, delimited by $eol:';
     $comment := '*     Comma Delimited list of Authors from by';
     $comment := '*     Copyright Publisher and date from publication.publisher';
     $comment := '*     and publication.copyrightYear';
     $comment := '*     ISBN from publication.isbn';
     $comment := '* Shortened to $length with ellipsis string of ...';
     $comment := '* @param {number} [$length=2000] - Maximum length';
+    $comment := '* @param {string} [$eol=\r\n] - The EOL characters to use';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $moodleextendeddescription := function($length){(
+    $metadataextendeddescription := function($length, $eol){(
         $maxlength:= $length ? $length : 2000;
-        $by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & '\r\n';
+        $myeol:= $eol ? $eol : '\r\n';
+        $by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & $myeol;
         
         $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ') : '' : '';
         $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
-        $copyright := publication ? $join([$publisher, $year],' ') & '\r\n' : '';
-        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn],' ') & '\r\n' : '' : '';
+        $copyright := publication ? $join([$publisher, $year],' ') & $myeol : '';
+        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn],' ') & $myeol : '' : '';
 
         $publication := publication ? $join([$copyright,$isbn]) : '';
 
         $ellipsis($join([$by,$publication,$plainstring(localizedMetadata[0].description)]), $maxlength, ' ...');
     )};
+
+
+    $comment := '*******************************************************';
+    $comment := '* Enhanced sharelink combining the link and any query';
+    $comment := '* string parameters based on contentType.percipioType';
+    $comment := '* in lowercase lookup against $commonShareLinkParametersLookup';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $metadatasharelink := function(){(
+        $urlparameter := $exists($commonShareLinkParametersLookup) ? $lookup($commonShareLinkParametersLookup, $lowercase(contentType.percipioType)) : '';
+        link & $urlparameter;
+    )};
+
+
+    $comment := 'End of Metadata Specific Functions';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Common Metadata Specific Variables';
+    $comment := 'These are the values that can change the metadata specific';
+    $comment := 'functions';
+
+    $comment := '* Whether to use the extended description option';
+    $comment := '* This combines the descripion and publication data';
+    $comment := '* See the $metadataextendeddescription function above';
+    $commonUseExtendedDescription := $exists($override.common.UseExtendedDescription) ? $override.common.UseExtendedDescription : true;
+
+    $comment := '* The EOL characters to use for the Extended Description';
+    $comment := '* See the $metadataextendeddescription function above';
+    $commonExtendedDescriptionEOL := $exists($override.common.ExtendedDescriptionEOL) ? $override.common.ExtendedDescriptionEOL : '\r\n';
+
+    $comment := '* Whether to include contentType.displayLabel as prefix to title';
+    $comment := '* See the $metadatatitle function above';
+    $commonIncludeContentTypeInTitle := $exists($override.common.IncludeContentTypeInTitle) ? $override.common.IncludeContentTypeInTitle : true;
+
+    $comment := '* Whether to include technologies[0].title and version as prefix to title';
+    $comment := '* See the $metadatatitle function above';
+    $commonIncludeTechnologyDetailsInTitle := $exists($override.common.IncludeTechnologyDetailsInTitle) ? $override.common.IncludeTechnologyDetailsInTitle : true;
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $comment := '* so for example to make a link chromeless include ?chromeless';
+    $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup ) ? $override.common.ShareLinkParametersLookup : {
+        'audiobook': '',
+        'book': '',
+        'channel': '',
+        'course': '',
+        'linked_content': '',
+        'video': ''
+    };
+
+    $comment := 'End of Common Metadata Specific Variables';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Moodle/Customer Specific Functions';
 
     $comment := '*******************************************************';
     $comment := '* Create a string[] that is deduplicated of values that combines these';
@@ -607,7 +677,7 @@ $.(
         $result;
     )};
 
-    $comment := 'End of Moodle Specific Functions for use in transform';
+    $comment := 'End of Moodle/Customer Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -615,39 +685,14 @@ $.(
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-    $comment := 'Start of Moodle Constants';
+    $comment := 'Start of Moodle/Customer Specific Variables';
     $comment := 'These are the values that can be changed per customer';
-
-    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link';
-    $comment := '* Returned value (right side) is the string to append to the link';
-    $moodle_LINKPARAMETERMAP := [{
-        'audiobook': '',
-        'book': '',
-        'channel': '',
-        'course': '',
-        'linked_content': '',
-        'video': ''
-    }];
 
     $comment := '* The number of tags values to include set to 0 to not return any';
     $comment := '* For more information see the $moodletagsarray function above';
-    $moodle_MAXTAGS := 10;
+    $moodleMaxTags := $exists($override.moodle.maxtags) ? $override.moodle.maxtags : 10;
     
-    $comment := '* Whether to use the extended description option';
-    $comment := '* This combines the descripion and publication data';
-    $comment := '* See the $moodlextendeddescription function above';
-    $moodle_USEEXTENDEDDESCRIPTION := true;
-
-    $comment := '* Whether to include contentType.displayLabel as prefix to title';
-    $comment := '* See the $successfactorstitle function above';
-    $moodle_INCLUDECONTENTYPE := true;
-
-    $comment := '* Whether to include technologies[0].title and version as prefix to title';
-    $comment := '* See the $successfactorstitle function above';
-    $moodle_INCLUDETECHNOLOGY := true;
-
-    $comment := 'End of Moodle Constants';
+    $comment := 'End of Moodle/Customer Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -662,17 +707,14 @@ $.(
     $transformed_data := (
         $.{
             'ContentUUID': id ? id : '',
-            'Title':  localizedMetadata[0].title ? $moodletitle($moodle_INCLUDECONTENTYPE, $moodle_INCLUDETECHNOLOGY) : '',
-            'Description': localizedMetadata[0].description ? $moodle_USEEXTENDEDDESCRIPTION ? $moodleextendeddescription() : $moodledescription() :'',
-             'ShareLinkURL': (
-                $urlparameter := $lookup($moodle_LINKPARAMETERMAP, $lowercase(contentType.percipioType));
-                link & $urlparameter
-            ),
+            'Title':  localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
+            'Description': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$override.common.ExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+            'ShareLinkURL': $metadatasharelink(),
             'ThumbnailImageURL' : imageUrl ? imageUrl : '',
             'PercipioType' : contentType ? contentType.displayLabel : '',
             'Duration': duration ? $isodurationtohhmmss(duration) : '00:00:00',
             'Tags': (
-                $tags := $moodle_MAXTAGS = 0 ? null : $moodletagsarray();
+                $tags := $moodleMaxTags = 0 ? null : $moodletagsarray();
                 $tags ? $join($tags,'|') : ''
              ),
             'Modality': (
@@ -687,7 +729,7 @@ $.(
     $comment := 'column order matches the deafult Percipio Import Tool for Moodle order';
     $extra_data := (
         $.{
-            'Language': $moodlelanguage(localeCodes[0]),
+            'Language': $rfc5646language(localeCodes[0]),
             'Locale': localeCodes[0]
         }
     );
