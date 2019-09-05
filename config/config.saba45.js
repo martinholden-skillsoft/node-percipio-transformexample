@@ -20,6 +20,16 @@ config.debug.logFile = `${config.customer}.log`;
 // Output path
 config.outputpath = `results/${config.customer}`;
 
+// JSONata Bindings
+config.jsonataBinding = {};
+config.jsonataBinding.override = {};
+
+// Platform specific overrides
+config.jsonataBinding.override.saba = {};
+
+// The maximum number of tags to include. Set to 0 to exclude
+config.jsonataBinding.override.saba.maxtags = 10;
+
 // Formatting options for the flat file exported using papaparse
 // See https://github.com/mholt/PapaParse
 config.textoptions = {};
@@ -55,7 +65,7 @@ config.request.query = {};
  * Type: string[]
  * Enum: COURSE,VIDEO,BOOK,AUDIOBOOK,CHANNEL,LINKED_CONTENT
  */
-config.request.query.typeFilter = null;
+config.request.query.typeFilter = 'CHANNEL';
 /**
  * Name: licensePoolIds
  * Description : Array of License pool IDs to which to restrict content.

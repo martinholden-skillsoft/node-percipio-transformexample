@@ -27,6 +27,38 @@ config.outputpath = 'results/output';
 // File Extension
 config.outputextension = 'csv';
 
+// JSONata Bindings
+// JSONata Bindings
+config.jsonataBinding = {};
+config.jsonataBinding.override = {};
+
+// Common Overrides
+config.jsonataBinding.override.common = {};
+
+// The MAPPING between Percipio contentType.percipioType lowercase
+// and any additions to the link
+// Returned value (right side) is the string to append to the link
+// so for example to make a link chromeless include ?chromeless
+// Make sure to include the leading ?
+config.jsonataBinding.override.common.ShareLinkParametersLookup = {
+  audiobook: '',
+  book: '',
+  channel: '',
+  course: '',
+  linked_content: '',
+  video: ''
+};
+
+// Whether to include technologies[0].title and version as prefix to title
+config.jsonataBinding.override.common.IncludeTechnologyDetailsInTitle = true;
+
+// Whether to include contentType.displayLabel as prefix to title
+config.jsonataBinding.override.common.IncludeContentTypeInTitle = true;
+
+// Whether to use the extended description option
+// This combines the descripion and publication data
+config.jsonataBinding.override.common.UseExtendedDescription = true;
+
 // Formatting options for the flat file exported using papaparse
 // See https://github.com/mholt/PapaParse
 config.textoptions = {};

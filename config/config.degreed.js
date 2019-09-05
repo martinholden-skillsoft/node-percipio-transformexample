@@ -20,6 +20,30 @@ config.debug.logFile = `${config.customer}.log`;
 // Output path
 config.outputpath = `results/${config.customer}`;
 
+// JSONata Bindings
+config.jsonataBinding = {};
+config.jsonataBinding.override = {};
+
+// Common Overrides - see config.global.js
+
+// Platform specific overrides
+config.jsonataBinding.override.degreed = {};
+
+// The MAPPING between Percipio contentType.percipioType lowercase
+// and the DEGREED content type.
+config.jsonataBinding.override.degreed.contenttypelookup = {
+  audiobook: 'Book',
+  book: 'Book',
+  channel: 'Article',
+  course: 'Course',
+  linked_content: 'Article',
+  video: 'Video'
+};
+
+// The number of TOPICn values to include set to 0 to not return any
+// For more information see the $degreedtopicsobject function in transform
+config.jsonataBinding.override.degreed.maxtopics = 10;
+
 // Formatting options for the flat file exported using papaparse
 // See https://github.com/mholt/PapaParse
 config.textoptions = {};

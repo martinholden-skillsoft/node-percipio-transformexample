@@ -20,6 +20,120 @@ config.debug.logFile = `${config.customer}.log`;
 // Output path
 config.outputpath = `results/${config.customer}`;
 
+// JSONata Bindings
+config.jsonataBinding = {};
+
+// An example of how the "overides" could be specified in the Scheduler job
+const exampleSchedulerConfig = {
+  activity: {
+    activityName: 'CONTENT_DISCOVERY',
+    preferences: {
+      action: 'CONTENT_EXPORT',
+      transformName: 'SuccessFactors',
+      override: {
+        common: {
+          UseExtendedDescription: true,
+          ExtendedDescriptionEOL: '  ',
+          IncludeTechnologyDetailsInTitle: true,
+          IncludeContentTypeInTitle: true,
+          ShareLinkParametersLookup: {
+            audiobook: '?chromeless',
+            book: '?chromeless',
+            channel: '',
+            course: '?chromeless',
+            linked_content: '?chromeless',
+            video: '?chromeless'
+          }
+        },
+        successfactors: {
+          showincataloglookup: {
+            audiobook: 'Y',
+            book: 'Y',
+            channel: 'Y',
+            course: 'Y',
+            linked_content: 'Y',
+            video: 'Y'
+          },
+          onlinestatuslookup: {
+            audiobook: 'Y',
+            book: 'Y',
+            channel: 'Y',
+            course: 'Y',
+            linked_content: 'Y',
+            video: 'Y'
+          },
+          languagelookup: {
+            en: 'English',
+            fr: 'French',
+            'fr-FR': 'French',
+            de: 'German',
+            'de-DE': 'German',
+            es: 'Spanish',
+            'es-ES': 'Spanish',
+            'es-DO': 'Spanish'
+          },
+          defaultlanguage: 'English',
+          typelookup: {
+            'audiobook~audiobook~audiobook summary': 'AUDIO SUMMARY',
+            'audiobook~audiobook~audiobook': 'AUDIOBOOK',
+            'book~book~book': 'BOOK',
+            'book~book~book review': 'BOOK',
+            'book~book~book summary': 'BOOK SUMMARY',
+            'channel~channel~channel': 'CHANNEL',
+            'course~course~course': 'COURSE',
+            'linked_content~assessment~testprep': 'LINKED CONTENT',
+            'linked_content~~practice lab': 'LINKED CONTENT',
+            'linked_content~~wintellect': 'LINKED CONTENT',
+            'linked_content~course~course': 'LINKED CONTENT',
+            'video~video~video': 'VIDEO'
+          },
+          completionlookup: {
+            'audiobook~audiobook~audiobook summary': 'AUDIO-BK-SUMM-COMPL',
+            'audiobook~audiobook~audiobook': 'AUDIO-BK-COMPL',
+            'book~book~book': 'BOOK-COMPL',
+            'book~book~book review': 'UNKNOWN',
+            'book~book~book summary': 'BOOK-SUMM-COMPL',
+            'channel~channel~channel': 'CHANNEL-COMPL',
+            'course~course~course': 'COURSE-COMPL',
+            'linked_content~assessment~testprep': 'LINKED-CTNT-COMPL',
+            'linked_content~~practice lab': 'LINKED-CTNT-COMPL',
+            'linked_content~~wintellect': 'LINKED-CTNT-COMPL',
+            'linked_content~course~course': 'LINKED-CTNT-COMPL',
+            'video~video~video': 'VIDEO-COMPL'
+          },
+          defaultcatalog: 'EXTERNAL',
+          cpntsrcid: 'SKILLSOFT',
+          buildcompany: 'Percipio',
+          chgbackmethod: 1,
+          timestampformat: '[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01][z]',
+          timezoneoffset: '-0500'
+        }
+      },
+      filename: {
+        outputPath: 'Skillsoft/itemconn/sf',
+        includeDate: false,
+        filenamePrefix: 'item_data_CLAQ1NA',
+        filenameSuffix: 'csv'
+      },
+      sftp: {
+        sftpConfigUuid: 'fa20850f-71a2-462c-973c-9f30e6f4a961'
+      },
+      csvOptions: {
+        delimiter: '|',
+        header: true,
+        newline: '!##!\r\n'
+      }
+    }
+  },
+  startAt: '2019-01-28T11:01:00.000Z',
+  jobConfig: {
+    type: 'ASYNC',
+    maxRetryCount: 5
+  }
+};
+
+config.jsonataBinding.override = exampleSchedulerConfig.activity.preferences.override;
+
 // File Extension
 config.outputextension = 'txt';
 
@@ -58,7 +172,7 @@ config.request.query = {};
  * Type: string[]
  * Enum: COURSE,VIDEO,BOOK,AUDIOBOOK,CHANNEL,LINKED_CONTENT
  */
-config.request.query.typeFilter = 'CHANNEL';
+config.request.query.typeFilter = null;
 /**
  * Name: licensePoolIds
  * Description : Array of License pool IDs to which to restrict content.
@@ -74,7 +188,7 @@ config.request.query.licensePoolIds = null;
  * Type: string
  * Format: date-time
  */
-config.request.query.updatedSince = null;
+config.request.query.updatedSince = '2019-09-01T00:00:00Z';
 /**
  * Name: offset
  * Description : Used in conjunction with 'max' to specify which set of 'max' content items

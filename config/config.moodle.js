@@ -20,6 +20,12 @@ config.debug.logFile = `${config.customer}.log`;
 // Output path
 config.outputpath = `results/${config.customer}`;
 
+// Platform specific overrides
+config.jsonataBinding.override.moodle = {};
+
+// The maximum number of tags to include. Set to 0 to exclude
+config.jsonataBinding.override.moodle.maxtags = 10;
+
 // Formatting options for the flat file exported using papaparse
 // See https://github.com/mholt/PapaParse
 config.textoptions = {};

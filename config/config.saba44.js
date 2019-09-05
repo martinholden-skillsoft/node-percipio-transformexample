@@ -20,6 +20,16 @@ config.debug.logFile = `${config.customer}.log`;
 // Output path
 config.outputpath = `results/${config.customer}`;
 
+// JSONata Bindings
+config.jsonataBinding = {};
+config.jsonataBinding.override = {};
+
+// Platform specific overrides
+config.jsonataBinding.override.saba = {};
+
+// The default Author to use if the by field is empty
+config.jsonataBinding.override.saba.defaultauthor = 'Skillsoft UK';
+
 // Formatting options for the flat file exported using papaparse
 // See https://github.com/mholt/PapaParse
 config.textoptions = {};
