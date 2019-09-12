@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SUCCESSFACTORS METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 22-AUG-2019';
+    $comment := 'Date: 12-SEP-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -280,11 +280,11 @@ $.(
     $comment := '*******************************************************';
     $comment := '* Enhanced sharelink combining the link and any query';
     $comment := '* string parameters based on contentType.percipioType';
-    $comment := '* in lowercase lookup against $commonShareLinkParametersLookup';
+    $comment := '* in lowercase lookup against $lookupValues';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadatasharelink := function(){(
-        $urlparameter := $exists($commonShareLinkParametersLookup) ? $lookup($commonShareLinkParametersLookup, $lowercase(contentType.percipioType)) : '';
+    $metadatasharelink := function($lookupValues){(
+        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : '';
         link & $urlparameter;
     )};
 
@@ -331,6 +331,19 @@ $.(
         'video': ''
     };
 
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link for MOBILE';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $comment := '* so for example to make a link chromeless include ?chromeless';
+    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
+        'audiobook': '?chromeless',
+        'book': '?chromeless',
+        'channel': '?chromeless',
+        'course': '?chromeless',
+        'linked_content': '?chromeless',
+        'video': '?chromeless'
+    };
+
     $comment := 'End of Common Metadata Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -368,6 +381,21 @@ $.(
         $formatToUse:= $format ? $format : '[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01]';
         $tzToUse := $tzoffset ? $tzoffset;
         $fromMillis($toMillis($timestamp),$formatToUse,$tzToUse)
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Converts the Percipio contentTyie info into a single';
+    $comment := '* lookup value.';
+    $comment := '* It is the Percipio contentType.percipioType,';
+    $comment := '* contentType.category, contentType.displayLabel in lowercase';
+    $comment := '* combined with ~ delimiter.';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************'; 
+    $successfactorslookuptype := function() {(
+        $percipioType := contentType.percipioType ? $trim(contentType.percipioType) : '';
+        $category := contentType.category ? $trim(contentType.category) : '';
+        $displayLabel := contentType.displayLabel ? $trim(contentType.displayLabel) : '';
+        $lowercase($join([$percipioType,$category,$displayLabel],'~'));
     )};
 
     $comment := 'End of SuccessFactors/Customer Specific Functions';
@@ -501,20 +529,20 @@ $.(
         $.{
             'CPNT_ID':id,
             'CPNT_TYP_ID': (
-                $lookupVal:= $lowercase($join([$trim(contentType.percipioType),$trim(contentType.category),$trim(contentType.displayLabel)],'~'));
+                $lookupVal:= $successfactorslookuptype();
                 $result := $lookup($successfactors_TYPELOOKUP, $lookupVal);
                 $result;
             ),
             'NOTACTIVE': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
             'CPNT_TITLE': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 300) : '',
             'DEL_MTH_ID':  (
-                $lookupVal:= $lowercase($join([$trim(contentType.percipioType),$trim(contentType.category),$trim(contentType.displayLabel)],'~'));
+                $lookupVal:= $successfactorslookuptype();
                 $result := $lookup($successfactors_TYPELOOKUP, $lookupVal);
                 $result;
             ),
             'HTML_CPNT_DESC': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $override.common.ExtendedDescriptionEOL) : $metadatadescription(2000) : '',
             'CMPL_STAT_ID': (
-                $lookupVal:= $lowercase($join([$trim(contentType.percipioType),$trim(contentType.category),$trim(contentType.displayLabel)],'~'));
+                $lookupVal:= $successfactorslookuptype();
                 $result := $lookup($successfactors_COMPLETIONLOOKUP, $lookupVal);
                 $result;
             ),
@@ -533,7 +561,7 @@ $.(
                 $contentOnline ? $contentOnline : 'Y'
             ),
             'LAUNCH_TYPE': 3,
-            'PRIMARY_PARAM': $metadatasharelink(),
+            'PRIMARY_PARAM': $metadatasharelink($commonShareLinkParametersLookup),
             'ITEM_ONLINE': (
                 $itemOnline := $lookup($successfactors_ONLINESTATUSLOOKUP, $lowercase(contentType.percipioType));
                 $itemOnline ? $itemOnline : 'Y'
@@ -550,7 +578,10 @@ $.(
             'REV_DTE': lifecycle.lastUpdatedDate ? $successfactorstimestamp(lifecycle.lastUpdatedDate, $successfactors_TIMESTAMPFORMAT, $successfactors_TIMEZONEOFFSET) : '',
             'CPNT_SRC_ID': $successfactors_CPNTSRCID,
             'CREATE_DTE': lifecycle.publishDate ? $successfactorstimestamp(lifecycle.publishDate, $successfactors_TIMESTAMPFORMAT, $successfactors_TIMEZONEOFFSET) : '',
-            'CHGBCK_METHOD': $successfactors_CHGBACKMETHOD
+            'CHGBCK_METHOD': $successfactors_CHGBACKMETHOD,
+            'SKIP_CONTENT_STRUCTURE_PAGE': 'Y',
+            'ENABLE_MOBILE_ACCESS': 'Y',
+            'MOBILE_PRIMARY_PARAM': $metadatasharelink($commonMobileShareLinkParametersLookup)
         }
     );
 
