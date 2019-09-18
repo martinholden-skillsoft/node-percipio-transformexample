@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SABA RELEASE 45 - But with LOCAL thumbnbail';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 09-SEP-2019';
+    $comment := 'Date: 18-SEP-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -804,6 +804,25 @@ $.(
     $comment := '* The base Category value to use in the $sabacategoriesobject function above';
     $saba_BASECATEGORY := $exists($override.saba.basecategory) ? $override.saba.basecategory : 'Skillsoft';
     
+    $comment := '* The Saba mobilecompatabilty value to use in the transform';
+    $comment := '* The current options based on Saba 45.0.0.202 are:';
+    $comment := '* Value    UI Name';
+    $comment := '* allDevices    All Devices';
+    $comment := '* notCompatible    Not Compatible';
+    $comment := '* iPhone    iPhone';
+    $comment := '* iPad    iPad';
+    $comment := '* both    iPhone and iPad';
+    $comment := '* androidSmall    Android Small Size Device';
+    $comment := '* androidNormal    Android Normal Size Device';
+    $comment := '* androidLargeAndAbove    Android Large and Above Size Device';
+    $comment := '* iPhone-responsive    iPhone-responsive';
+    $comment := '* iPad-responsive    iPad-responsive';
+    $comment := '* both-responsive    iPhone and iPad-responsive';
+    $comment := '* allDevice-responsive    AllDevices-responsive';
+    $comment := '* allLargeDevices    All Large Devices-responsive';
+    $comment := '* allSmallDevices    All Small Devices-responsive';
+    $saba_MOBILECOMPATABILTY := $exists($override.saba.mobilecompatabilty) ? $override.saba.mobilecompatabilty : 'allDevice-responsive';
+
     $comment := 'End of Saba Release 45/Customer Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -829,7 +848,7 @@ $.(
         'CSFILESTITLE': '',
         'CSFILESRELATIVEPATH': '',
         'CREATEWBTCOURSE': 'TRUE',
-        'MOBILECOMPATIBILITY': 'allDevices-responsive',
+        'MOBILECOMPATIBILITY': $saba_MOBILECOMPATABILTY,
         'CONTENTFOLDER': $saba_CONTENTFOLDER,
         'CONTENTTYPE': 'Website',
         'EXTERNALID': xapiActivityId,
