@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR DEGREED METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 22-AUG-2019';
+    $comment := 'Date: 18-SEP-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -462,6 +462,37 @@ $.(
     $comment := 'Source JSON object to be processed is one returned by:';
     $comment := ' - Scheduled Task - CONTENT_EXPORT';
     $comment := ' - API Call - content-discovery/v1/organizations/{orgId}/catalog-content';
+
+    $comment := '*******************************************************';
+    $comment := '* The plain text version of the localizedMetadata[0].title';
+    $comment := '* Prefixed with contentType.displayLabel in () and ';
+    $comment := '* including the technologies[0].title and';
+    $comment := '* technologies[0].version';
+    $comment := '* Shortened to $length with ellipsis string of ...';
+    $comment := '* @param {boolean} [$includecontenttype=true] - Include';
+    $comment := '*                  the contentype :';        
+    $comment := '* @param {boolean} [$includetechnology=true] - Include';
+    $comment := '*                  the technology and version in title';
+    $comment := '*                  if title does not contain :';
+    $comment := '* @param {number} [$length=255] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $metadatatitle := function($includecontenttype, $includetechnology,$length){(
+        $maxlength := $exists($length) ? $length : 255;
+        $addtechnology := $exists($includetechnology) ? $boolean($includetechnology) : true;
+        $addtechnology := $addtechnology ? ($contains(localizedMetadata[0].title, ':') ? false : true) : $addtechnology;
+
+        $addcontenttype := $exists($includecontenttype) ? $boolean($includecontenttype) : true;
+
+        $contenttypestring := $addcontenttype ? '(' & contentType.displayLabel & ') ' : '';
+
+        $technologystring := $addtechnology ? (technologies[0].title ? $plainstring(technologies[0].title) & (technologies[0].version? ' ' & $plainstring(technologies[0].version))& ': ');
+
+        $fulltitle := $contenttypestring & $technologystring & $plainstring(localizedMetadata[0].title);
+
+        $ellipsis($fulltitle, $maxlength, ' ...');
+    )};
+
 
     $comment := '*******************************************************';
     $comment := '* Plain text version of the localizedMetadata[0].title.';
