@@ -861,8 +861,8 @@ $.(
         'CONTENTSERVER': $saba_CONTENTSERVER,
         'LOCATIONORURL': $metadatasharelink(),
         'LAUNCHURL': $metadatasharelink(),
-        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$override.common.ExtendedDescriptionEOL) : $metadatadescription(2000) : '',
-        'COURSE_ABSTRACT': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(1000,$override.common.ExtendedDescriptionEOL) : $metadatadescription(1000) : '',
+        'CONTENTDESCRIPTION': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+        'COURSE_ABSTRACT': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(1000,$commonExtendedDescriptionEOL) : $metadatadescription(1000) : '',
         'OWNER': $saba_OWNER,
         'SUREVALMRA': '',
         'ISSCORING': 'FALSE',
@@ -880,11 +880,11 @@ $.(
         ),
         'CONTENT_STATUS': lifecycle.status = 'ACTIVE' ? 'PUBLISHED' : 'ON_HOLD',
         'COURSE_IMAGE_URL': imageUrl,
-        'DESCRIPTION': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$override.common.ExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+        'DESCRIPTION': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
         'DISPLAY_CALL_CENTER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
         'DISPLAY_LEARNER': lifecycle.status = 'ACTIVE' ? 'TRUE' : 'FALSE',
         'WBT_DURATION': $isodurationtohhmm(duration),
-        'WBT_DESCRIPTION': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$override.common.ExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+        'WBT_DESCRIPTION': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
         'MARK_COMPLETE_EXTERNALLY': (
             $markComplete := $lookup($saba_MARKCOMPLETEEXTERNALMAP, $lowercase(contentType.percipioType));
             $markComplete ? $markComplete : 'FALSE';

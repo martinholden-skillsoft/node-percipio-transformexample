@@ -540,7 +540,7 @@ $.(
                 $result := $lookup($successfactors_TYPELOOKUP, $lookupVal);
                 $result;
             ),
-            'HTML_CPNT_DESC': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $override.common.ExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+            'HTML_CPNT_DESC': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
             'CMPL_STAT_ID': (
                 $lookupVal:= $successfactorslookuptype();
                 $result := $lookup($successfactors_COMPLETIONLOOKUP, $lookupVal);

@@ -773,7 +773,7 @@ $.(
             'URL': $metadatasharelink(),
             'Delete': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
             'Title': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
-            'Summary': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $override.common.ExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+            'Summary': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
             'ImageURL': imageUrl ? imageUrl : '',
             'Duration' : $degreedduration(),
             'Language': localeCodes[0] ? $substringBefore(localeCodes[0], '-') : 'en',
