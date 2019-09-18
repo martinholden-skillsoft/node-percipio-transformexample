@@ -565,7 +565,7 @@ $.(
 
     $comment := '* The EOL characters to use for the Extended Description';
     $comment := '* See the $metadataextendeddescription function above';
-    $commonExtendedDescriptionEOL := $exists($override.common.ExtendedDescriptionEOL) ? $override.common.ExtendedDescriptionEOL : '\r\n';
+    $commonExtendedDescriptionEOL := $exists($override.common.ExtendedDescriptionEOL) ? $override.common.ExtendedDescriptionEOL : '<br>';
 
     $comment := '* Whether to include contentType.displayLabel as prefix to title';
     $comment := '* See the $metadatatitle function above';
@@ -673,7 +673,9 @@ $.(
             'video': associations.channels[0].id
         }], $lowercase(contentType.percipioType));
 
-        $result:= { 'Channel': $channelTitle, 'ChannelUUID': $channelUUID };
+
+
+        $result:= { 'Channel': $channelTitle ? $channelTitle : '', 'ChannelUUID': $channelUUID ? $channelUUID : '' };
         $result;
     )};
 
@@ -708,7 +710,7 @@ $.(
         $.{
             'ContentUUID': id ? id : '',
             'Title':  localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
-            'Description': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$override.common.ExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+            'Description': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
             'ShareLinkURL': $metadatasharelink(),
             'ThumbnailImageURL' : imageUrl ? imageUrl : '',
             'PercipioType' : contentType ? contentType.displayLabel : '',
@@ -728,7 +730,7 @@ $.(
     $comment := 'We tranform these seperately so we can make sure the file output';
     $comment := 'column order matches the deafult Percipio Import Tool for Moodle order';
     $extra_data := (
-        $.{
+         $.{
             'Language': $rfc5646language(localeCodes[0]),
             'Locale': localeCodes[0]
         }
