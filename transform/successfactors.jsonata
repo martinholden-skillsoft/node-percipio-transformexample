@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SUCCESSFACTORS METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 12-SEP-2019';
+    $comment := 'Date: 19-SEP-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -37,7 +37,7 @@ $.(
         $result := $replace($result, $registered, '(r)');
         $result := $replace($result, $tm, '(tm)');
         $result := $replace($result, $apos, '\u0027');
-        $result := $replace($result, $curylydoublequotes, '"');
+        $result := $replace($result, $curylydoublequotes, '\u0022');
         $result := $replace($result, $nbsp, ' ');
         $result := $replace($result, $otherentities, '');
         $result; 
@@ -369,9 +369,9 @@ $.(
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format timestamp such as 2019-08-13T13:14:15Z';
-    $comment := '* to the relevant SuccessFactor format needed';
+    $comment := '* to the relevant SuccessFactor format needed (MON-DD-YYYY HH24:MI:SS)';
     $comment := '* @param {string} $timestamp - The ISO8601 timestamp';    
-    $comment := '* @param {string} [$format=MON-DD-YYYY HH24:MI:SS] - The format to';
+    $comment := '* @param {string} [$format=[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01]] - The format to';
     $comment := '*                     which has the same syntax as fn:format-dateTime.';
     $comment := '*      https://www.w3.org/TR/xpath-functions-31/#func-format-dateTime';
     $comment := '* @param {string} [$tzoffset=] - The TimeZone Offset';

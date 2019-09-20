@@ -4,7 +4,7 @@ $.(
     $comment := 'TRANSFORM FOR MOODLE 3.x Percipio Course Import';
     $comment := 'See https://github.com/martinholden-skillsoft/moodle-tool_uploadpercipio';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 22-AUG-2019';
+    $comment := 'Date: 19-SEP-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -38,7 +38,7 @@ $.(
         $result := $replace($result, $registered, '(r)');
         $result := $replace($result, $tm, '(tm)');
         $result := $replace($result, $apos, '\u0027');
-        $result := $replace($result, $curylydoublequotes, '"');
+        $result := $replace($result, $curylydoublequotes, '\u0022');
         $result := $replace($result, $nbsp, ' ');
         $result := $replace($result, $otherentities, '');
         $result; 
@@ -537,11 +537,11 @@ $.(
     $comment := '*******************************************************';
     $comment := '* Enhanced sharelink combining the link and any query';
     $comment := '* string parameters based on contentType.percipioType';
-    $comment := '* in lowercase lookup against $commonShareLinkParametersLookup';
+    $comment := '* in lowercase lookup against $lookupValues';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadatasharelink := function(){(
-        $urlparameter := $exists($commonShareLinkParametersLookup) ? $lookup($commonShareLinkParametersLookup, $lowercase(contentType.percipioType)) : '';
+    $metadatasharelink := function($lookupValues){(
+        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : '';
         link & $urlparameter;
     )};
 
@@ -586,6 +586,19 @@ $.(
         'course': '',
         'linked_content': '',
         'video': ''
+    };
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link for MOBILE';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $comment := '* so for example to make a link chromeless include ?chromeless';
+    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
+        'audiobook': '?chromeless',
+        'book': '?chromeless',
+        'channel': '?chromeless',
+        'course': '?chromeless',
+        'linked_content': '?chromeless',
+        'video': '?chromeless'
     };
 
     $comment := 'End of Common Metadata Specific Variables';
@@ -711,7 +724,7 @@ $.(
             'ContentUUID': id ? id : '',
             'Title':  localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
             'Description': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
-            'ShareLinkURL': $metadatasharelink(),
+            'ShareLinkURL': link ? $metadatasharelink($commonShareLinkParametersLookup) : '',
             'ThumbnailImageURL' : imageUrl ? imageUrl : '',
             'PercipioType' : contentType ? contentType.displayLabel : '',
             'Duration': duration ? $isodurationtohhmmss(duration) : '00:00:00',
@@ -731,8 +744,8 @@ $.(
     $comment := 'column order matches the deafult Percipio Import Tool for Moodle order';
     $extra_data := (
          $.{
-            'Language': $rfc5646language(localeCodes[0]),
-            'Locale': localeCodes[0]
+            'Language': localeCodes[0] ? $rfc5646language(localeCodes[0]) : '',
+            'Locale': localeCodes[0] ? localeCodes[0] : ''
         }
     );
 

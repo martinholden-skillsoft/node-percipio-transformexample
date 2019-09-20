@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SABA RELEASE 45';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 18-SEP-2019';
+    $comment := 'Date: 19-SEP-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -37,7 +37,7 @@ $.(
         $result := $replace($result, $registered, '(r)');
         $result := $replace($result, $tm, '(tm)');
         $result := $replace($result, $apos, '\u0027');
-        $result := $replace($result, $curylydoublequotes, '"');
+        $result := $replace($result, $curylydoublequotes, '\u0022');
         $result := $replace($result, $nbsp, ' ');
         $result := $replace($result, $otherentities, '');
         $result; 
@@ -536,11 +536,11 @@ $.(
     $comment := '*******************************************************';
     $comment := '* Enhanced sharelink combining the link and any query';
     $comment := '* string parameters based on contentType.percipioType';
-    $comment := '* in lowercase lookup against $commonShareLinkParametersLookup';
+    $comment := '* in lowercase lookup against $lookupValues';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadatasharelink := function(){(
-        $urlparameter := $exists($commonShareLinkParametersLookup) ? $lookup($commonShareLinkParametersLookup, $lowercase(contentType.percipioType)) : '';
+    $metadatasharelink := function($lookupValues){(
+        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : '';
         link & $urlparameter;
     )};
 
@@ -585,6 +585,19 @@ $.(
         'course': '',
         'linked_content': '',
         'video': ''
+    };
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link for MOBILE';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $comment := '* so for example to make a link chromeless include ?chromeless';
+    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
+        'audiobook': '?chromeless',
+        'book': '?chromeless',
+        'channel': '?chromeless',
+        'course': '?chromeless',
+        'linked_content': '?chromeless',
+        'video': '?chromeless'
     };
 
     $comment := 'End of Common Metadata Specific Variables';
@@ -859,8 +872,8 @@ $.(
         'DELIVERYVENDOR': $saba_DELIVERYVENDOR,
         'SECURECONTEXT': '',
         'CONTENTSERVER': $saba_CONTENTSERVER,
-        'LOCATIONORURL': $metadatasharelink(),
-        'LAUNCHURL': $metadatasharelink(),
+        'LOCATIONORURL': $metadatasharelink($commonShareLinkParametersLookup),
+        'LAUNCHURL': $metadatasharelink($commonShareLinkParametersLookup),
         'CONTENTDESCRIPTION': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
         'COURSE_ABSTRACT': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(1000,$commonExtendedDescriptionEOL) : $metadatadescription(1000) : '',
         'OWNER': $saba_OWNER,
@@ -896,7 +909,8 @@ $.(
         'DISCONTINUE_ALL_ENROLLMENTS' : lifecycle.status = 'ACTIVE' ? '' : 'TRUE',
         'REMOVE_COURSE_FROM_ALL_PLANS': lifecycle.status = 'ACTIVE' ? '' : 'TRUE',
         'COURSE_HIDE_CLASSMATES': 'FALSE',
-        'COURSE_TARGET_DAYS': 0
+        'COURSE_TARGET_DAYS': 0,
+        'LXP_CONTENT': 'TRUE'
       }
     );
 
