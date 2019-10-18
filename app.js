@@ -66,7 +66,7 @@ const callPercipio = async options => {
     try {
       const response = await axios.request(axiosConfig);
       logger.debug(`Response Headers: ${JSON.stringify(response.headers)}`, loggingOptions);
-      logger.debug(`Response Body: ${JSON.stringify(response.data)}`, loggingOptions);
+      logger.silly(`Response Body: ${JSON.stringify(response.data)}`, loggingOptions);
 
       return response;
     } catch (err) {
@@ -153,7 +153,7 @@ const getAllMetadataAndTransformAndExportToCSV = async options => {
             `Total Records to download as reported in header['x-total-count'] ${totalRecords.toLocaleString()}`,
             loggingOptions
           );
-          reportCount = NODE_ENV === 'production';
+          reportCount = false;
         }
       } catch (err) {
         logger.error('ERROR: trying to download results', loggingOptions);
@@ -175,12 +175,16 @@ const getAllMetadataAndTransformAndExportToCSV = async options => {
         loggingOptions
       );
 
-      if (response.data.length < opts.request.query.max) {
+      // Set offset - number of records in response
+      opts.request.query.offset += response.data.length;
+
+      if (opts.request.query.offset >= totalRecords) {
         keepGoing = false;
       }
 
-      // Set offset - number of records in response
-      opts.request.query.offset += response.data.length;
+      /*       if (response.data.length < opts.request.query.max) {
+        keepGoing = false;
+      } */
     }
     step1.end();
     step3.on('finish', () => {
@@ -210,7 +214,7 @@ const main = async configOptions => {
 
   // Set logging to silly level for dev
   if (NODE_ENV.toUpperCase() === 'DEVELOPMENT') {
-    logger.level = 'silly';
+    logger.level = 'debug';
   } else {
     logger.level = options.debug.loggingLevel;
   }
@@ -268,7 +272,7 @@ const main = async configOptions => {
     globalTunnel.initialize();
   }
 
-  if (_.isNull(options.request.orgId)) {
+  if (_.isNull(options.request.path.orgId)) {
     logger.error(
       'Invalid configuration - no orgid in config file or set env ORGID',
       loggingOptions
