@@ -1,0 +1,781 @@
+$.(
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'TRANSFORM FOR MOODLE 3.x Single Page Course Importer';
+    $comment := 'See https://github.com/lushonline/moodle-tool_uploadpage';
+    $comment := 'Author: Martin Holden';
+    $comment := 'Date: 18-OCT-2019';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Generic Function Library';
+
+    $comment := '*******************************************************';
+    $comment := '* Converts a string such as description to plain string,by stripping out';
+    $comment := '* HTML tags and HTML Entities';
+    $comment := '* @param {string} $source';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $plainstring := function ($source) {(
+        $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
+        $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
+        $apos := /&(#8217;|apos;|rsquo;)|[\u2019|\u8217]/;
+        $copy := /[\u00A9]|&(#169;|copy;)/;
+        $tm := /[\u2122]|&(#8482;|trade;)/;
+        $registered := /[\u00AE]|&(#174;|reg;)/;
+        $curylydoublequotes := /[\u201C\u201D\u201E\u201F\u2033\u2036]|&(ldquo;|rdquo;)/;
+        $pipe := /[\u007c]|&(verbar;|vert;|VerticalLine;)/;
+        $nbsp := /[\u00A0]|&(#160;|#xA0;|nbsp;)/;
+        $otherentities := /&(#?[\w\d]+;)/;
+
+        $result := $source ? $trim($source) : '';
+        $result := $replace($result, $pipe, '-');
+        $result := $replace($result, $htmltags, '');
+        $result := $replace($result, $dash, '-');
+        $result := $replace($result, $copy, '(c)');
+        $result := $replace($result, $registered, '(r)');
+        $result := $replace($result, $tm, '(tm)');
+        $result := $replace($result, $apos, '\u0027');
+        $result := $replace($result, $curylydoublequotes, '\u0022');
+        $result := $replace($result, $nbsp, ' ');
+        $result := $replace($result, $otherentities, '');
+        $result; 
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Shortens a string at a word boundary to the specified length, option to';
+    $comment := '* define suffix to show this such as ...';
+    $comment := '* @param {string} $source';
+    $comment := '* @param {number} $maxlength - The maximum length, if $ellipsisString is';
+    $comment := '*                                 the overall length allows for this';
+    $comment := '* @param {string} $ellipsisString - The suffix to use';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $ellipsis := function ($source, $maxlength, $ellipsisString) {(
+        $wordboundary := /\s(\w+)$/;
+        $trimlength := $maxlength - $length($ellipsisString);
+
+        $needtrim := ($length($source) > $maxlength);
+        $trimmedSource := $needtrim ? $trim($substring($source, 0, $trimlength));
+
+        $trimmedSource := $replace($trimmedSource, $wordboundary, '') & $ellipsisString;
+        $needtrim ? $trimmedSource : $source;
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total seconds';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';    
+    $isodurationtoseconds := function ($isoduration) {(
+        $input := $isoduration = null ? '' : $isoduration;
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '0';
+        $remainder := $substringAfter($time, 'H');
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '0';
+        $remainder := $substringAfter($remainder, 'M');
+        $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '0';
+        $result := (($number($hours) * 3600) + ($number($minutes) * 60) + $number($seconds));
+        $result;
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total minutes, to the specified precision';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @param {number} [$precision=2] - The precision';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';  
+    $isodurationtominutes := function ($isoduration, $precision) {(
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 60, $prec);
+        $result;
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a numeric value of total hours, to the specified precision';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @param {number} [$precision=2] - The precision';
+    $comment := '* @returns {number}';
+    $comment := '*******************************************************';  
+    $isodurationtohours := function ($isoduration, $precision) {(
+        $seconds := $isodurationtoseconds($isoduration);
+        $prec := $exists($precision) ? $precision : 2;
+        $result := $seconds = 0 ? 0 : $round($seconds / 3600, $prec);
+        $result;
+    )};
+
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a string in format hh:mm. No rounding so example would be 01:34';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $isodurationtohhmm := function ($isoduration) {(
+        $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
+        $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
+        $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
+        $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0');
+        $result;
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
+    $comment := '* to a string in format hh:mm:ss. So example would be 01:34:56';
+    $comment := '* @param {string} $isoduration - ISO8601 format duration';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $isodurationtohhmmss := function ($isoduration) {(
+        $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
+        $time := $substringAfter($input, 'T');
+        $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
+        $remainder := $contains($time, 'H') ? $substringAfter($time, 'H') : $time;
+        $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
+        $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
+        $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0') & ':' & $pad($seconds, -2, '0');
+        $result;
+    )};
+
+
+    $comment := '*******************************************************';
+    $comment := '* Take an array of objects, and return a JSON object where:';
+    $comment := '*      JSON Key is $prefix with incrementing value e.g. KEY1, KEY2';
+    $comment := '*      JSON Value is the value e.g. en-us, or if array of objects a';
+    $comment := '*        $delimiter delimited string. e.g. en-us|Title1|Description1';
+    $comment := '* @param {string} $source - The array';
+    $comment := '* @param {string} $prefix - The prefix to use as the JSON Key';
+    $comment := '* @param {number} [$maxCount=10] - The number of Keys';
+    $comment := '* @param {string} [$delimiter=|] - The delimiter for Object strings';
+    $comment := '* @returns {Object}';
+    $comment := '*******************************************************';  
+    $flattenArrayAndObject := function($source, $prefix, $maxCount, $delimiter) {(
+        $maxCount := $maxCount ? $maxCount : 10;
+        $delimiter := $delimiter ? $delimiter : '|';
+
+        $padarray := [1..$maxCount].('');
+        $sourceArray := $count($source)=0 ? [] : [];
+        $result := '';
+        
+        $sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
+            $model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
+            $needdelimiter:= $count($keys($v)) > 0 ? $delimiter : '';
+            $trimend:= $count($keys($v)) > 0;
+            $kv := $spread($model);
+            $result:= $reduce($kv, function($accum, $val) {(
+                $accum & $each($val, function($val, $key) {$val}) & $needdelimiter;
+            )}, '');
+                $trimend ? $substring($result,0,$length($result)-1) : $result;
+        )})
+        );
+
+        $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+            $v != ''
+        });
+
+        $sourceArray := $append($sourceArray, $padarray);
+    
+        $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
+            $i < $maxCount
+        });
+
+        $sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
+            $prefix & ($i + 1) & '~|~' & $v
+        });
+
+        $sourceArrayDelimited.{
+            $substringBefore('~|~'): $substringAfter('~|~')
+        }
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Get the language string from a RFC5646 locale';
+    $comment := '* @param {string} $locale - RFC 5646 language tag, consisting of';
+    $comment := '*                    2-character language code and optional variant/region';
+    $comment := '*                    code, with hyphen delimiter (e.g. en, en-US';
+    $comment := '* @param {boolean} [$languageonly=false] - Only check with language code';
+    $comment := '* @param {string} [$default=] - Default when no match.';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $rfc5646language := function ($locale, $languageonly, $default) {(
+            $defaultLanguage := $default ? $default : '';
+            $checkLanguageOnly := $languageonly ? $languageonly : false;
+
+            $RFC5646_LANGUAGE_TAGS := [{
+                'af': 'Afrikaans',
+                'af-ZA': 'Afrikaans (South Africa)',
+                'ar': 'Arabic',
+                'ar-AE': 'Arabic (U.A.E.)',
+                'ar-BH': 'Arabic (Bahrain)',
+                'ar-DZ': 'Arabic (Algeria)',
+                'ar-EG': 'Arabic (Egypt)',
+                'ar-IQ': 'Arabic (Iraq)',
+                'ar-JO': 'Arabic (Jordan)',
+                'ar-KW': 'Arabic (Kuwait)',
+                'ar-LB': 'Arabic (Lebanon)',
+                'ar-LY': 'Arabic (Libya)',
+                'ar-MA': 'Arabic (Morocco)',
+                'ar-OM': 'Arabic (Oman)',
+                'ar-QA': 'Arabic (Qatar)',
+                'ar-SA': 'Arabic (Saudi Arabia)',
+                'ar-SY': 'Arabic (Syria)',
+                'ar-TN': 'Arabic (Tunisia)',
+                'ar-YE': 'Arabic (Yemen)',
+                'az': 'Azeri (Latin)',
+                'az-AZ': 'Azeri (Latin) (Azerbaijan)',
+                'az-Cyrl-AZ': 'Azeri (Cyrillic) (Azerbaijan)',
+                'be': 'Belarusian',
+                'be-BY': 'Belarusian (Belarus)',
+                'bg': 'Bulgarian',
+                'bg-BG': 'Bulgarian (Bulgaria)',
+                'bs-BA': 'Bosnian (Bosnia and Herzegovina)',
+                'ca': 'Catalan',
+                'ca-ES': 'Catalan (Spain)',
+                'cs': 'Czech',
+                'cs-CZ': 'Czech (Czech Republic)',
+                'cy': 'Welsh',
+                'cy-GB': 'Welsh (United Kingdom)',
+                'da': 'Danish',
+                'da-DK': 'Danish (Denmark)',
+                'de': 'German',
+                'de-AT': 'German (Austria)',
+                'de-CH': 'German (Switzerland)',
+                'de-DE': 'German (Germany)',
+                'de-LI': 'German (Liechtenstein)',
+                'de-LU': 'German (Luxembourg)',
+                'dv': 'Divehi',
+                'dv-MV': 'Divehi (Maldives)',
+                'el': 'Greek',
+                'el-GR': 'Greek (Greece)',
+                'en': 'English',
+                'en-AU': 'English (Australia)',
+                'en-BZ': 'English (Belize)',
+                'en-CA': 'English (Canada)',
+                'en-CB': 'English (Caribbean)',
+                'en-GB': 'English (United Kingdom)',
+                'en-IE': 'English (Ireland)',
+                'en-JM': 'English (Jamaica)',
+                'en-NZ': 'English (New Zealand)',
+                'en-PH': 'English (Republic of the Philippines)',
+                'en-TT': 'English (Trinidad and Tobago)',
+                'en-US': 'English (United States)',
+                'en-ZA': 'English (South Africa)',
+                'en-ZW': 'English (Zimbabwe)',
+                'eo': 'Esperanto',
+                'es': 'Spanish',
+                'es-AR': 'Spanish (Argentina)',
+                'es-BO': 'Spanish (Bolivia)',
+                'es-CL': 'Spanish (Chile)',
+                'es-CO': 'Spanish (Colombia)',
+                'es-CR': 'Spanish (Costa Rica)',
+                'es-DO': 'Spanish (Dominican Republic)',
+                'es-EC': 'Spanish (Ecuador)',
+                'es-ES': 'Spanish (Spain)',
+                'es-GT': 'Spanish (Guatemala)',
+                'es-HN': 'Spanish (Honduras)',
+                'es-MX': 'Spanish (Mexico)',
+                'es-NI': 'Spanish (Nicaragua)',
+                'es-PA': 'Spanish (Panama)',
+                'es-PE': 'Spanish (Peru)',
+                'es-PR': 'Spanish (Puerto Rico)',
+                'es-PY': 'Spanish (Paraguay)',
+                'es-SV': 'Spanish (El Salvador)',
+                'es-UY': 'Spanish (Uruguay)',
+                'es-VE': 'Spanish (Venezuela)',
+                'et': 'Estonian',
+                'et-EE': 'Estonian (Estonia)',
+                'eu': 'Basque',
+                'eu-ES': 'Basque (Spain)',
+                'fa': 'Farsi',
+                'fa-IR': 'Farsi (Iran)',
+                'fi': 'Finnish',
+                'fi-FI': 'Finnish (Finland)',
+                'fo': 'Faroese',
+                'fo-FO': 'Faroese (Faroe Islands)',
+                'fr': 'French',
+                'fr-BE': 'French (Belgium)',
+                'fr-CA': 'French (Canada)',
+                'fr-CH': 'French (Switzerland)',
+                'fr-FR': 'French (France)',
+                'fr-LU': 'French (Luxembourg)',
+                'fr-MC': 'French (Principality of Monaco)',
+                'gl': 'Galician',
+                'gl-ES': 'Galician (Spain)',
+                'gu': 'Gujarati',
+                'gu-IN': 'Gujarati (India)',
+                'he': 'Hebrew',
+                'he-IL': 'Hebrew (Israel)',
+                'hi': 'Hindi',
+                'hi-IN': 'Hindi (India)',
+                'hr': 'Croatian',
+                'hr-BA': 'Croatian (Bosnia and Herzegovina)',
+                'hr-HR': 'Croatian (Croatia)',
+                'hu': 'Hungarian',
+                'hu-HU': 'Hungarian (Hungary)',
+                'hy': 'Armenian',
+                'hy-AM': 'Armenian (Armenia)',
+                'id': 'Indonesian',
+                'id-ID': 'Indonesian (Indonesia)',
+                'is': 'Icelandic',
+                'is-IS': 'Icelandic (Iceland)',
+                'it': 'Italian',
+                'it-CH': 'Italian (Switzerland)',
+                'it-IT': 'Italian (Italy)',
+                'ja': 'Japanese',
+                'ja-JP': 'Japanese (Japan)',
+                'ka': 'Georgian',
+                'ka-GE': 'Georgian (Georgia)',
+                'kk': 'Kazakh',
+                'kk-KZ': 'Kazakh (Kazakhstan)',
+                'kn': 'Kannada',
+                'kn-IN': 'Kannada (India)',
+                'ko': 'Korean',
+                'ko-KR': 'Korean (Korea)',
+                'kok': 'Konkani',
+                'kok-IN': 'Konkani (India)',
+                'ky': 'Kyrgyz',
+                'ky-KG': 'Kyrgyz (Kyrgyzstan)',
+                'lt': 'Lithuanian',
+                'lt-LT': 'Lithuanian (Lithuania)',
+                'lv': 'Latvian',
+                'lv-LV': 'Latvian (Latvia)',
+                'mi': 'Maori',
+                'mi-NZ': 'Maori (New Zealand)',
+                'mk': 'FYRO Macedonian',
+                'mk-MK': 'FYRO Macedonian (Former Yugoslav Republic of Macedonia)',
+                'mn': 'Mongolian',
+                'mn-MN': 'Mongolian (Mongolia)',
+                'mr': 'Marathi',
+                'mr-IN': 'Marathi (India)',
+                'ms': 'Malay',
+                'ms-BN': 'Malay (Brunei Darussalam)',
+                'ms-MY': 'Malay (Malaysia)',
+                'mt': 'Maltese',
+                'mt-MT': 'Maltese (Malta)',
+                'nb': 'Norwegian (Bokm?l)',
+                'nb-NO': 'Norwegian (Bokm?l) (Norway)',
+                'nl': 'Dutch',
+                'nl-BE': 'Dutch (Belgium)',
+                'nl-NL': 'Dutch (Netherlands)',
+                'nn-NO': 'Norwegian (Nynorsk) (Norway)',
+                'ns': 'Northern Sotho',
+                'ns-ZA': 'Northern Sotho (South Africa)',
+                'pa': 'Punjabi',
+                'pa-IN': 'Punjabi (India)',
+                'pl': 'Polish',
+                'pl-PL': 'Polish (Poland)',
+                'ps': 'Pashto',
+                'ps-AR': 'Pashto (Afghanistan)',
+                'pt': 'Portuguese',
+                'pt-BR': 'Portuguese (Brazil)',
+                'pt-PT': 'Portuguese (Portugal)',
+                'qu': 'Quechua',
+                'qu-BO': 'Quechua (Bolivia)',
+                'qu-EC': 'Quechua (Ecuador)',
+                'qu-PE': 'Quechua (Peru)',
+                'ro': 'Romanian',
+                'ro-RO': 'Romanian (Romania)',
+                'ru': 'Russian',
+                'ru-RU': 'Russian (Russia)',
+                'sa': 'Sanskrit',
+                'sa-IN': 'Sanskrit (India)',
+                'se': 'Sami',
+                'se-FI': 'Sami (Finland)',
+                'se-NO': 'Sami (Norway)',
+                'se-SE': 'Sami (Sweden)',
+                'sk': 'Slovak',
+                'sk-SK': 'Slovak (Slovakia)',
+                'sl': 'Slovenian',
+                'sl-SI': 'Slovenian (Slovenia)',
+                'sq': 'Albanian',
+                'sq-AL': 'Albanian (Albania)',
+                'sr-BA': 'Serbian (Latin) (Bosnia and Herzegovina)',
+                'sr-Cyrl-BA': 'Serbian (Cyrillic) (Bosnia and Herzegovina)',
+                'sr-SP': 'Serbian (Latin) (Serbia and Montenegro)',
+                'sr-Cyrl-SP': 'Serbian (Cyrillic) (Serbia and Montenegro)',
+                'sv': 'Swedish',
+                'sv-FI': 'Swedish (Finland)',
+                'sv-SE': 'Swedish (Sweden)',
+                'sw': 'Swahili',
+                'sw-KE': 'Swahili (Kenya)',
+                'syr': 'Syriac',
+                'syr-SY': 'Syriac (Syria)',
+                'ta': 'Tamil',
+                'ta-IN': 'Tamil (India)',
+                'te': 'Telugu',
+                'te-IN': 'Telugu (India)',
+                'th': 'Thai',
+                'th-TH': 'Thai (Thailand)',
+                'tl': 'Tagalog',
+                'tl-PH': 'Tagalog (Philippines)',
+                'tn': 'Tswana',
+                'tn-ZA': 'Tswana (South Africa)',
+                'tr': 'Turkish',
+                'tr-TR': 'Turkish (Turkey)',
+                'tt': 'Tatar',
+                'tt-RU': 'Tatar (Russia)',
+                'ts': 'Tsonga',
+                'uk': 'Ukrainian',
+                'uk-UA': 'Ukrainian (Ukraine)',
+                'ur': 'Urdu',
+                'ur-PK': 'Urdu (Islamic Republic of Pakistan)',
+                'uz': 'Uzbek (Latin)',
+                'uz-UZ': 'Uzbek (Latin) (Uzbekistan)',
+                'uz-Cyrl-UZ': 'Uzbek (Cyrillic) (Uzbekistan)',
+                'vi': 'Vietnamese',
+                'vi-VN': 'Vietnamese (Viet Nam)',
+                'xh': 'Xhosa',
+                'xh-ZA': 'Xhosa (South Africa)',
+                'zh': 'Chinese',
+                'zh-CN': 'Chinese (S)',
+                'zh-HK': 'Chinese (Hong Kong)',
+                'zh-MO': 'Chinese (Macau)',
+                'zh-SG': 'Chinese (Singapore)',
+                'zh-TW': 'Chinese (T)',
+                'zu': 'Zulu',
+                'zu-ZA': 'Zulu (South Africa)'
+            }];
+
+            $result:= $checkLanguageOnly = true ? null : $lookup($RFC5646_LANGUAGE_TAGS, $trim($locale));
+            
+            $result:= $result ? $result : $lookup($RFC5646_LANGUAGE_TAGS, $trim($split($locale,'-')[0]));
+
+            $result ? $result : $defaultLanguage;
+    )};
+
+
+    $comment := 'End of Generic Function Library';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Metadata Specific Functions';
+    $comment := 'These are the functions common for metadata transforms';
+    $comment := 'Source JSON object to be processed is one returned by:';
+    $comment := ' - Scheduled Task - CONTENT_EXPORT';
+    $comment := ' - API Call - content-discovery/v1/organizations/{orgId}/catalog-content';
+
+    $comment := '*******************************************************';
+    $comment := '* The plain text version of the localizedMetadata[0].title';
+    $comment := '* Prefixed with contentType.displayLabel in () and ';
+    $comment := '* including the technologies[0].title and';
+    $comment := '* technologies[0].version';
+    $comment := '* Shortened to $length with ellipsis string of ...';
+    $comment := '* @param {boolean} [$includecontenttype=true] - Include';
+    $comment := '*                  the contentype :';        
+    $comment := '* @param {boolean} [$includetechnology=true] - Include';
+    $comment := '*                  the technology and version in title';
+    $comment := '*                  if title does not contain :';
+    $comment := '* @param {number} [$length=255] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $metadatatitle := function($includecontenttype, $includetechnology,$length){(
+        $maxlength := $exists($length) ? $length : 255;
+        $addtechnology := $exists($includetechnology) ? $boolean($includetechnology) : true;
+        $addtechnology := $addtechnology ? ($contains(localizedMetadata[0].title, ':') ? false : true) : $addtechnology;
+
+        $addcontenttype := $exists($includecontenttype) ? $boolean($includecontenttype) : true;
+
+        $contenttypestring := $addcontenttype ? '(' & contentType.displayLabel & ') ' : '';
+
+        $technologystring := $addtechnology ? (technologies[0].title ? $plainstring(technologies[0].title) & (technologies[0].version? ' ' & $plainstring(technologies[0].version))& ': ');
+
+        $fulltitle := $contenttypestring & $technologystring & $plainstring(localizedMetadata[0].title);
+
+        $ellipsis($fulltitle, $maxlength, ' ...');
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Plain text version of the localizedMetadata[0].description.';
+    $comment := '*  Shortened to $length with ellipsis string of ...';
+    $comment := '* @param {number} [$length=2000] - Maximum length';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $metadatadescription := function($length){(
+        $maxlength:= $length ? $length : 2000;
+        $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
+    )};
+
+
+    $comment := '*******************************************************';
+    $comment := '* Plain text version of the localizedMetadata[0].title.';
+    $comment := '* and if defined add, delimited by $eol:';
+    $comment := '*     Comma Delimited list of Authors from by';
+    $comment := '*     Copyright Publisher and date from publication.publisher';
+    $comment := '*     and publication.copyrightYear';
+    $comment := '*     ISBN from publication.isbn';
+    $comment := '* Shortened to $length with ellipsis string of ...';
+    $comment := '* @param {number} [$length=2000] - Maximum length';
+    $comment := '* @param {string} [$eol=\r\n] - The EOL characters to use';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $metadataextendeddescription := function($length, $eol){(
+        $maxlength:= $length ? $length : 2000;
+        $myeol:= $eol ? $eol : '\r\n';
+        $by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & $myeol;
+        
+        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ') : '' : '';
+        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
+        $copyright := publication ? $join([$publisher, $year],' ') & $myeol : '';
+        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn],' ') & $myeol : '' : '';
+
+        $publication := publication ? $join([$copyright,$isbn]) : '';
+
+        $ellipsis($join([$by,$publication,$plainstring(localizedMetadata[0].description)]), $maxlength, ' ...');
+    )};
+
+
+    $comment := '*******************************************************';
+    $comment := '* Enhanced sharelink combining the link and any query';
+    $comment := '* string parameters based on contentType.percipioType';
+    $comment := '* in lowercase lookup against $lookupValues';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $metadatasharelink := function($lookupValues){(
+        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : '';
+        link & $urlparameter;
+    )};
+
+
+    $comment := 'End of Metadata Specific Functions';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Common Metadata Specific Variables';
+    $comment := 'These are the values that can change the metadata specific';
+    $comment := 'functions';
+
+    $comment := '* Whether to use the extended description option';
+    $comment := '* This combines the descripion and publication data';
+    $comment := '* See the $metadataextendeddescription function above';
+    $commonUseExtendedDescription := $exists($override.common.UseExtendedDescription) ? $override.common.UseExtendedDescription : true;
+
+    $comment := '* The EOL characters to use for the Extended Description';
+    $comment := '* See the $metadataextendeddescription function above';
+    $commonExtendedDescriptionEOL := $exists($override.common.ExtendedDescriptionEOL) ? $override.common.ExtendedDescriptionEOL : '<br>';
+
+    $comment := '* Whether to include contentType.displayLabel as prefix to title';
+    $comment := '* See the $metadatatitle function above';
+    $commonIncludeContentTypeInTitle := $exists($override.common.IncludeContentTypeInTitle) ? $override.common.IncludeContentTypeInTitle : true;
+
+    $comment := '* Whether to include technologies[0].title and version as prefix to title';
+    $comment := '* See the $metadatatitle function above';
+    $commonIncludeTechnologyDetailsInTitle := $exists($override.common.IncludeTechnologyDetailsInTitle) ? $override.common.IncludeTechnologyDetailsInTitle : true;
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $comment := '* so for example to make a link chromeless include ?chromeless';
+    $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup ) ? $override.common.ShareLinkParametersLookup : {
+        'audiobook': '',
+        'book': '',
+        'channel': '',
+        'course': '',
+        'linked_content': '',
+        'video': ''
+    };
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link for MOBILE';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $comment := '* so for example to make a link chromeless include ?chromeless';
+    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
+        'audiobook': '?chromeless',
+        'book': '?chromeless',
+        'channel': '?chromeless',
+        'course': '?chromeless',
+        'linked_content': '?chromeless',
+        'video': '?chromeless'
+    };
+
+    $comment := 'End of Common Metadata Specific Variables';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Moodle/Customer Specific Functions';
+
+    $comment := '*******************************************************';
+    $comment := '* Create a string[] that is deduplicated of values that combines these';
+    $comment := '* data values:';
+    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel';
+    $comment := '*   keywords';
+    $comment := '*   associations.areas';
+    $comment := '*   associations.subjects';
+    $comment := '*   associations.channels[*].title';
+    $comment := '*   $otherKeyword variable';
+    $comment := '* @param {string} [$otherTag=] - Additional Tag to include';
+    $comment := '* @param {number} [$maxCount=10] - Maximum number of tags';
+    $comment := '* @returns {string[]}';
+    $comment := '*******************************************************';
+    $moodletagsarray := function($otherTag, $maxCount){(
+        $maxtags := $maxCount ? $maxCount : 10;
+        $padarray := [1..$maxtags].('');
+        $tags :=  $lowercase(contentType.percipioType) = 'channel' or $lowercase(contentType.percipioType) = 'journey' ? [localizedMetadata[0].title] : [];
+
+        $tags := keywords ? $append($tags,keywords) : $tags;
+
+        $tags := $append($tags, $map(associations.areas, function($v, $i, $a) {
+            $v ? $trim($v) : ''
+        }));
+          
+        $tags := $append($tags, $map(associations.subjects, function($v, $i, $a) {
+            $v ? $trim($v) : ''
+        }));
+
+        $tags := $append($tags, $map(associations.channels, function($v, $i, $a) {
+            $v.title ? $trim($v.title) : ''
+        }));
+
+        $tags := $otherKeyword ? $append($tags, [ $otherTag]) : $tags;
+        
+        $tags := $map($sort($tags),function($v, $i, $a){
+            $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
+        );
+      
+        $tags := $append($tags, $padarray);
+
+        $tags := $filter($tags, function ($v, $i, $a) {
+            $i < $maxtags
+        });
+
+        $tags := $filter($tags, function($v, $i, $a) {
+            $v != ''
+        });
+
+        $tags
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Create a HTML description for the page, each of these';
+    $comment := '* is surrounded by <p></p>';
+    $comment := '*     Comma Delimited list of Authors from by';
+    $comment := '*     Copyright Publisher and date from publication.publisher';
+    $comment := '*     and publication.copyrightYear';
+    $comment := '*     ISBN from publication.isbn';
+    $comment := '*     imageUrl is added as a hyperlink to $metadatasharelink()';
+    $comment := '*     localizedMetadata[0].description';
+    $comment := '*     Launch text is added as a hyperlink to $metadatasharelink()';
+    $comment := '* @returns {string} object';
+    $comment := '*******************************************************';
+    $moodledescriptionobject := function(){(
+
+        $launchpathstart := $metadatasharelink() ? '<a href="' & $metadatasharelink() & '" target="_blank">' : '';
+
+        $thumbnail := imageUrl ? '<p>' & $launchpathstart & '<img src="' & imageUrl & '?width=400" alt="' & localizedMetadata[0].title & '" class="img-responsive"></a></p>' : '';
+        
+        $by := $count(by) = 0 ? '' : '<p>By: ' & $join(by, ', ') & '</p>';
+        
+        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ')  : '' : '';
+        
+        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
+        
+        $copyright := publication ? '<p>' & $join([$publisher, $year],' ') & '</p>' : '';
+        
+        $isbn := publication ? publication.isbn ? '<p>' & $join(['ISBN:', publication.isbn],' ') & '</p>' : '' : '';
+
+        $launchlink := $launchpathstart ? '<p>' & $launchpathstart & 'Launch</a></p>' : '';        
+
+        $publication := publication ? $join([$copyright,$isbn]) : '';
+
+		$description := localizedMetadata[0].description ? '<p>' & localizedMetadata[0].description & '</p>' : '';
+
+        $join([$by,$publication,$thumbnail,$description,$launchlink])
+        
+    )};
+
+    $comment := 'End of Moodle/Customer Specific Functions';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Moodle/Customer Specific Variables';
+    $comment := 'These are the values that can be changed per customer';
+
+    $comment := '* The number of tags values to include set to 0 to not return any';
+    $comment := '* For more information see the $moodletagsarray function above';
+    $moodleMaxTags := $exists($override.moodle.maxtags) ? $override.moodle.maxtags : 10;
+    
+    $comment := 'End of Moodle/Customer Specific Variables';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'START OF TRANSFORM';
+
+    $comment := '*******************************************************';
+    $comment := 'Transform the basic data, uses the CONSTANTS specified above';
+
+    $transformed_data := (
+        $.{
+            'COURSE_IDNUMBER': id ? id : '',
+            'COURSE_SHORTNAME': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 215) & ' (' & id & ')' : '',
+            'COURSE_FULLNAME': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
+            'COURSE_SUMMARY': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+            'COURSE_TAGS': (
+                $tags := $moodleMaxTags = 0 ? null : $moodletagsarray();
+                $tags ? $join($tags,'|') : ''
+             ),
+            'COURSE_VISIBLE': lifecycle.status = 'ACTIVE' ? 1 : 0,
+            'COURSE_CATEGORYIDNUMBER': (
+                $idnumber := $lookup([{
+                    'audiobook': associations.channels[0].id,
+                    'book': associations.channels[0].id,
+                    'channel': id,
+                    'course': associations.channels[0].id,
+                    'linked_content': associations.channels[0].id,
+                    'video': associations.channels[0].id,
+                    'journey': id
+                }], $lowercase(contentType.percipioType));
+                
+                $idnumber ? $idnumber: ''
+                
+            ),
+            'COURSE_CATEGORYNAME': (
+                $catname := $lookup([{
+                    'audiobook': associations.channels[0].title,
+                    'book': associations.channels[0].title,
+                    'channel': localizedMetadata[0].title,
+                    'course': associations.channels[0].title,
+                    'linked_content': associations.channels[0].title,
+                    'video': associations.channels[0].title,
+                    'journey': localizedMetadata[0].title
+                }], $lowercase(contentType.percipioType));
+                
+                $catname ? $catname : ''
+            ),
+            'PAGE_NAME': (
+            	localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : ''
+            ),
+            'PAGE_INTRO': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+            'PAGE_CONTENT': $moodledescriptionobject()
+          }
+    );
+
+    $comment := '*******************************************************';
+    $comment := 'Combine the :';
+    $comment := '   $transformed_data - Basic transfomed data';
+
+    $results := $transformed_data;
+    $results;
+)
