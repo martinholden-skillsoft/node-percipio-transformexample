@@ -1,6 +1,6 @@
 {
 	"name": "node-percipio-transformexample",
-	"version": "1.1.12",
+	"version": "1.1.11",
 	"description": "Retrieve and transform content data from Percipio, using Node Streams.",
 	"main": "app.js",
 	"scripts": {
