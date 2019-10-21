@@ -9,6 +9,109 @@ $.(
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
+    $comment := 'Start of Overrides';
+    $comment := 'The example below defines overrides that match the defaults';
+    $comment := 'You actually only need to define the Overides needed, search for';
+    $comment := '$override. in this file to see the definition of each option';
+    
+    $override := {
+        'common' : {
+        	'UseExtendedDescription' : true,
+            'ExtendedDescriptionEOL' : '\r\n',
+            'IncludeContentTypeInTitle' : true,
+            'IncludeTechnologyDetailsInTitle': true,
+            'ShareLinkParametersLookup' : {
+                'audiobook': '',
+                'book': '',
+                'channel': '',
+                'course': '',
+                'linked_content': '',
+                'video': '',
+                'journey': '',
+                'default': ''
+            },
+            'MobileShareLinkParametersLookup' : {
+                'audiobook': '?chromeless=true&preventAppDownload=true',
+                'book': '?chromeless=true&preventAppDownload=true',
+                'channel': '?chromeless=true&preventAppDownload=true',
+                'course': '?chromeless=true&preventAppDownload=true',
+                'linked_content': '?chromeless=true&preventAppDownload=true',
+                'video': '?chromeless=true&preventAppDownload=true',
+                'journey': '?chromeless=true&preventAppDownload=true',
+                'default': '?chromeless=true&preventAppDownload=true'
+            }
+        },
+        'successfactors' : {
+            'showincataloglookup' : {
+                'audiobook': 'Y',
+                'book': 'Y',
+                'channel': 'Y',
+                'course': 'Y',
+                'linked_content': 'Y',
+                'video': 'Y',
+                'journey': 'Y'
+            },
+            'onlinestatuslookup' : {
+                'audiobook': 'Y',
+                'book': 'Y',
+                'channel': 'Y',
+                'course': 'Y',
+                'linked_content': 'Y',
+                'video': 'Y',
+                'journey': 'Y'
+            },
+            'languagelookup' : {
+                'en': 'English',
+                'fr': 'French',
+                'fr-FR': 'French',
+                'de': 'German',
+                'de-DE': 'German',
+                'es': 'Spanish',
+                'es-ES': 'Spanish',
+                'es-DO': 'Spanish'
+            },
+            'defaultlanguage' : 'English',
+            'typelookup' : {
+                'audiobook~audiobook~audiobook summary': 'AUDIO SUMMARY',
+                'audiobook~audiobook~audiobook': 'AUDIOBOOK',
+                'book~book~book': 'BOOK',
+                'book~book~book review': 'BOOK',
+                'book~book~book summary': 'BOOK SUMMARY',
+                'channel~channel~channel': 'CHANNEL',
+                'course~course~course': 'COURSE',
+                'linked_content~assessment~testprep': 'LINKED CONTENT',
+                'linked_content~~practice lab': 'LINKED CONTENT',
+                'linked_content~~wintellect': 'LINKED CONTENT',
+                'linked_content~course~course': 'LINKED CONTENT',
+                'video~video~video': 'VIDEO',
+                'journey~curriculum~journey': 'JOURNEY'
+            },
+            'completionlookup' :{
+                'audiobook~audiobook~audiobook summary': 'AUDIO-BK-SUMM-COMPL',
+                'audiobook~audiobook~audiobook': 'AUDIO-BK-COMPL',
+                'book~book~book': 'BOOK-COMPL',
+                'book~book~book review': 'UNKNOWN',
+                'book~book~book summary': 'BOOK-SUMM-COMPL',
+                'channel~channel~channel': 'CHANNEL-COMPL',
+                'course~course~course': 'COURSE-COMPL',
+                'linked_content~assessment~testprep': 'LINKED-CTNT-COMPL',
+                'linked_content~~practice lab': 'LINKED-CTNT-COMPL',
+                'linked_content~~wintellect': 'LINKED-CTNT-COMPL',
+                'linked_content~course~course': 'LINKED-CTNT-COMPL',
+                'video~video~video': 'VIDEO-COMPL',
+                'journey~curriculum~journey': 'JOURNEY-COMPL'
+            },
+            'defaultcatalog' :'EXTERNAL',
+            'cpntsrcid' :'SKILLSOFT',
+            'buildcompany' : 'Percipio',
+            'chgbackmethod' : 1,
+            'timestampformat' : '[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01][z]',
+            'timezoneoffset' : '-0500'
+        }
+	};
+    
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
     $comment := 'Start of Generic Function Library';
 
     $comment := '*******************************************************';
