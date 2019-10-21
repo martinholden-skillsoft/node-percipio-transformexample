@@ -4,7 +4,7 @@ $.(
     $comment := 'TRANSFORM FOR MOODLE 3.x Single Page Course Importer';
     $comment := 'See https://github.com/lushonline/moodle-tool_uploadpage';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 18-OCT-2019';
+    $comment := 'Date: 21-OCT-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -541,7 +541,9 @@ $.(
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
     $metadatasharelink := function($lookupValues){(
-        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : '';
+        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : null;
+        $urlparameter := $urlparameter ? $urlparameter : $exists( $lookupValues) ? $lookup( $lookupValues, 'default') : '';
+        
         link & $urlparameter;
     )};
 
@@ -575,8 +577,8 @@ $.(
     $comment := '* See the $metadatatitle function above';
     $commonIncludeTechnologyDetailsInTitle := $exists($override.common.IncludeTechnologyDetailsInTitle) ? $override.common.IncludeTechnologyDetailsInTitle : true;
 
-    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link';
+   $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup ) ? $override.common.ShareLinkParametersLookup : {
@@ -585,11 +587,13 @@ $.(
         'channel': '',
         'course': '',
         'linked_content': '',
-        'video': ''
+        'video': '',
+        'journey': '',
+        'default': ''
     };
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link for MOBILE';
+    $comment := '* and any additions to the link for MOBILE. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
@@ -598,7 +602,9 @@ $.(
         'channel': '?chromeless',
         'course': '?chromeless',
         'linked_content': '?chromeless',
-        'video': '?chromeless'
+        'video': '?chromeless',
+        'journey': '?chromeless',
+        'default': '?chromeless'
     };
 
     $comment := 'End of Common Metadata Specific Variables';
@@ -626,7 +632,12 @@ $.(
     $moodletagsarray := function($otherTag, $maxCount){(
         $maxtags := $maxCount ? $maxCount : 10;
         $padarray := [1..$maxtags].('');
-        $tags :=  $lowercase(contentType.percipioType) = 'channel' or $lowercase(contentType.percipioType) = 'journey' ? [localizedMetadata[0].title] : [];
+
+        $tags := [];
+
+        $tags :=  $lowercase(contentType.percipioType) = 'channel' ? $append($tags,[localizedMetadata[0].title]) : $tags;
+
+        $tags :=  $lowercase(contentType.percipioType) = 'journey' ? $append($tags,[localizedMetadata[0].title]) : $tags;
 
         $tags := keywords ? $append($tags,keywords) : $tags;
 
