@@ -132,7 +132,11 @@ const exampleSchedulerConfig = {
   }
 };
 
+// Show example of overriding
 config.jsonataBinding.override = exampleSchedulerConfig.activity.preferences.override;
+
+// Null out overrides
+config.jsonataBinding.override = null;
 
 // File Extension
 config.outputextension = 'txt';
@@ -172,7 +176,7 @@ config.request.query = {};
  * Type: string[]
  * Enum: COURSE,VIDEO,BOOK,AUDIOBOOK,CHANNEL,LINKED_CONTENT
  */
-config.request.query.typeFilter = null;
+config.request.query.typeFilter = ['JOURNEY'];
 /**
  * Name: licensePoolIds
  * Description : Array of License pool IDs to which to restrict content.
@@ -188,7 +192,7 @@ config.request.query.licensePoolIds = null;
  * Type: string
  * Format: date-time
  */
-config.request.query.updatedSince = '2019-09-01T00:00:00Z';
+config.request.query.updatedSince = null;
 /**
  * Name: offset
  * Description : Used in conjunction with 'max' to specify which set of 'max' content items
