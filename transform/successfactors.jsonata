@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SUCCESSFACTORS METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 19-SEP-2019';
+    $comment := 'Date: 21-OCT-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -195,6 +195,27 @@ $.(
         }
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Remove any query string or hash parameters from a URL';
+    $comment := '* @param {string} $url - The URL string';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+	$stripQueryStringandHash := function($url){(
+    	$myurl := $url ? $url : '';
+    	$split( $myurl , /\#|\?/)[0];
+    )};
+    
+    $comment := '*******************************************************';
+    $comment := '* Get the document extension from a URL';
+    $comment := '* @param {string} $url - The URL string';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $getDocumentExtension := function($url){(
+    	$myurl := $url ? $url : '';
+        $mydocument := $reverse($split($myurl,'/'))[0];
+        $contains($mydocument, '.') ? $reverse($split($mydocument, '.'))[0] : ''
+    )};
+
     $comment := 'End of Generic Function Library';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -284,7 +305,9 @@ $.(
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
     $metadatasharelink := function($lookupValues){(
-        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : '';
+        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : null;
+        $urlparameter := $urlparameter ? $urlparameter : $exists( $lookupValues) ? $lookup( $lookupValues, 'default') : '';
+        
         link & $urlparameter;
     )};
 
@@ -319,7 +342,7 @@ $.(
     $commonIncludeTechnologyDetailsInTitle := $exists($override.common.IncludeTechnologyDetailsInTitle) ? $override.common.IncludeTechnologyDetailsInTitle : true;
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link';
+    $comment := '* and any additions to the link. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup ) ? $override.common.ShareLinkParametersLookup : {
@@ -328,11 +351,13 @@ $.(
         'channel': '',
         'course': '',
         'linked_content': '',
-        'video': ''
+        'video': '',
+        'journey': '',
+        'default': ''
     };
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link for MOBILE';
+    $comment := '* and any additions to the link for MOBILE. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
@@ -341,7 +366,9 @@ $.(
         'channel': '?chromeless',
         'course': '?chromeless',
         'linked_content': '?chromeless',
-        'video': '?chromeless'
+        'video': '?chromeless',
+        'journey': '?chromeless',
+        'default': '?chromeless'
     };
 
     $comment := 'End of Common Metadata Specific Variables';
@@ -417,7 +444,8 @@ $.(
         'channel': 'Y',
         'course': 'Y',
         'linked_content': 'Y',
-        'video': 'Y'
+        'video': 'Y',
+        'journey': 'Y'
     };
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
@@ -429,7 +457,8 @@ $.(
         'channel': 'Y',
         'course': 'Y',
         'linked_content': 'Y',
-        'video': 'Y'
+        'video': 'Y',
+        'journey': 'Y'
     };
 
     $comment := '* The MAPPING between Percipio localeCode to SuccessFactors locales';
@@ -463,7 +492,8 @@ $.(
         'linked_content~~practice lab': 'LINKED CONTENT',
         'linked_content~~wintellect': 'LINKED CONTENT',
         'linked_content~course~course': 'LINKED CONTENT',
-        'video~video~video': 'VIDEO'
+        'video~video~video': 'VIDEO',
+        'journey~journey~journey': 'JOURNEY'
     };
 
     $comment := '* The MAPPING between Percipio contentType.percipioType,';
@@ -481,7 +511,8 @@ $.(
         'linked_content~~practice lab': 'LINKED-CTNT-COMPL',
         'linked_content~~wintellect': 'LINKED-CTNT-COMPL',
         'linked_content~course~course': 'LINKED-CTNT-COMPL',
-        'video~video~video': 'VIDEO-COMPL'
+        'video~video~video': 'VIDEO-COMPL',
+        'journey~journey~journey': 'JOURNEY-COMPL'
     };
 
     $comment := '* The default CATALOG that content will be created in within';
