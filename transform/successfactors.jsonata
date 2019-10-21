@@ -361,14 +361,14 @@ $.(
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
-        'audiobook': '?chromeless',
-        'book': '?chromeless',
-        'channel': '?chromeless',
-        'course': '?chromeless',
-        'linked_content': '?chromeless',
-        'video': '?chromeless',
-        'journey': '?chromeless',
-        'default': '?chromeless'
+        'audiobook': '?chromeless=true&preventAppDownload=true',
+        'book': '?chromeless=true&preventAppDownload=true',
+        'channel': '?chromeless=true&preventAppDownload=true',
+        'course': '?chromeless=true&preventAppDownload=true',
+        'linked_content': '?chromeless=true&preventAppDownload=true',
+        'video': '?chromeless=true&preventAppDownload=true',
+        'journey': '?chromeless=true&preventAppDownload=true',
+        'default': '?chromeless=true&preventAppDownload=true'
     };
 
     $comment := 'End of Common Metadata Specific Variables';
@@ -493,7 +493,7 @@ $.(
         'linked_content~~wintellect': 'LINKED CONTENT',
         'linked_content~course~course': 'LINKED CONTENT',
         'video~video~video': 'VIDEO',
-        'journey~journey~journey': 'JOURNEY'
+        'journey~curriculum~journey': 'JOURNEY'
     };
 
     $comment := '* The MAPPING between Percipio contentType.percipioType,';
@@ -512,7 +512,7 @@ $.(
         'linked_content~~wintellect': 'LINKED-CTNT-COMPL',
         'linked_content~course~course': 'LINKED-CTNT-COMPL',
         'video~video~video': 'VIDEO-COMPL',
-        'journey~journey~journey': 'JOURNEY-COMPL'
+        'journey~curriculum~journey': 'JOURNEY-COMPL'
     };
 
     $comment := '* The default CATALOG that content will be created in within';
@@ -562,20 +562,20 @@ $.(
             'CPNT_TYP_ID': (
                 $lookupVal:= $successfactorslookuptype();
                 $result := $lookup($successfactors_TYPELOOKUP, $lookupVal);
-                $result;
+                $result ? $result :'UNKNOWN';
             ),
             'NOTACTIVE': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
             'CPNT_TITLE': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 300) : '',
             'DEL_MTH_ID':  (
                 $lookupVal:= $successfactorslookuptype();
                 $result := $lookup($successfactors_TYPELOOKUP, $lookupVal);
-                $result;
+                $result ? $result :'UNKNOWN';
             ),
             'HTML_CPNT_DESC': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
             'CMPL_STAT_ID': (
                 $lookupVal:= $successfactorslookuptype();
                 $result := $lookup($successfactors_COMPLETIONLOOKUP, $lookupVal);
-                $result;
+                $result ? $result :'UNKNOWN-COMPL';
             ),
             'CREDIT_HRS': $successfactorsduration(),
             'SHOW_IN_CATALOG': (
