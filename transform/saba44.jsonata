@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SABA RELEASE 44';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 19-SEP-2019';
+    $comment := 'Date: 21-OCT-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -539,7 +539,9 @@ $.(
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
     $metadatasharelink := function($lookupValues){(
-        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : '';
+        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : null;
+        $urlparameter := $urlparameter ? $urlparameter : $exists( $lookupValues) ? $lookup( $lookupValues, 'default') : '';
+        
         link & $urlparameter;
     )};
 
@@ -573,7 +575,7 @@ $.(
     $commonIncludeTechnologyDetailsInTitle := $exists($override.common.IncludeTechnologyDetailsInTitle) ? $override.common.IncludeTechnologyDetailsInTitle : true;
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link';
+    $comment := '* and any additions to the link. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup ) ? $override.common.ShareLinkParametersLookup : {
@@ -582,11 +584,13 @@ $.(
         'channel': '',
         'course': '',
         'linked_content': '',
-        'video': ''
+        'video': '',
+        'journey': '',
+        'default': ''
     };
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link for MOBILE';
+    $comment := '* and any additions to the link for MOBILE. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
@@ -595,7 +599,9 @@ $.(
         'channel': '?chromeless',
         'course': '?chromeless',
         'linked_content': '?chromeless',
-        'video': '?chromeless'
+        'video': '?chromeless',
+        'journey': '?chromeless',
+        'default': '?chromeless'
     };
 
     $comment := 'End of Common Metadata Specific Variables';
@@ -609,7 +615,7 @@ $.(
     $comment := '*******************************************************';
     $comment := '* Create a string[] that is deduplicated of values that combines these';
     $comment := '* data values:';
-    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel';
+    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel or journey';
     $comment := '*   keywords';
     $comment := '*   associations.areas';
     $comment := '*   associations.subjects';
@@ -619,7 +625,11 @@ $.(
     $comment := '* @returns {string[]}';
     $comment := '*******************************************************';
     $sabakeywordsarray := function($otherKeyword){(
-        $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? [localizedMetadata[0].title] : [];
+        $keywords := [];
+
+        $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? $append($keywords,[localizedMetadata[0].title]) : $keywords;
+
+        $keywords :=  $lowercase(contentType.percipioType) = 'journey' ? $append($keywords,[localizedMetadata[0].title]) : $keywords;
 
         $keywords := keywords ? $append($keywords,keywords) : $keywords;
 
@@ -700,7 +710,11 @@ $.(
         $maxcategories := $maxCount ? $maxCount : 10;
         $padarray := [1..$maxcategories].('');
 
-        $categories :=  $lowercase(contentType.percipioType) = 'channel' ? [$basecategory &'\\'&localizedMetadata[0].title] : $count(associations.channels) = 0 ? [$basecategory] : [];
+        $categories := [];
+
+        $categories :=  $lowercase(contentType.percipioType) = 'channel' ? $append($categories,[$basecategory &'\\'&localizedMetadata[0].title]) : $count(associations.channels) = 0 ? $append($categories,[$basecategory]) : $categories;
+
+        $categories :=  $lowercase(contentType.percipioType) = 'journey' ? $append($categories,[$basecategory &'\\'&localizedMetadata[0].title]) : $count(associations.channels) = 0 ? $append($categories,[$basecategory]) : $categories;
 
         $categories := $append($categories, $map(associations.channels, function ($v, $i, $a) {
             $v.title ? $trim($basecategory &'\\'&$v.title) : ''
@@ -791,7 +805,8 @@ $.(
                 'channel': 'FALSE',
                 'course': 'TRUE',
                 'linked_content': 'TRUE',
-                'video': 'TRUE'
+                'video': 'TRUE',
+                'journey': 'FALSE'
               };
 
     $comment := '* The PREFIX combined with contentType.displayLabel that is used';
