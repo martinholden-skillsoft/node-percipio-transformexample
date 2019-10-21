@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SABA RELEASE 45';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 19-SEP-2019';
+    $comment := 'Date: 21-OCT-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -450,6 +450,26 @@ $.(
             $result ? $result : $defaultLanguage;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Remove any query string or hash parameters from a URL';
+    $comment := '* @param {string} $url - The URL string';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+	$stripQueryStringandHash := function($url){(
+    	$myurl := $url ? $url : '';
+    	$split( $myurl , /\#|\?/)[0];
+    )};
+    
+    $comment := '*******************************************************';
+    $comment := '* Get the document extension from a URL';
+    $comment := '* @param {string} $url - The URL string';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $getDocumentExtension := function($url){(
+    	$myurl := $url ? $url : '';
+        $mydocument := $reverse($split($myurl,'/'))[0];
+        $contains($mydocument, '.') ? $reverse($split($mydocument, '.'))[0] : ''
+    )};
 
     $comment := 'End of Generic Function Library';
     $comment := '*******************************************************';
@@ -540,7 +560,9 @@ $.(
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
     $metadatasharelink := function($lookupValues){(
-        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : '';
+        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : null;
+        $urlparameter := $urlparameter ? $urlparameter : $exists( $lookupValues) ? $lookup( $lookupValues, 'default') : '';
+        
         link & $urlparameter;
     )};
 
@@ -575,7 +597,7 @@ $.(
     $commonIncludeTechnologyDetailsInTitle := $exists($override.common.IncludeTechnologyDetailsInTitle) ? $override.common.IncludeTechnologyDetailsInTitle : true;
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link';
+    $comment := '* and any additions to the link. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup ) ? $override.common.ShareLinkParametersLookup : {
@@ -584,11 +606,13 @@ $.(
         'channel': '',
         'course': '',
         'linked_content': '',
-        'video': ''
+        'video': '',
+        'journey': '',
+        'default': ''
     };
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link for MOBILE';
+    $comment := '* and any additions to the link for MOBILE. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
@@ -597,7 +621,9 @@ $.(
         'channel': '?chromeless',
         'course': '?chromeless',
         'linked_content': '?chromeless',
-        'video': '?chromeless'
+        'video': '?chromeless',
+        'journey': '?chromeless',
+        'default': '?chromeless'
     };
 
     $comment := 'End of Common Metadata Specific Variables';
@@ -621,7 +647,11 @@ $.(
     $comment := '* @returns {string[]}';
     $comment := '*******************************************************';
     $sabakeywordsarray := function($otherKeyword){(
-        $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? [localizedMetadata[0].title] : [];
+        $keywords := [];
+
+        $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? $append($keywords,[localizedMetadata[0].title]) : $keywords;
+
+        $keywords :=  $lowercase(contentType.percipioType) = 'journey' ? $append($keywords,[localizedMetadata[0].title]) : $keywords;
 
         $keywords := keywords ? $append($keywords,keywords) : $keywords;
 
@@ -702,7 +732,11 @@ $.(
         $maxcategories := $maxCount ? $maxCount : 10;
         $padarray := [1..$maxcategories].('');
 
-        $categories :=  $lowercase(contentType.percipioType) = 'channel' ? [$basecategory &'\\'&localizedMetadata[0].title] : $count(associations.channels) = 0 ? [$basecategory] : [];
+        $categories := [];
+
+        $categories :=  $lowercase(contentType.percipioType) = 'channel' ? $append($categories,[$basecategory &'\\'&localizedMetadata[0].title]) : $count(associations.channels) = 0 ? $append($categories,[$basecategory]) : $categories;
+
+        $categories :=  $lowercase(contentType.percipioType) = 'journey' ? $append($categories,[$basecategory &'\\'&localizedMetadata[0].title]) : $count(associations.channels) = 0 ? $append($categories,[$basecategory]) : $categories;
 
         $categories := $append($categories, $map(associations.channels, function ($v, $i, $a) {
             $v.title ? $trim($basecategory &'\\'&$v.title) : ''
@@ -728,6 +762,19 @@ $.(
         $convert_to_values := $key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
         
         $convert_to_values
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Get local image filename';
+    $comment := '* @param {string} [$id] - The item unqiue id';
+    $comment := '* @param {string} [$imageurl] - The URL to the thumbnail';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $sabaimagefilename := function($id, $imageurl) {(
+    	$myimageextension := $imageurl ? $trim($getDocumentExtension($stripQueryStringandHash($imageurl))) : '';
+        $myid := $id ? $trim($id) : '';
+        $mydelimiter := $myimageextension = '' ? '' : '.';
+        $join([$myid,$myimageextension],$mydelimiter)
     )};
 
     $comment := 'End of Saba Release 45/Customer Specific Functions';
@@ -793,7 +840,8 @@ $.(
                 'channel': 'FALSE',
                 'course': 'TRUE',
                 'linked_content': 'TRUE',
-                'video': 'TRUE'
+                'video': 'TRUE',
+                'journey': 'FALSE'
               };
 
     $comment := '* The PREFIX combined with contentType.displayLabel that is used';
@@ -910,7 +958,7 @@ $.(
         'REMOVE_COURSE_FROM_ALL_PLANS': lifecycle.status = 'ACTIVE' ? '' : 'TRUE',
         'COURSE_HIDE_CLASSMATES': 'FALSE',
         'COURSE_TARGET_DAYS': 0,
-        'LXP_CONTENT': 'TRUE'
+        'LXP_CONTENT': 'FALSE'
       }
     );
 
