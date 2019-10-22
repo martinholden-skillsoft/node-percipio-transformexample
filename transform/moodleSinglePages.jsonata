@@ -4,9 +4,57 @@ $.(
     $comment := 'TRANSFORM FOR MOODLE 3.x Single Page Course Importer';
     $comment := 'See https://github.com/lushonline/moodle-tool_uploadpage';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 21-OCT-2019';
+    $comment := 'Date: 22-OCT-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Overrides';
+    $comment := 'The example below defines overrides that match the defaults';
+    $comment := 'You actually only need to define the Overides needed, search for';
+    $comment := '$override. in this file to see the definition of each option';
+    
+    $override := {
+        'comment_common' : '{object} Common shared settings for metadata trasnforms',
+        'common' : {
+            'Comment_UseExtendedDescription' : '{boolean} Whether to use the extended description option. This combines the descripion and publication data. See the $metadataextendeddescription function',
+        	'UseExtendedDescription' : true,
+            'Comment_ExtendedDescriptionEOL' : '{string} The EOL characters to use for the Extended Description. See the $metadataextendeddescription function',
+            'ExtendedDescriptionEOL' : '\r\n',
+            'Comment_IncludeContentTypeInTitle' : '{boolean} Whether to include contentType.displayLabel as prefix to title. See the $metadatatitle function',
+            'IncludeContentTypeInTitle' : true,
+            'Comment_IncludeTechnologyDetailsInTitle' : '{boolean} Whether to include technologies[0].title and version as prefix to title. See the $metadatatitle function',
+            'IncludeTechnologyDetailsInTitle': true,
+            'Comment_ShareLinkParametersLookup' : '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link. default option to handle unknown types. Returned value (right side) is the string to append to the link',
+            'ShareLinkParametersLookup' : {
+                'audiobook': '',
+                'book': '',
+                'channel': '',
+                'course': '',
+                'linked_content': '',
+                'video': '',
+                'journey': '',
+                'default': ''
+            },
+            'Comment_MobileShareLinkParametersLookup' : '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link for Mobile. default option to handle unknown types. Returned value (right side) is the string to append to the link',
+            'MobileShareLinkParametersLookup' : {
+                'audiobook': '?chromeless=true&preventAppDownload=true',
+                'book': '?chromeless=true&preventAppDownload=true',
+                'channel': '?chromeless=true&preventAppDownload=true',
+                'course': '?chromeless=true&preventAppDownload=true',
+                'linked_content': '?chromeless=true&preventAppDownload=true',
+                'video': '?chromeless=true&preventAppDownload=true',
+                'journey': '?chromeless=true&preventAppDownload=true',
+                'default': '?chromeless=true&preventAppDownload=true'
+            }
+        },
+        'comment_moodle' : '{object} Moodle specific settings for metadata transforms',
+        'moodle' : {
+            'comment_maxtags' : 'The number of tags values to include set to 0 to not return any. For more information see the $moodletagsarray function',
+            'maxtags' : 10
+        }
+	};
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
