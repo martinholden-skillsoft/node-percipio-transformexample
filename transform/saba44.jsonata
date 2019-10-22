@@ -3,9 +3,101 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SABA RELEASE 44';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 21-OCT-2019';
+    $comment := 'Date: 22-OCT-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Overrides';
+    $comment := 'The example below defines overrides that match the defaults';
+    $comment := 'You actually only need to define the Overides needed, search for';
+    $comment := '$override. in this file to see the definition of each option';
+    
+    $override := {
+        'comment_common' : '{object} Common shared settings for metadata trasnforms',
+        'common' : {
+            'Comment_UseExtendedDescription' : '{boolean} Whether to use the extended description option. This combines the descripion and publication data. See the $metadataextendeddescription function',
+        	'UseExtendedDescription' : true,
+            'Comment_ExtendedDescriptionEOL' : '{string} The EOL characters to use for the Extended Description. See the $metadataextendeddescription function',
+            'ExtendedDescriptionEOL' : '\r\n',
+            'Comment_IncludeContentTypeInTitle' : '{boolean} Whether to include contentType.displayLabel as prefix to title. See the $metadatatitle function',
+            'IncludeContentTypeInTitle' : true,
+            'Comment_IncludeTechnologyDetailsInTitle' : '{boolean} Whether to include technologies[0].title and version as prefix to title. See the $metadatatitle function',
+            'IncludeTechnologyDetailsInTitle': true,
+            'Comment_ShareLinkParametersLookup' : '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link. default option to handle unknown types. Returned value (right side) is the string to append to the link',
+            'ShareLinkParametersLookup' : {
+                'audiobook': '',
+                'book': '',
+                'channel': '',
+                'course': '',
+                'linked_content': '',
+                'video': '',
+                'journey': '',
+                'default': ''
+            },
+            'Comment_MobileShareLinkParametersLookup' : '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link for Mobile. default option to handle unknown types. Returned value (right side) is the string to append to the link',
+            'MobileShareLinkParametersLookup' : {
+                'audiobook': '?chromeless=true&preventAppDownload=true',
+                'book': '?chromeless=true&preventAppDownload=true',
+                'channel': '?chromeless=true&preventAppDownload=true',
+                'course': '?chromeless=true&preventAppDownload=true',
+                'linked_content': '?chromeless=true&preventAppDownload=true',
+                'video': '?chromeless=true&preventAppDownload=true',
+                'journey': '?chromeless=true&preventAppDownload=true',
+                'default': '?chromeless=true&preventAppDownload=true'
+            }
+        },
+        'comment_saba' : '{object} Saba specific settings for metadata transforms',
+        'saba' : {
+            'comment_activedomain' : 'The DOMAIN that must exist in Saba where the active Percipio Content should be placed',
+            'activedomain' : 'World',
+            'comment_archivedomain' : 'The DOMAIN that must exist in Saba where the inactive Percipio Content should be placed',
+            'archivedomain' : 'Archive',
+            'comment_contentprovider' : 'The CONTENT PROVIDER this value must exist in Saba, and must be a URL Vendor so xAPI works',
+            'contentprovider' :'Percipio_URL_Vendor',
+            'comment_deliveryvendor' : 'The DELIVERY VENDOR this value must exist in Saba',
+            'deliveryvendor' :'Saba',
+            'comment_contentfolder' : 'The CONTENT folder where content is added that must exist in Saba content library',
+            'contentfolder' :'PERCIPIO_CONTENT',
+            'comment_playertemplate' : 'The PLAYER TEMPLATE that must exist in Saba',
+            'playertemplate' :'Percipio',
+            'comment_contentserver' : 'The CONTENT SERVER where content is added that must exist in Saba content',
+            'contentserver' :'Saba Default Content Server',
+            'comment_owner' : 'The SABA Account that must exist in Saba that owns this content',
+            'owner' :'SSADMIN',
+            'comment_languagemap' : 'The MAPPING between Percipio localeCode to SABA language string. The PERCIPIO (left side) value is the lower case value before the hyphen in the locale i.e. en-us -> en; fr-FR -> fr',
+            'languagemap' : {
+                        'en': 'English',
+                        'fr': 'French',
+                        'de': 'German',
+                        'es': 'Spanish'
+                        },
+            'comment_defaultlanguage' : 'The default SABA language string to use if the map does not succeed',
+            'defaultlanguage' :'English',
+            'comment_markcompleteexternalmap' : 'The MAPPING between Percipio contentType.percipioType lowercase that controls whether type can be marked COMPLETED thru receipt of a COMPLETED xAPI statement from Percipio',
+            'markcompleteexternalmap' : {
+                'audiobook': 'TRUE',
+                'book': 'TRUE',
+                'channel': 'FALSE',
+                'course': 'TRUE',
+                'linked_content': 'TRUE',
+                'video': 'TRUE',
+                'journey': 'FALSE'
+              },
+            'comment_deliverytypeprefix' : 'The PREFIX combined with contentType.displayLabel that is used for SABA Delivery types. The Delivery types must exist in SABA. If no prefix needed set to empty string, make sure to include trailing space if defined',
+            'deliverytypeprefix' : 'Skillsoft ',
+            'comment_defaultauthor' : 'The default SABA Author string to use if the by array is empty in the Percipio data',
+            'defaultauthor' :'Skillsoft',
+            'comment_maxtags' : 'The number of TAGSn values to include set to 0 to not return any. For more information see the $sabatagsobject function',
+            'maxtags' : 5,
+            'comment_maxcategories' : 'The number of CATEGORYn values to include set to 0 to not return any. For more information see the $sabacategoriesobject function',
+            'maxcategories' : 5,
+            'comment_basecategory' : 'The base Category value to use in the $sabacategoriesobject function',
+            'basecategory' : 'Skillsoft'
+        }
+	};
+
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
