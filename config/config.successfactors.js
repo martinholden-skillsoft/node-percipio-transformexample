@@ -23,7 +23,7 @@ config.outputpath = `results/${config.customer}`;
 // JSONata Bindings
 config.jsonataBinding = {};
 
-// An example of how the "overides" could be specified in the Scheduler job
+// An example of how the "overide" could be specified in the Scheduler job
 const exampleSchedulerConfig = {
   activity: {
     activityName: 'CONTENT_DISCOVERY',
@@ -31,37 +31,71 @@ const exampleSchedulerConfig = {
       action: 'CONTENT_EXPORT',
       transformName: 'SuccessFactors',
       override: {
+        comment_common: '{object} Common shared settings for metadata trasnforms',
         common: {
+          Comment_UseExtendedDescription:
+            '{boolean} Whether to use the extended description option. This combines the descripion and publication data. See the $metadataextendeddescription function',
           UseExtendedDescription: true,
-          ExtendedDescriptionEOL: '  ',
-          IncludeTechnologyDetailsInTitle: true,
+          Comment_ExtendedDescriptionEOL:
+            '{string} The EOL characters to use for the Extended Description. See the $metadataextendeddescription function',
+          ExtendedDescriptionEOL: '\r\n',
+          Comment_IncludeContentTypeInTitle:
+            '{boolean} Whether to include contentType.displayLabel as prefix to title. See the $metadatatitle function',
           IncludeContentTypeInTitle: true,
+          Comment_IncludeTechnologyDetailsInTitle:
+            '{boolean} Whether to include technologies[0].title and version as prefix to title. See the $metadatatitle function',
+          IncludeTechnologyDetailsInTitle: true,
+          Comment_ShareLinkParametersLookup:
+            '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link. default option to handle unknown types. Returned value (right side) is the string to append to the link',
           ShareLinkParametersLookup: {
-            audiobook: '?chromeless',
-            book: '?chromeless',
+            audiobook: '',
+            book: '',
             channel: '',
-            course: '?chromeless',
-            linked_content: '?chromeless',
-            video: '?chromeless'
+            course: '',
+            linked_content: '',
+            video: '',
+            journey: '',
+            default: ''
+          },
+          Comment_MobileShareLinkParametersLookup:
+            '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link for Mobile. default option to handle unknown types. Returned value (right side) is the string to append to the link',
+          MobileShareLinkParametersLookup: {
+            audiobook: '?chromeless=true&preventAppDownload=true',
+            book: '?chromeless=true&preventAppDownload=true',
+            channel: '?chromeless=true&preventAppDownload=true',
+            course: '?chromeless=true&preventAppDownload=true',
+            linked_content: '?chromeless=true&preventAppDownload=true',
+            video: '?chromeless=true&preventAppDownload=true',
+            journey: '?chromeless=true&preventAppDownload=true',
+            default: '?chromeless=true&preventAppDownload=true'
           }
         },
+        comment_successfactors: '{object} Successfactors specific settings for metadata trasnforms',
         successfactors: {
+          comment_showincataloglookup:
+            'The MAPPING between Percipio contentType.percipioType lowercase and the visibility in the catalog. Y = VISIBLE, N = HIDDEN. This can be used to hide contentTypes if necessary.',
           showincataloglookup: {
             audiobook: 'Y',
             book: 'Y',
             channel: 'Y',
             course: 'Y',
             linked_content: 'Y',
-            video: 'Y'
+            video: 'Y',
+            journey: 'Y'
           },
+          comment_onlinestatuslookup:
+            'The MAPPING between Percipio contentType.percipioType lowercase and the ONLINE status. Y = ONLINE, N = OFFLINE. This can be used to hide contentTypes if necessary.',
           onlinestatuslookup: {
             audiobook: 'Y',
             book: 'Y',
             channel: 'Y',
             course: 'Y',
             linked_content: 'Y',
-            video: 'Y'
+            video: 'Y',
+            journey: 'Y'
           },
+          comment_languagelookup:
+            'The MAPPING between Percipio localeCode to SuccessFactors locales. The PERCIPIO (left side) value is the RFC5646 Language Tag',
           languagelookup: {
             en: 'English',
             fr: 'French',
@@ -72,7 +106,11 @@ const exampleSchedulerConfig = {
             'es-ES': 'Spanish',
             'es-DO': 'Spanish'
           },
+          comment_defaultlanguage:
+            'The default SuccessFactors locale string to use if the map does not succeed',
           defaultlanguage: 'English',
+          comment_typelookup:
+            'The MAPPING between Percipio contentType.percipioType, contentType.category, contentType.displayLabel in lowercase combined with ~ delimiter to the SuccessFactors Component Types',
           typelookup: {
             'audiobook~audiobook~audiobook summary': 'AUDIO SUMMARY',
             'audiobook~audiobook~audiobook': 'AUDIOBOOK',
@@ -85,8 +123,11 @@ const exampleSchedulerConfig = {
             'linked_content~~practice lab': 'LINKED CONTENT',
             'linked_content~~wintellect': 'LINKED CONTENT',
             'linked_content~course~course': 'LINKED CONTENT',
-            'video~video~video': 'VIDEO'
+            'video~video~video': 'VIDEO',
+            'journey~curriculum~journey': 'JOURNEY'
           },
+          comment_completionlookup:
+            'The MAPPING between Percipio contentType.percipioType, contentType.category, contentType.displayLabel in lowercase combined with ~ delimiter to the SuccessFactors Completion Types',
           completionlookup: {
             'audiobook~audiobook~audiobook summary': 'AUDIO-BK-SUMM-COMPL',
             'audiobook~audiobook~audiobook': 'AUDIO-BK-COMPL',
@@ -99,13 +140,26 @@ const exampleSchedulerConfig = {
             'linked_content~~practice lab': 'LINKED-CTNT-COMPL',
             'linked_content~~wintellect': 'LINKED-CTNT-COMPL',
             'linked_content~course~course': 'LINKED-CTNT-COMPL',
-            'video~video~video': 'VIDEO-COMPL'
+            'video~video~video': 'VIDEO-COMPL',
+            'journey~curriculum~journey': 'JOURNEY-COMPL'
           },
+          comment_defaultcatalog:
+            'The default CATALOG that content will be created in within SuccessFactors, the CATALOG must already exist. This is used for the CATALOG_1 column.',
           defaultcatalog: 'EXTERNAL',
+          comment_cpntsrcid:
+            'The default CPNT_SRC_ID that content will be associated with in SuccessFactors, the CPNT_SRC_ID must already exist. This is used for the CPNT_SRC_ID column.',
           cpntsrcid: 'SKILLSOFT',
+          comment_buildcompany:
+            'The default BUILD_COMPANY that content will be associated with in SuccessFactors. This is used for the BUILD_COMPANY column if the item does not have a association.parent',
           buildcompany: 'Percipio',
+          comment_chgbackmethod:
+            'The default CHARGE BACK method that content will be associated with in SuccessFactors. This is used for the CHGBCK_METHOD column.',
           chgbackmethod: 1,
+          comment_timestampformat:
+            'The default format to use when converting ISO8601 timestamps. This has the same syntax as fn:format-dateTime. https://www.w3.org/TR/xpath-functions-31/#func-format-dateTime',
           timestampformat: '[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01][z]',
+          comment_timezoneoffset:
+            'The default TimeZone Offset to use when converting ISO8601 timestamps',
           timezoneoffset: '-0500'
         }
       },
@@ -134,9 +188,6 @@ const exampleSchedulerConfig = {
 
 // Show example of overriding
 config.jsonataBinding.override = exampleSchedulerConfig.activity.preferences.override;
-
-// Null out overrides
-config.jsonataBinding.override = null;
 
 // File Extension
 config.outputextension = 'txt';
@@ -176,7 +227,7 @@ config.request.query = {};
  * Type: string[]
  * Enum: COURSE,VIDEO,BOOK,AUDIOBOOK,CHANNEL,LINKED_CONTENT
  */
-config.request.query.typeFilter = ['JOURNEY'];
+config.request.query.typeFilter = ['CHANNEL', 'JOURNEY'];
 /**
  * Name: licensePoolIds
  * Description : Array of License pool IDs to which to restrict content.
