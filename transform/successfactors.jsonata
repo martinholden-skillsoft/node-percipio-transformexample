@@ -3,10 +3,163 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SUCCESSFACTORS METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 29-OCT-2019';
+    $comment := 'Date: 18-NOV-2019';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-    
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Overrides';
+    $comment := 'The example below defines overrides that match the defaults';
+    $comment := 'You actually only need to define the Overides needed, search for';
+    $comment := '$override. in this file to see the definition of each option';
+
+    $override := {
+    'comment_common': '{object} Common shared settings for metadata trasnforms',
+    'common': {
+        'Comment_UseExtendedDescription': '{boolean} Whether to use the extended description option. This combines the descripion and publication data. See the $metadataextendeddescription function',
+        'UseExtendedDescription': true,
+        'Comment_ExtendedDescriptionEOL': '{string} The EOL characters to use for the Extended Description. See the $metadataextendeddescription function',
+        'ExtendedDescriptionEOL': '\r\n',
+        'Comment_IncludeContentTypeInTitle': '{boolean} Whether to include contentType.displayLabel as prefix to title. See the $metadatatitle function',
+        'IncludeContentTypeInTitle': true,
+        'Comment_IncludeTechnologyDetailsInTitle': '{boolean} Whether to include technologies[0].title and version as prefix to title. See the $metadatatitle function',
+        'IncludeTechnologyDetailsInTitle': true,
+        'Comment_ShareLinkParametersLookup': '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link. default option to handle unknown types. Returned value (right side) is the string to append to the link',
+        'ShareLinkParametersLookup': {
+            'audiobook': '',
+            'book': '',
+            'channel': '',
+            'course': '',
+            'linked_content': '',
+            'video': '',
+            'journey': '',
+            'default': ''
+        },
+        'Comment_MobileShareLinkParametersLookup': '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link for Mobile. default option to handle unknown types. Returned value (right side) is the string to append to the link',
+        'MobileShareLinkParametersLookup': {
+            'audiobook': '',
+            'book': '',
+            'channel': '',
+            'course': '',
+            'linked_content': '',
+            'video': '',
+            'journey': '',
+            'default': ''
+        }
+    },
+    'comment_successfactors': '{object} SuccessFactors specific settings for metadata transforms',
+    'successfactors': {
+        'comment_showincataloglookup': 'The MAPPING between Percipio contentType.percipioType lowercase and the visibility in the catalog. Y = VISIBLE, N = HIDDEN. This can be used to hide contentTypes if necessary.',
+        'showincataloglookup': {
+            'audiobook': 'Y',
+            'book': 'Y',
+            'channel': 'Y',
+            'course': 'Y',
+            'linked_content': 'Y',
+            'video': 'Y',
+            'journey': 'Y'
+        },
+        'comment_onlinestatuslookup': 'The MAPPING between Percipio contentType.percipioType lowercase and the ONLINE STATUS. Y = ONLINE, N = OFFLINE. This can be used to hide contentTypes if necessary.',
+        'onlinestatuslookup': {
+            'audiobook': 'Y',
+            'book': 'Y',
+            'channel': 'Y',
+            'course': 'Y',
+            'linked_content': 'Y',
+            'video': 'Y',
+            'journey': 'Y'
+        },
+        'comment_languagelookup': 'The MAPPING between Percipio localeCode to SuccessFactors locales to The PERCIPIO (left side) value is the RFC5646 Language Tag',
+        'languagelookup': {
+            'en': 'English',
+            'fr': 'French',
+            'fr-FR': 'French',
+            'de': 'German',
+            'de-DE': 'German',
+            'es': 'Spanish',
+            'es-ES': 'Spanish',
+            'es-DO': 'Spanish'
+        },
+        'comment_defaultlanguage': 'The default SuccessFactors locale string to use if the map does not succeed',
+        'defaultlanguage': 'English',
+        'comment_typelookup': 'The MAPPING between Percipio contentType.percipioType, contentType.category, contentType.displayLabel in lowercase combined with ~ delimiter to the SuccessFactors Component Types ',
+        'typelookup': {
+            'audiobook~~': 'AUDIOBOOK',
+            'audiobook~audiobook~': 'AUDIOBOOK',
+            'audiobook~audiobook~audiobook': 'AUDIOBOOK',
+            'audiobook~audiobook~audiobook summary': 'AUDIO SUMMARY',
+            'book~~': 'BOOK',
+            'book~book~': 'BOOK',
+            'book~book~book': 'BOOK',
+            'book~book~book review': 'BOOK',
+            'book~book~book summary': 'BOOK SUMMARY',
+            'channel~~': 'CHANNEL',
+            'channel~channel~': 'CHANNEL',
+            'channel~channel~channel': 'CHANNEL',
+            'course~~': 'COURSE',
+            'course~course~': 'COURSE',
+            'course~course~course': 'COURSE',
+            'linked_content~~': 'LINKED CONTENT',
+            'linked_content~assessment~testprep': 'LINKED CONTENT',
+            'linked_content~assessment~': 'LINKED CONTENT',
+            'linked_content~~practice lab': 'LINKED CONTENT',
+            'linked_content~~wintellect': 'LINKED CONTENT',
+            'linked_content~course~': 'LINKED CONTENT',
+            'linked_content~course~course': 'LINKED CONTENT',
+            'video~~': 'VIDEO',
+            'video~video~': 'VIDEO',
+            'video~video~video': 'VIDEO',
+            'journey~~': 'JOURNEY',
+            'journey~curriculum~': 'JOURNEY',
+            'journey~curriculum~journey': 'JOURNEY'
+        },
+        'comment_completionlookup': 'The MAPPING between Percipio contentType.percipioType, contentType.category, contentType.displayLabel in lowercase combined with ~ delimiter to the SuccessFactors Completion Types ',
+        'completionlookup': {
+            'audiobook~~': 'AUDIO-BK-COMPL',
+            'audiobook~audiobook~': 'AUDIO-BK-COMPL',
+            'audiobook~audiobook~audiobook': 'AUDIO-BK-COMPL',
+            'audiobook~audiobook~audiobook summary': 'AUDIO-BK-SUMM-COMPL',
+            'book~~': 'BOOK-COMPL',
+            'book~book~': 'BOOK-COMPL',
+            'book~book~book': 'BOOK-COMPL',
+            'book~book~book review': 'BOOK-COMPL',
+            'book~book~book summary': 'BOOK-SUMM-COMPLY',
+            'channel~~': 'CHANNEL-COMPL',
+            'channel~channel~': 'CHANNEL-COMPL',
+            'channel~channel~channel': 'CHANNEL-COMPL',
+            'course~~': 'COURSE-COMPL',
+            'course~course~': 'COURSE-COMPL',
+            'course~course~course': 'COURSE-COMPL',
+            'linked_content~~': 'LINKED-CTNT-COMPL',
+            'linked_content~assessment~testprep': 'LINKED-CTNT-COMPL',
+            'linked_content~assessment~': 'LINKED-CTNT-COMPL',
+            'linked_content~~practice lab': 'LINKED-CTNT-COMPL',
+            'linked_content~~wintellect': 'LINKED-CTNT-COMPL',
+            'linked_content~course~': 'LINKED-CTNT-COMPL',
+            'linked_content~course~course': 'LINKED-CTNT-COMPL',
+            'video~~': 'VIDEO-COMPL',
+            'video~video~': 'VIDEO-COMPL',
+            'video~video~video': 'VIDEO-COMPL',
+            'journey~~': 'JOURNEY-COMPL',
+            'journey~curriculum~': 'JOURNEY-COMPL',
+            'journey~curriculum~journey': 'JOURNEY-COMPL'
+        },
+        'comment_defaultcatalog': 'The default CATALOG that content will be created in within SuccessFactors, the CATALOG must already exist. This is used for the CATALOG_1 column.',
+        'defaultcatalog': 'EXTERNAL',
+        'comment_cpntsrcid': 'The default CPNT_SRC_ID that content will be associated with in SuccessFactors, the CPNT_SRC_ID must already exist. This is used for the CPNT_SRC_ID column.',
+        'cpntsrcid': 'EXTERNAL',
+        'comment_buildcompany': 'The default BUILD_COMPANY that content will be associated with in SuccessFactors. This is used for the BUILD_COMPANY column if the item does not have a association.parent',
+        'buildcompany': 'Percipio',
+        'comment_chgbackmethod': 'The default CHARGE BACK method that content will be associated with in SuccessFactors. This is used for the CHGBCK_METHOD column.',
+        'chgbackmethod': 1,
+        'comment_timestampformat': 'The default format to use when converting ISO8601 timestamps. This has the same syntax as fn:format-dateTime. https://www.w3.org/TR/xpath-functions-31/#func-format-dateTime',
+        'timestampformat': '[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01][z]',
+        'comment_timezoneoffset': 'The default TimeZone Offset to use when converting ISO8601 timestamps',
+        'timezoneoffset': '-0500'
+    }
+};
+
     $comment := '*******************************************************';
     $comment := '*******************************************************';
     $comment := 'Start of Generic Function Library';
@@ -17,7 +170,8 @@ $.(
     $comment := '* @param {string} $source';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $plainstring := function ($source) {(
+    $plainstring := function ($source) {
+    (
         $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
         $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
         $apos := /&(#8217;|apos;|rsquo;)|[\u2019|\u8217]/;
@@ -40,8 +194,8 @@ $.(
         $result := $replace($result, $curylydoublequotes, '\u0022');
         $result := $replace($result, $nbsp, ' ');
         $result := $replace($result, $otherentities, '');
-        $result; 
-    )};
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Shortens a string at a word boundary to the specified length, option to';
@@ -52,7 +206,8 @@ $.(
     $comment := '* @param {string} $ellipsisString - The suffix to use';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $ellipsis := function ($source, $maxlength, $ellipsisString) {(
+    $ellipsis := function ($source, $maxlength, $ellipsisString) {
+    (
         $wordboundary := /\s(\w+)$/;
         $trimlength := $maxlength - $length($ellipsisString);
 
@@ -60,16 +215,17 @@ $.(
         $trimmedSource := $needtrim ? $trim($substring($source, 0, $trimlength));
 
         $trimmedSource := $replace($trimmedSource, $wordboundary, '') & $ellipsisString;
-        $needtrim ? $trimmedSource : $source;
-    )};
+        $needtrim ? $trimmedSource : $source; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
     $comment := '* to a numeric value of total seconds';
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';    
-    $isodurationtoseconds := function ($isoduration) {(
+    $comment := '*******************************************************';
+    $isodurationtoseconds := function ($isoduration) {
+    (
         $input := $isoduration = null ? '' : $isoduration;
         $time := $substringAfter($input, 'T');
         $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '0';
@@ -78,8 +234,8 @@ $.(
         $remainder := $substringAfter($remainder, 'M');
         $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '0';
         $result := (($number($hours) * 3600) + ($number($minutes) * 60) + $number($seconds));
-        $result;
-    )};
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
@@ -87,13 +243,14 @@ $.(
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @param {number} [$precision=2] - The precision';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';  
-    $isodurationtominutes := function ($isoduration, $precision) {(
+    $comment := '*******************************************************';
+    $isodurationtominutes := function ($isoduration, $precision) {
+    (
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
         $result := $seconds = 0 ? 0 : $round($seconds / 60, $prec);
-        $result;
-    )};
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
@@ -101,22 +258,23 @@ $.(
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @param {number} [$precision=2] - The precision';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';  
-    $isodurationtohours := function ($isoduration, $precision) {(
+    $comment := '*******************************************************';
+    $isodurationtohours := function ($isoduration, $precision) {
+    (
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
         $result := $seconds = 0 ? 0 : $round($seconds / 3600, $prec);
-        $result;
-    )};
-
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
     $comment := '* to a string in format hh:mm. No rounding so example would be 01:34';
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-    $isodurationtohhmm := function ($isoduration) {(
+    $comment := '*******************************************************';
+    $isodurationtohhmm := function ($isoduration) {
+    (
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
         $time := $substringAfter($input, 'T');
         $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
@@ -124,16 +282,17 @@ $.(
         $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
         $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
         $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0');
-        $result;
-    )};
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
     $comment := '* to a string in format hh:mm:ss. So example would be 01:34:56';
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-    $isodurationtohhmmss := function ($isoduration) {(
+    $comment := '*******************************************************';
+    $isodurationtohhmmss := function ($isoduration) {
+    (
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
         $time := $substringAfter($input, 'T');
         $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
@@ -141,9 +300,8 @@ $.(
         $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
         $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
         $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0') & ':' & $pad($seconds, -2, '0');
-        $result;
-    )};
-
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Take an array of objects, and return a JSON object where:';
@@ -155,66 +313,71 @@ $.(
     $comment := '* @param {number} [$maxCount=10] - The number of Keys';
     $comment := '* @param {string} [$delimiter=|] - The delimiter for Object strings';
     $comment := '* @returns {Object}';
-    $comment := '*******************************************************';  
-    $flattenArrayAndObject := function($source, $prefix, $maxCount, $delimiter) {(
+    $comment := '*******************************************************';
+    $flattenArrayAndObject := function ($source, $prefix, $maxCount, $delimiter) {
+    (
         $maxCount := $maxCount ? $maxCount : 10;
         $delimiter := $delimiter ? $delimiter : '|';
 
         $padarray := [1..$maxCount].('');
-        $sourceArray := $count($source)=0 ? [] : [];
+        $sourceArray := $count($source) = 0 ? [] : [];
         $result := '';
-        
-        $sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
-            $model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
-            $needdelimiter:= $count($keys($v)) > 0 ? $delimiter : '';
-            $trimend:= $count($keys($v)) > 0;
-            $kv := $spread($model);
-            $result:= $reduce($kv, function($accum, $val) {(
-                $accum & $each($val, function($val, $key) {$val}) & $needdelimiter;
-            )}, '');
-                $trimend ? $substring($result,0,$length($result)-1) : $result;
-        )})
-        );
+
+        $sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {
+                (
+                    $model := $count($keys($v)) > 0 ? $v : {
+                    'key': $v ? $v : ''
+                };
+                    $needdelimiter := $count($keys($v)) > 0 ? $delimiter : '';
+                    $trimend := $count($keys($v)) > 0;
+                    $kv := $spread($model);
+                    $result := $reduce($kv, function ($accum, $val) {
+                        (
+                            $accum & $each($val, function ($val, $key) {
+                                $val
+                            }) & $needdelimiter; )
+                    }, '');
+                    $trimend ? $substring($result, 0, $length($result) - 1) : $result; )
+            }));
 
         $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
             $v != ''
         });
 
         $sourceArray := $append($sourceArray, $padarray);
-    
+
         $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
             $i < $maxCount
         });
 
-        $sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
-            $prefix & ($i + 1) & '~|~' & $v
-        });
-
-        $sourceArrayDelimited.{
-            $substringBefore('~|~'): $substringAfter('~|~')
-        }
-    )};
+        $sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) { {
+                $prefix & ($i + 1): $v
+            }
+        }); )
+};
 
     $comment := '*******************************************************';
     $comment := '* Remove any query string or hash parameters from a URL';
     $comment := '* @param {string} $url - The URL string';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-	$stripQueryStringandHash := function($url){(
-    	$myurl := $url ? $url : '';
-    	$split( $myurl , /\#|\?/)[0];
-    )};
-    
+    $comment := '*******************************************************';
+    $stripQueryStringandHash := function ($url) {
+    (
+        $myurl := $url ? $url : '';
+        $split($myurl, /\#|\?/)[0]; )
+};
+
     $comment := '*******************************************************';
     $comment := '* Get the document extension from a URL';
     $comment := '* @param {string} $url - The URL string';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-    $getDocumentExtension := function($url){(
-    	$myurl := $url ? $url : '';
-        $mydocument := $reverse($split($myurl,'/'))[0];
-        $contains($mydocument, '.') ? $reverse($split($mydocument, '.'))[0] : ''
-    )};
+    $comment := '*******************************************************';
+    $getDocumentExtension := function ($url) {
+    (
+        $myurl := $url ? $url : '';
+        $mydocument := $reverse($split($myurl, '/'))[0];
+        $contains($mydocument, '.') ? $reverse($split($mydocument, '.'))[0] : '')
+};
 
     $comment := 'End of Generic Function Library';
     $comment := '*******************************************************';
@@ -235,14 +398,15 @@ $.(
     $comment := '* technologies[0].version';
     $comment := '* Shortened to $length with ellipsis string of ...';
     $comment := '* @param {boolean} [$includecontenttype=true] - Include';
-    $comment := '*                  the contentype :';        
+    $comment := '*                  the contentype :';
     $comment := '* @param {boolean} [$includetechnology=true] - Include';
     $comment := '*                  the technology and version in title';
     $comment := '*                  if title does not contain :';
     $comment := '* @param {number} [$length=255] - Maximum length';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-    $metadatatitle := function($includecontenttype, $includetechnology, $length){(
+    $comment := '*******************************************************';
+    $metadatatitle := function ($includecontenttype, $includetechnology, $length) {
+    (
         $maxlength := $exists($length) ? $length : 255;
         $addtechnology := $exists($includetechnology) ? $boolean($includetechnology) : true;
         $addtechnology := $addtechnology ? ($contains(localizedMetadata[0].title, ':') ? false : true) : $addtechnology;
@@ -251,12 +415,12 @@ $.(
 
         $contenttypestring := $addcontenttype ? '(' & contentType.displayLabel & ') ' : '';
 
-        $technologystring := $addtechnology ? (technologies[0].title ? $plainstring(technologies[0].title) & (technologies[0].version? ' ' & $plainstring(technologies[0].version))& ': ');
+        $technologystring := $addtechnology ? (technologies[0].title ? $plainstring(technologies[0].title) & (technologies[0].version ? ' ' & $plainstring(technologies[0].version)) & ': ');
 
         $fulltitle := $contenttypestring & $technologystring & $plainstring(localizedMetadata[0].title);
 
-        $ellipsis($fulltitle, $maxlength, ' ...');
-    )};
+        $ellipsis($fulltitle, $maxlength, ' ...'); )
+};
 
     $comment := '*******************************************************';
     $comment := '* Plain text version of the localizedMetadata[0].description.';
@@ -264,11 +428,11 @@ $.(
     $comment := '* @param {number} [$length=2000] - Maximum length';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadatadescription := function($length){(
-        $maxlength:= $length ? $length : 2000;
-        $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
-    )};
-
+    $metadatadescription := function ($length) {
+    (
+        $maxlength := $length ? $length : 2000;
+        $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...'); )
+};
 
     $comment := '*******************************************************';
     $comment := '* Plain text version of the localizedMetadata[0].title.';
@@ -282,21 +446,21 @@ $.(
     $comment := '* @param {string} [$eol=\r\n] - The EOL characters to use';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadataextendeddescription := function($length, $eol){(
-        $maxlength:= $length ? $length : 2000;
-        $myeol:= $eol ? $eol : '\r\n';
-        $by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & $myeol;
-        
-        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ') : '' : '';
-        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
-        $copyright := publication ? $join([$publisher, $year],' ') & $myeol : '';
-        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn],' ') & $myeol : '' : '';
+    $metadataextendeddescription := function ($length, $eol) {
+    (
+        $maxlength := $length ? $length : 2000;
+        $myeol := $eol ? $eol : '\r\n';
+        $by := $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & $myeol;
 
-        $publication := publication ? $join([$copyright,$isbn]) : '';
+        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher], ' ') : '' : '';
+        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)], ' ') : '' : '';
+        $copyright := publication ? $join([$publisher, $year], ' ') & $myeol : '';
+        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn], ' ') & $myeol : '' : '';
 
-        $ellipsis($join([$by,$publication,$plainstring(localizedMetadata[0].description)]), $maxlength, ' ...');
-    )};
+        $publication := publication ? $join([$copyright, $isbn]) : '';
 
+        $ellipsis($join([$by, $publication, $plainstring(localizedMetadata[0].description)]), $maxlength, ' ...'); )
+};
 
     $comment := '*******************************************************';
     $comment := '* Enhanced sharelink combining the link and any query';
@@ -304,19 +468,17 @@ $.(
     $comment := '* in lowercase lookup against $lookupValues';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadatasharelink := function($lookupValues){(
-        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : null;
-        $urlparameter := $urlparameter ? $urlparameter : $exists( $lookupValues) ? $lookup( $lookupValues, 'default') : '';
-        
-        link & $urlparameter;
-    )};
+    $metadatasharelink := function ($lookupValues) {
+    (
+        $urlparameter := $exists($lookupValues) ? $lookup($lookupValues, $lowercase(contentType.percipioType)) : null;
+        $urlparameter := $urlparameter ? $urlparameter : $exists($lookupValues) ? $lookup($lookupValues, 'default') : '';
 
+        link & $urlparameter; )
+};
 
     $comment := 'End of Metadata Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -345,36 +507,35 @@ $.(
     $comment := '* and any additions to the link. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
-    $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup ) ? $override.common.ShareLinkParametersLookup : {
-        'audiobook': '',
-        'book': '',
-        'channel': '',
-        'course': '',
-        'linked_content': '',
-        'video': '',
-        'journey': '',
-        'default': ''
-    };
+    $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup) ? $override.common.ShareLinkParametersLookup : {
+    'audiobook' : '',
+    'book' : '',
+    'channel' : '',
+    'course' : '',
+    'linked_content': '',
+    'video': '',
+    'journey': '',
+    'default': ''
+};
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
     $comment := '* and any additions to the link for MOBILE. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
-    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
-        'audiobook': '?chromeless=true&preventAppDownload=true',
-        'book': '?chromeless=true&preventAppDownload=true',
-        'channel': '?chromeless=true&preventAppDownload=true',
-        'course': '?chromeless=true&preventAppDownload=true',
-        'linked_content': '?chromeless=true&preventAppDownload=true',
-        'video': '?chromeless=true&preventAppDownload=true',
-        'journey': '?chromeless=true&preventAppDownload=true',
-        'default': '?chromeless=true&preventAppDownload=true'
-    };
+    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup) ? $override.common.MobileShareLinkParametersLookup : {
+    'audiobook': '',
+    'book': '',
+    'channel': '',
+    'course': '',
+    'linked_content': '',
+    'video': '',
+    'journey': '',
+    'default': ''
+};
 
     $comment := 'End of Common Metadata Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -385,30 +546,31 @@ $.(
     $comment := '* to the relevant numeric value needed for the SuccessFactors content';
     $comment := '* which is a number of hours to 2 decimals representing or 0';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';  
-    $successfactorsduration := function () {(
+    $comment := '*******************************************************';
+    $successfactorsduration := function () {
+    (
         $seconds := $isodurationtoseconds(duration);
         $prec := 2;
         $result := $round($seconds / 3600, $prec);
-        $result ? $result : 0
-    )};
-
+        $result ? $result : 0)
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format timestamp such as 2019-08-13T13:14:15Z';
     $comment := '* to the relevant SuccessFactor format needed (MON-DD-YYYY HH24:MI:SS)';
-    $comment := '* @param {string} $timestamp - The ISO8601 timestamp';    
+    $comment := '* @param {string} $timestamp - The ISO8601 timestamp';
     $comment := '* @param {string} [$format=[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01]] - The format to';
     $comment := '*                     which has the same syntax as fn:format-dateTime.';
     $comment := '*      https://www.w3.org/TR/xpath-functions-31/#func-format-dateTime';
     $comment := '* @param {string} [$tzoffset=] - The TimeZone Offset';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-    $successfactorstimestamp := function ($timestamp, $format, $tzoffset) {(
-        $formatToUse:= $format ? $format : '[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01]';
+    $comment := '*******************************************************';
+    $successfactorstimestamp := function ($timestamp, $format, $tzoffset) {
+    (
+        $formatToUse := $format ? $format : '[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01]';
         $tzToUse := $tzoffset ? $tzoffset;
-        $fromMillis($toMillis($timestamp),$formatToUse,$tzToUse)
-    )};
+        $fromMillis($toMillis($timestamp), $formatToUse, $tzToUse))
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts the Percipio contentTyie info into a single';
@@ -416,19 +578,25 @@ $.(
     $comment := '* It is the Percipio contentType.percipioType,';
     $comment := '* contentType.category, contentType.displayLabel in lowercase';
     $comment := '* combined with ~ delimiter.';
+    $comment := '* @param {boolean} [$ignoreCategory=false] - if true dont include the contentType.category in the returned value';
+    $comment := '* @param {boolean} [$ignoreDisplayLabel=false] - if true dont include the contentType.displayLabel in the returned value';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************'; 
-    $successfactorslookuptype := function() {(
+    $comment := '*******************************************************';
+    $successfactorslookuptype := function ($ignoreCategory, $ignoreDisplayLabel) {
+    (
+        $ignoreCat := $ignoreCategory ? $ignoreCategory : false;
+        $ignoreDisp := $ignoreDisplayLabel ? $ignoreDisplayLabel : false;
+
         $percipioType := contentType.percipioType ? $trim(contentType.percipioType) : '';
-        $category := contentType.category ? $trim(contentType.category) : '';
-        $displayLabel := contentType.displayLabel ? $trim(contentType.displayLabel) : '';
-        $lowercase($join([$percipioType,$category,$displayLabel],'~'));
-    )};
+
+        $category := $ignoreCat ? '' : contentType.category ? $trim(contentType.category) : '';
+        $displayLabel := $ignoreDisp ? '' : contentType.displayLabel ? $trim(contentType.displayLabel) : '';
+        $lowercase($join([$percipioType, $category, $displayLabel], '~')); )
+};
 
     $comment := 'End of SuccessFactors/Customer Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -438,116 +606,146 @@ $.(
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
     $comment := '* and the visibility in the catalog. Y = VISIBLE, N = HIDDEN';
     $comment := '* This can be used to hide contentTypes if necessary.';
-    $successfactors_SHOWINCATALOGLOOKUP :=  $exists($override.successfactors.showincataloglookup) ? $override.successfactors.showincataloglookup : {
-        'audiobook': 'Y',
-        'book': 'Y',
-        'channel': 'Y',
-        'course': 'Y',
-        'linked_content': 'Y',
-        'video': 'Y',
-        'journey': 'Y'
-    };
+    $successfactors_SHOWINCATALOGLOOKUP := $exists($override.successfactors.showincataloglookup) ? $override.successfactors.showincataloglookup : {
+    'audiobook' : 'Y',
+    'book': 'Y',
+    'channel': 'Y',
+    'course': 'Y',
+    'linked_content': 'Y',
+    'video': 'Y',
+    'journey': 'Y'
+};
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
     $comment := '* and the ONLINE status. Y = ONLINE, N = OFFLINE';
     $comment := '* This can be used to hide contentTypes if necessary.';
-    $successfactors_ONLINESTATUSLOOKUP:= $exists($override.successfactors.onlinestatuslookup) ? $override.successfactors.onlinestatuslookup :{
-        'audiobook': 'Y',
-        'book': 'Y',
-        'channel': 'Y',
-        'course': 'Y',
-        'linked_content': 'Y',
-        'video': 'Y',
-        'journey': 'Y'
-    };
+    $successfactors_ONLINESTATUSLOOKUP := $exists($override.successfactors.onlinestatuslookup) ? $override.successfactors.onlinestatuslookup : {
+    'audiobook': 'Y',
+    'book': 'Y',
+    'channel': 'Y',
+    'course': 'Y',
+    'linked_content': 'Y',
+    'video': 'Y',
+    'journey': 'Y'
+};
 
     $comment := '* The MAPPING between Percipio localeCode to SuccessFactors locales';
     $comment := '* The PERCIPIO (left side) value is the RFC5646 Language Tag';
-    $successfactors_LANGUAGELOOKUP := $exists($override.successfactors.languagelookup) ? $override.successfactors.languagelookup :{
-        'en': 'English',
-        'fr': 'French',
-        'fr-FR': 'French',
-        'de': 'German',
-        'de-DE': 'German',
-        'es': 'Spanish',
-        'es-ES': 'Spanish',
-        'es-DO': 'Spanish'
-    };
+    $successfactors_LANGUAGELOOKUP := $exists($override.successfactors.languagelookup) ? $override.successfactors.languagelookup : {
+    'en': 'English',
+    'fr': 'French',
+    'fr-FR': 'French',
+    'de': 'German',
+    'de-DE': 'German',
+    'es': 'Spanish',
+    'es-ES': 'Spanish',
+    'es-DO': 'Spanish'
+};
 
     $comment := '* The default SuccessFactors locale string to use if the map does not succeed';
-    $successfactors_DEFAULTLANGUAGE := $exists($override.successfactors.defaultlanguage) ? $override.successfactors.defaultlanguage :'English';
-  
+    $successfactors_DEFAULTLANGUAGE := $exists($override.successfactors.defaultlanguage) ? $override.successfactors.defaultlanguage : 'English';
+
     $comment := '* The MAPPING between Percipio contentType.percipioType,';
     $comment := '* contentType.category, contentType.displayLabel in lowercase';
     $comment := '* combined with ~ delimiter to the SuccessFactors Component Types ';
-    $successfactors_TYPELOOKUP := $exists($override.successfactors.typelookup) ? $override.successfactors.typelookup :{
-        'audiobook~audiobook~audiobook summary': 'AUDIO SUMMARY',
-        'audiobook~audiobook~audiobook': 'AUDIOBOOK',
-        'book~book~book': 'BOOK',
-        'book~book~book review': 'BOOK',
-        'book~book~book summary': 'BOOK SUMMARY',
-        'channel~channel~channel': 'CHANNEL',
-        'course~course~course': 'COURSE',
-        'linked_content~assessment~testprep': 'LINKED CONTENT',
-        'linked_content~~practice lab': 'LINKED CONTENT',
-        'linked_content~~wintellect': 'LINKED CONTENT',
-        'linked_content~course~course': 'LINKED CONTENT',
-        'video~video~video': 'VIDEO',
-        'journey~curriculum~journey': 'JOURNEY'
-    };
+    $comment := '* Fallback types for contentType.percipioType and contentType.category, plus contentType.percipioType only are included';
+    $successfactors_TYPELOOKUP := $exists($override.successfactors.typelookup) ? $override.successfactors.typelookup : {
+    'audiobook~~': 'AUDIOBOOK',
+    'audiobook~audiobook~': 'AUDIOBOOK',
+    'audiobook~audiobook~audiobook': 'AUDIOBOOK',
+    'audiobook~audiobook~audiobook summary': 'AUDIO SUMMARY',
+    'book~~': 'BOOK',
+    'book~book~': 'BOOK',
+    'book~book~book': 'BOOK',
+    'book~book~book review': 'BOOK',
+    'book~book~book summary': 'BOOK SUMMARY',
+    'channel~~': 'CHANNEL',
+    'channel~channel~': 'CHANNEL',
+    'channel~channel~channel': 'CHANNEL',
+    'course~~': 'COURSE',
+    'course~course~': 'COURSE',
+    'course~course~course': 'COURSE',
+    'linked_content~~': 'LINKED CONTENT',
+    'linked_content~assessment~testprep': 'LINKED CONTENT',
+    'linked_content~assessment~': 'LINKED CONTENT',
+    'linked_content~~practice lab': 'LINKED CONTENT',
+    'linked_content~~wintellect': 'LINKED CONTENT',
+    'linked_content~course~': 'LINKED CONTENT',
+    'linked_content~course~course': 'LINKED CONTENT',
+    'video~~': 'VIDEO',
+    'video~video~': 'VIDEO',
+    'video~video~video': 'VIDEO',
+    'journey~~': 'JOURNEY',
+    'journey~curriculum~': 'JOURNEY',
+    'journey~curriculum~journey': 'JOURNEY'
+};
 
-    $comment := '* The MAPPING between Percipio contentType.percipioType,';
-    $comment := '* contentType.category, contentType.displayLabel in lowercase';
-    $comment := '* combined with ~ delimiter to the SuccessFactors Completion Type';
-    $successfactors_COMPLETIONLOOKUP := $exists($override.successfactors.completionlookup) ? $override.successfactors.completionlookup :{
-        'audiobook~audiobook~audiobook summary': 'AUDIO-BK-SUMM-COMPL',
-        'audiobook~audiobook~audiobook': 'AUDIO-BK-COMPL',
-        'book~book~book': 'BOOK-COMPL',
-        'book~book~book review': 'UNKNOWN',
-        'book~book~book summary': 'BOOK-SUMM-COMPL',
-        'channel~channel~channel': 'CHANNEL-COMPL',
-        'course~course~course': 'COURSE-COMPL',
-        'linked_content~assessment~testprep': 'LINKED-CTNT-COMPL',
-        'linked_content~~practice lab': 'LINKED-CTNT-COMPL',
-        'linked_content~~wintellect': 'LINKED-CTNT-COMPL',
-        'linked_content~course~course': 'LINKED-CTNT-COMPL',
-        'video~video~video': 'VIDEO-COMPL',
-        'journey~curriculum~journey': 'JOURNEY-COMPL'
-    };
+    $comment := ' * The MAPPING between Percipio contentType.percipioType, ';
+    $comment := ' * contentType.category, contentType.displayLabel in lowercase ';
+    $comment := ' * combined with ~delimiter to the SuccessFactors Completion Type ';
+    $successfactors_COMPLETIONLOOKUP := $exists($override.successfactors.completionlookup) ? $override.successfactors.completionlookup : {
+    'audiobook~~': 'AUDIO-BK-COMPL',
+    'audiobook~audiobook~': 'AUDIO-BK-COMPL',
+    'audiobook~audiobook~audiobook': 'AUDIO-BK-COMPL',
+    'audiobook~audiobook~audiobook summary': 'AUDIO-BK-SUMM-COMPL',
+    'book~~': 'BOOK-COMPL',
+    'book~book~': 'BOOK-COMPL',
+    'book~book~book': 'BOOK-COMPL',
+    'book~book~book review': 'BOOK-COMPL',
+    'book~book~book summary': 'BOOK-SUMM-COMPLY',
+    'channel~~': 'CHANNEL-COMPL',
+    'channel~channel~': 'CHANNEL-COMPL',
+    'channel~channel~channel': 'CHANNEL-COMPL',
+    'course~~': 'COURSE-COMPL',
+    'course~course~': 'COURSE-COMPL',
+    'course~course~course': 'COURSE-COMPL',
+    'linked_content~~': 'LINKED-CTNT-COMPL',
+    'linked_content~assessment~testprep': 'LINKED-CTNT-COMPL',
+    'linked_content~assessment~': 'LINKED-CTNT-COMPL',
+    'linked_content~~practice lab': 'LINKED-CTNT-COMPL',
+    'linked_content~~wintellect': 'LINKED-CTNT-COMPL',
+    'linked_content~course~': 'LINKED-CTNT-COMPL',
+    'linked_content~course~course': 'LINKED-CTNT-COMPL',
+    'video~~': 'VIDEO-COMPL',
+    'video~video~': 'VIDEO-COMPL',
+    'video~video~video': 'VIDEO-COMPL',
+    'journey~~': 'JOURNEY-COMPL',
+    'journey~curriculum~': 'JOURNEY-COMPL',
+    'journey~curriculum~journey': 'JOURNEY-COMPL'
+};
 
-    $comment := '* The default CATALOG that content will be created in within';
-    $comment := '* SuccessFactors, the CATALOG must already exist.';
-    $comment := '* This is used for the CATALOG_1 column.';
-    $successfactors_DEFAULTCATALOG := $exists($override.successfactors.defaultcatalog) ? $override.successfactors.defaultcatalog :'EXTERNAL';
+    $comment := ' * The default CATALOG that content will be created in within ';
+    $comment := ' * SuccessFactors, the CATALOG must already exist.';
+    $comment := ' * This is used for the CATALOG_1 column.';
+    $successfactors_DEFAULTCATALOG := $exists($override.successfactors.defaultcatalog) ? $override.successfactors.defaultcatalog : ' EXTERNAL ';
 
-    $comment := '* The default CPNT_SRC_ID that content will be associated with in';
-    $comment := '* SuccessFactors, the CPNT_SRC_ID must already exist.';
-    $comment := '* This is used for the CPNT_SRC_ID column.';
-    $successfactors_CPNTSRCID := $exists($override.successfactors.cpntsrcid) ? $override.successfactors.cpntsrcid :'SKILLSOFT';
+    $comment := ' * The default CPNT_SRC_ID that content will be associated with in ';
+    $comment := ' * SuccessFactors, the CPNT_SRC_ID must already exist.';
+    $comment := ' * This is used for the CPNT_SRC_ID column.';
+    $successfactors_CPNTSRCID := $exists($override.successfactors.cpntsrcid) ? $override.successfactors.cpntsrcid : ' SKILLSOFT ';
 
-    $comment := '* The default BUILD_COMPANY that content will be associated with in';
-    $comment := '* SuccessFactors.';
-    $comment := '* This is used for the BUILD_COMPANY column if the item does not have.';
-    $comment := '* a association.parent';
-    $successfactors_BUILDCOMPANY := $exists($override.successfactors.buildcompany) ? $override.successfactors.buildcompany : 'Percipio';
+    $comment := ' * The default BUILD_COMPANY that content will be associated with in ';
+    $comment := ' * SuccessFactors.';
+    $comment := ' * This is used for the BUILD_COMPANY column if the item does not have.';
+    $comment := ' * a association.parent ';
+    $successfactors_BUILDCOMPANY := $exists($override.successfactors.buildcompany) ? $override.successfactors.buildcompany : ' Percipio ';
 
-    $comment := '* The default CHARGE BACK method that content will be associated with in';
-    $comment := '* SuccessFactors.';
-    $comment := '* This is used for the CHGBCK_METHOD column.';
+    $comment := ' * The default CHARGE BACK method that content will be associated with in ';
+    $comment := ' * SuccessFactors.';
+    $comment := ' * This is used for the CHGBCK_METHOD column.';
     $successfactors_CHGBACKMETHOD := $exists($override.successfactors.chgbackmethod) ? $override.successfactors.chgbackmethod : 1;
 
-    $comment := '* The default format to use when converting ISO8601 timestamps';
-    $comment := '* This has the same syntax as fn:format-dateTime.';
-    $comment := '* https://www.w3.org/TR/xpath-functions-31/#func-format-dateTime';
+    $comment := ' * The default format to use when converting ISO8601 timestamps ';
+    $comment := ' * This has the same syntax as fn:format-dateTime.';
+    $comment := ' * https: //www.w3.org/TR/xpath-functions-31/#func-format-dateTime';
     $successfactors_TIMESTAMPFORMAT := $exists($override.successfactors.timestampformat) ? $override.successfactors.timestampformat : '[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01][z]';
-     
+
     $comment := '* The default TimeZone Offset to use when converting ISO8601 timestamps';
     $successfactors_TIMEZONEOFFSET := $exists($override.successfactors.timezoneoffset) ? $override.successfactors.timezoneoffset : '-0500';
 
     $comment := 'End of SuccessFactors/Customer Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -558,63 +756,57 @@ $.(
 
     $transformed_data := (
         $.{
-            'CPNT_ID':id,
-            'CPNT_TYP_ID': (
-                $lookupVal:= $successfactorslookuptype();
-                $result := $lookup($successfactors_TYPELOOKUP, $lookupVal);
-                $result ? $result :'UNKNOWN';
-            ),
-            'NOTACTIVE': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
-            'CPNT_TITLE': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 300) : '',
-            'DEL_MTH_ID':  (
-                $lookupVal:= $successfactorslookuptype();
-                $result := $lookup($successfactors_TYPELOOKUP, $lookupVal);
-                $result ? $result :'UNKNOWN';
-            ),
-            'HTML_CPNT_DESC': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
-            'CMPL_STAT_ID': (
-                $lookupVal:= $successfactorslookuptype();
-                $result := $lookup($successfactors_COMPLETIONLOOKUP, $lookupVal);
-                $result ? $result :'UNKNOWN-COMPL';
-            ),
-            'CREDIT_HRS': $successfactorsduration(),
-            'SHOW_IN_CATALOG': (
-                $localVisibility := $lookup($successfactors_SHOWINCATALOGLOOKUP, $lowercase(contentType.percipioType));
-                $localVisibility ? $localVisibility : 'Y'
-            ),
-            'CATALOG_1':  $successfactors_DEFAULTCATALOG,
-            'APP_ID': id,
-            'BUILD_COMPANY': (
-                associations.parent = null ? $successfactors_BUILDCOMPANY : associations.parent.title
-            ),
-            'CONTENT_ONLINE': (
-                $contentOnline := $lookup($successfactors_ONLINESTATUSLOOKUP, $lowercase(contentType.percipioType));
-                $contentOnline ? $contentOnline : 'Y'
-            ),
-            'LAUNCH_TYPE': 3,
-            'PRIMARY_PARAM': $metadatasharelink($commonShareLinkParametersLookup),
-            'ITEM_ONLINE': (
-                $itemOnline := $lookup($successfactors_ONLINESTATUSLOOKUP, $lowercase(contentType.percipioType));
-                $itemOnline ? $itemOnline : 'Y'
-            ),
-            'MODULE_NAME': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 300) : '',
-            'THUMBNAIL_URI': imageUrl ? imageUrl : '',
-            'LOCALE': (
-                $locale := $lookup($successfactors_LANGUAGELOOKUP, $lowercase(localeCodes[0]));
-                $comment := 'If we dont get an exact match try the langauge only, the value before the - i.e. fr-FR -> fr';
-                $locale := $locale ? $locale : $lookup($successfactors_LANGUAGELOOKUP, $trim($split($lowercase(localeCodes[0]),'-')[0]));
-                $locale ? $locale : $successfactors_DEFAULTLANGUAGE
-            ),
-            'LAUNCH_IN_A_NEW_BWSR_WINDOW': 'Y',
-            'REV_DTE': lifecycle.lastUpdatedDate ? $successfactorstimestamp(lifecycle.lastUpdatedDate, $successfactors_TIMESTAMPFORMAT, $successfactors_TIMEZONEOFFSET) : '',
-            'CPNT_SRC_ID': $successfactors_CPNTSRCID,
-            'CREATE_DTE': lifecycle.publishDate ? $successfactorstimestamp(lifecycle.publishDate, $successfactors_TIMESTAMPFORMAT, $successfactors_TIMEZONEOFFSET) : '',
-            'CHGBCK_METHOD': $successfactors_CHGBACKMETHOD,
-            'SKIP_CONTENT_STRUCTURE_PAGE': 'Y',
-            'ENABLE_MOBILE_ACCESS': 'Y',
-            'MOBILE_PRIMARY_PARAM': $metadatasharelink($commonMobileShareLinkParametersLookup)
-        }
-    );
+        'CPNT_ID': id,
+        'CPNT_TYP_ID': (
+            $result := $lookup($successfactors_TYPELOOKUP, $successfactorslookuptype());
+            $result := $result ? $result : $lookup($successfactors_TYPELOOKUP, $successfactorslookuptype(false, true));
+            $result := $result ? $result : $lookup($successfactors_TYPELOOKUP, $successfactorslookuptype(true, true));
+            $result ? $result : 'UNKNOWN'; ),
+        'NOTACTIVE': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
+        'CPNT_TITLE': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 300) : '',
+        'DEL_MTH_ID': (
+            $result := $lookup($successfactors_TYPELOOKUP, $successfactorslookuptype());
+            $result := $result ? $result : $lookup($successfactors_TYPELOOKUP, $successfactorslookuptype(false, true));
+            $result := $result ? $result : $lookup($successfactors_TYPELOOKUP, $successfactorslookuptype(true, true));
+            $result ? $result : 'UNKNOWN'; ),
+        'HTML_CPNT_DESC': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+        'CMPL_STAT_ID': (
+            $result := $lookup($successfactors_COMPLETIONLOOKUP, $successfactorslookuptype());
+            $result := $result ? $result : $lookup($successfactors_COMPLETIONLOOKUP, $successfactorslookuptype(false, true));
+            $result := $result ? $result : $lookup($successfactors_COMPLETIONLOOKUP, $successfactorslookuptype(true, true));
+            $result ? $result : 'UNKNOWN'; ),
+        'CREDIT_HRS': $successfactorsduration(),
+        'SHOW_IN_CATALOG': (
+            $localVisibility := $lookup($successfactors_SHOWINCATALOGLOOKUP, $lowercase(contentType.percipioType));
+            $localVisibility ? $localVisibility : 'Y'),
+        'CATALOG_1': $successfactors_DEFAULTCATALOG,
+        'APP_ID': id,
+        'BUILD_COMPANY': (
+            associations.parent = null ? $successfactors_BUILDCOMPANY : associations.parent.title),
+        'CONTENT_ONLINE': (
+            $contentOnline := $lookup($successfactors_ONLINESTATUSLOOKUP, $lowercase(contentType.percipioType));
+            $contentOnline ? $contentOnline : 'Y'),
+        'LAUNCH_TYPE': 3,
+        'PRIMARY_PARAM': $metadatasharelink($commonShareLinkParametersLookup),
+        'ITEM_ONLINE': (
+            $itemOnline := $lookup($successfactors_ONLINESTATUSLOOKUP, $lowercase(contentType.percipioType));
+            $itemOnline ? $itemOnline : 'Y'),
+        'MODULE_NAME': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 300) : '',
+        'THUMBNAIL_URI': imageUrl ? imageUrl : '',
+        'LOCALE': (
+            $locale := $lookup($successfactors_LANGUAGELOOKUP, $lowercase(localeCodes[0]));
+            $comment := 'If we dont get an exact match try the langauge only, the value before the - i.e. fr-FR -> fr';
+            $locale := $locale ? $locale : $lookup($successfactors_LANGUAGELOOKUP, $trim($split($lowercase(localeCodes[0]), '-')[0]));
+            $locale ? $locale : $successfactors_DEFAULTLANGUAGE),
+        'LAUNCH_IN_A_NEW_BWSR_WINDOW': 'Y',
+        'REV_DTE': lifecycle.lastUpdatedDate ? $successfactorstimestamp(lifecycle.lastUpdatedDate, $successfactors_TIMESTAMPFORMAT, $successfactors_TIMEZONEOFFSET) : '',
+        'CPNT_SRC_ID': $successfactors_CPNTSRCID,
+        'CREATE_DTE': lifecycle.publishDate ? $successfactorstimestamp(lifecycle.publishDate, $successfactors_TIMESTAMPFORMAT, $successfactors_TIMEZONEOFFSET) : '',
+        'CHGBCK_METHOD': $successfactors_CHGBACKMETHOD,
+        'SKIP_CONTENT_STRUCTURE_PAGE': 'Y',
+        'ENABLE_MOBILE_ACCESS': 'Y',
+        'MOBILE_PRIMARY_PARAM': $metadatasharelink($commonMobileShareLinkParametersLookup)
+    });
 
     $comment := '*******************************************************';
     $comment := 'Combine the :';
