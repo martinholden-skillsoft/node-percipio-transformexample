@@ -3,8 +3,16 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SUCCESSFACTORS METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 19-NOV-2019';
+    $comment := 'Date: 20-NOV-2019';
     $comment := '*******************************************************';
+    $comment := '* 20-NOV-2019 - Added ENABLE_RATING column controlled by';
+    $comment := '* override successfactors.enablerating';
+    $comment := '* Explicitly set column INCLUDE_PREV_REV_RATING to Y';
+    $comment := '*';
+    $comment := '* 20-NOV-2019 - Added SELF_RECORD_LRNGEVT column controlled';
+    $comment := '* by override successfactors.selfrecordlrngevt';
+    $comment := '*';
+    $comment := '* 20-NOV-2019 - Added PRODUCTION_READY column set to Y';
     $comment := '*******************************************************';
 
     $comment := '*******************************************************';
@@ -22,7 +30,7 @@ $.(
         'Comment_ExtendedDescriptionEOL': '{string} The EOL characters to use for the Extended Description. See the $metadataextendeddescription function',
         'ExtendedDescriptionEOL': '\r\n',
         'Comment_IncludeContentTypeInTitle': '{boolean} Whether to include contentType.displayLabel as prefix to title. See the $metadatatitle function',
-        'IncludeContentTypeInTitle': false,
+        'IncludeContentTypeInTitle': true,
         'Comment_IncludeTechnologyDetailsInTitle': '{boolean} Whether to include technologies[0].title and version as prefix to title. See the $metadatatitle function',
         'IncludeTechnologyDetailsInTitle': true,
         'Comment_ShareLinkParametersLookup': '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link. default option to handle unknown types. Returned value (right side) is the string to append to the link',
@@ -158,7 +166,11 @@ $.(
         'comment_revdtetimestampformat': 'The default format to use when converting todays date for the REV_DTE column. This has the same syntax as fn:format-dateTime. https://www.w3.org/TR/xpath-functions-31/#func-format-dateTime',
         'revdtetimestampformat': '[MNn,*-3]-[D01]-[Y0001] 12:00:00[z]',
         'comment_timezoneoffset': 'The default TimeZone Offset to use when converting ISO8601 timestamps',
-        'timezoneoffset': '-0500'
+        'timezoneoffset': '-0500',
+        'comment_enablerating': 'The ENABLE_RATING option. This allows users, after completing the training, to rate the item. N = disable item ratings by users Y = enable item ratings by users',
+        'enablerating': 'Y',
+        'comment_selfrecordlrngevt': 'The SELF_RECORD_LRNGEVT option. This enables a user to self-record completion of this item. Y =	Allow users to self-record a learning event N =	Do not allow users to self-record a learning event',
+        'selfrecordlrngevt': 'N'
     }
 };
 
@@ -762,6 +774,16 @@ $.(
     $comment := '* The default TimeZone Offset to use when converting ISO8601 timestamps';
     $successfactors_TIMEZONEOFFSET := $exists($override.successfactors.timezoneoffset) ? $override.successfactors.timezoneoffset : '-0500';
 
+    $comment := '* This allows users, after completing the training, to rate the item.';
+    $comment := '* N = disable item ratings by users Y = enable item ratings by users';
+    $comment := '* This is used for the ENABLE_RATING column.';
+    $successfactors_ENABLERATING := $exists($override.successfactors.enablerating) ? $override.successfactors.enablerating : 'Y';
+
+    $comment := '* This enables a user to self-record completion of this item.';
+    $comment := '* Y =	Allow users to self-record a learning event N =	Do not allow users to self-record a learning event';
+    $comment := '* This is used for the SELF_RECORD_LRNGEVT column.';
+    $successfactors_SELFRECORDLRNGEVT := $exists($override.successfactors.selfrecordlrngevt) ? $override.successfactors.selfrecordlrngevt : 'N';
+
     $comment := 'End of SuccessFactors/Customer Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -824,7 +846,11 @@ $.(
         'CHGBCK_METHOD': $successfactors_CHGBACKMETHOD,
         'SKIP_CONTENT_STRUCTURE_PAGE': 'Y',
         'ENABLE_MOBILE_ACCESS': 'Y',
-        'MOBILE_PRIMARY_PARAM': $metadatasharelink($commonMobileShareLinkParametersLookup)
+        'MOBILE_PRIMARY_PARAM': $metadatasharelink($commonMobileShareLinkParametersLookup),
+        'ENABLE_RATING': $successfactors_ENABLERATING,
+        'INCLUDE_PREV_REV_RATING' : 'Y',
+        'PRODUCTION_READY': 'Y',
+        'SELF_RECORD_LRNGEVT': $successfactors_SELFRECORDLRNGEVT
     });
 
     $comment := '*******************************************************';

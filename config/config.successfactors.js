@@ -160,7 +160,13 @@ const exampleSchedulerConfig = {
           timestampformat: '[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01][z]',
           comment_timezoneoffset:
             'The default TimeZone Offset to use when converting ISO8601 timestamps',
-          timezoneoffset: '-0500'
+          timezoneoffset: '-0500',
+          comment_enablerating:
+            'The ENABLE_RATING option. This allows users, after completing the training, to rate the item. N = disable item ratings by users Y = enable item ratings by users',
+          enablerating: 'Y',
+          comment_selfrecordlrngevt:
+            'The SELF_RECORD_LRNGEVT option. This enables a user to self-record completion of this item. Y =	Allow users to self-record a learning event N =	Do not allow users to self-record a learning event',
+          selfrecordlrngevt: 'N'
         }
       },
       filename: {
