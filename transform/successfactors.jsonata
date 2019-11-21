@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SUCCESSFACTORS METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 20-NOV-2019';
+    $comment := 'Date: 21-NOV-2019';
     $comment := '*******************************************************';
     $comment := '* 20-NOV-2019 - Added ENABLE_RATING column controlled by';
     $comment := '* override successfactors.enablerating';
@@ -13,6 +13,10 @@ $.(
     $comment := '* by override successfactors.selfrecordlrngevt';
     $comment := '*';
     $comment := '* 20-NOV-2019 - Added PRODUCTION_READY column set to Y';
+    $comment := '*';
+    $comment := '* 21-NOV-2019 - Trimmed the querystring parameters from';    
+    $comment := '* imageUrl as SuccessFactors will reject URLs. Do this';
+    $comment := '* using $stripQueryStringandHash()';
     $comment := '*******************************************************';
 
     $comment := '*******************************************************';
@@ -833,7 +837,7 @@ $.(
             $itemOnline := $lookup($successfactors_ONLINESTATUSLOOKUP, $lowercase(contentType.percipioType));
             $itemOnline ? $itemOnline : 'Y'),
         'MODULE_NAME': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 300) : '',
-        'THUMBNAIL_URI': imageUrl ? imageUrl : '',
+        'THUMBNAIL_URI': imageUrl ? $stripQueryStringandHash(imageUrl) : '',
         'LOCALE': (
             $locale := $lookup($successfactors_LANGUAGELOOKUP, $lowercase(localeCodes[0]));
             $comment := 'If we dont get an exact match try the langauge only, the value before the - i.e. fr-FR -> fr';
