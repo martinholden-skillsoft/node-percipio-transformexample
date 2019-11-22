@@ -114,8 +114,9 @@ const getAllMetadataAndTransformAndExportToCSV = async options => {
     let downloadedRecords = 0;
 
     const extension = opts.outputextension || 'csv';
+    const filename = opts.outputfilename || 'result';
 
-    const outputFile = Path.join(opts.outputpath, `result.${extension}`);
+    const outputFile = Path.join(opts.outputpath, `${filename}.${extension}`);
 
     const step1 = new bpjsonatatransform.JSONataStream(options); // Use object mode and outputs object
     const step2 = new bpcsvtransform.CSVStream(options); // Use object mode and outputs object
