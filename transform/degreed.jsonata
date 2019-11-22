@@ -6,8 +6,8 @@ $.(
     $comment := 'Date: 22-NOV-2019';
     $comment := '*******************************************************';
     $comment := '* 22-NOV-2019 - Deduplicate and sort the output of the';
-    $comment := '* $keywordsArray function';
-    $comment := '* 22-NOV-2019 - Updated defaulr mapping to Degreed types';    
+    $comment := '* $keywordsArray function.';
+    $comment := '* 22-NOV-2019 - Updated default mapping to Degreed types';
     $comment := '*******************************************************';
 
     $comment := '*******************************************************';
@@ -260,13 +260,11 @@ $.(
         });
 
         $sourceArrayDelimited := $map($sourceArray, function ($v, $i, $a) {
-            $prefix & ($i + 1) & '~|~' & $v
+            { $prefix & ($i + 1) : $v }
         });
 
-        $sourceArrayDelimited.{
-        $substringBefore('~|~'): $substringAfter('~|~')
-    })
-};
+        $sourceArrayDelimited
+        )};
 
     $comment := '*******************************************************';
     $comment := '* Get the language string from a RFC5646 locale';
@@ -753,11 +751,12 @@ $.(
             $i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
         });
 
+
         $keywords := $filter($keywords, function ($v, $i, $a) {
             $v != ''
         });
 
-        $sort($distinct($keywords)))
+        $sort($keywords))
 };
 
     $comment := '*******************************************************';
