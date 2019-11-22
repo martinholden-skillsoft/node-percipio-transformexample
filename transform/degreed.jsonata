@@ -3,8 +3,10 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR DEGREED METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 22-OCT-2019';
+    $comment := 'Date: 22-NOV-2019';
     $comment := '*******************************************************';
+    $comment := '* 22-NOV-2019 - Deduplicate and sort the output of the';
+    $comment := '* $keywordsArray function';
     $comment := '*******************************************************';
 
     $comment := '*******************************************************';
@@ -38,14 +40,14 @@ $.(
             },
             'Comment_MobileShareLinkParametersLookup' : '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link for Mobile. default option to handle unknown types. Returned value (right side) is the string to append to the link',
             'MobileShareLinkParametersLookup' : {
-                'audiobook': '?chromeless=true&preventAppDownload=true',
-                'book': '?chromeless=true&preventAppDownload=true',
-                'channel': '?chromeless=true&preventAppDownload=true',
-                'course': '?chromeless=true&preventAppDownload=true',
-                'linked_content': '?chromeless=true&preventAppDownload=true',
-                'video': '?chromeless=true&preventAppDownload=true',
-                'journey': '?chromeless=true&preventAppDownload=true',
-                'default': '?chromeless=true&preventAppDownload=true'
+                'audiobook': '',
+                'book': '',
+                'channel': '',
+                'course': '',
+                'linked_content': '',
+                'video': '',
+                'journey': '',
+                'default': ''
             }
         },
         'comment_degreed' : '{object} Degreed specific settings for metadata transforms',
@@ -680,14 +682,14 @@ $.(
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
     $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
-        'audiobook': '?chromeless',
-        'book': '?chromeless',
-        'channel': '?chromeless',
-        'course': '?chromeless',
-        'linked_content': '?chromeless',
-        'video': '?chromeless',
-        'journey': '?chromeless',
-        'default': '?chromeless'
+        'audiobook': '',
+        'book': '',
+        'channel': '',
+        'course': '',
+        'linked_content': '',
+        'video': '',
+        'journey': '',
+        'default': ''
     };
 
     $comment := 'End of Common Metadata Specific Variables';
@@ -744,7 +746,7 @@ $.(
             $v != ''
         });
 
-        $keywords
+        $sort($distinct($keywords))
     )};
 
     $comment := '*******************************************************';
@@ -775,11 +777,9 @@ $.(
             $i < $maxtopics
         });
         
-        $topic_key_value_string_combined := $map($topics, function ($v, $i, $a) {
-            'TOPIC' & ($i + 1) & '~|~' & $v
+         $convert_to_TOPICn_values := $map($topics, function ($v, $i, $a) {
+            { 'TOPIC' & ($i + 1) : $v }
         });
-        
-        $convert_to_TOPICn_values := $topic_key_value_string_combined.{$substringBefore('~|~'): $substringAfter('~|~')};
         
         $convert_to_TOPICn_values
     )};
