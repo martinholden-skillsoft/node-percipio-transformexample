@@ -7,6 +7,7 @@ $.(
     $comment := '*******************************************************';
     $comment := '* 22-NOV-2019 - Deduplicate and sort the output of the';
     $comment := '* $keywordsArray function';
+    $comment := '* 22-NOV-2019 - Updated defaulr mapping to Degreed types';    
     $comment := '*******************************************************';
 
     $comment := '*******************************************************';
@@ -15,59 +16,58 @@ $.(
     $comment := 'The example below defines overrides that match the defaults';
     $comment := 'You actually only need to define the Overides needed, search for';
     $comment := '$override. in this file to see the definition of each option';
-    
-    $override := {
-        'comment_common' : '{object} Common shared settings for metadata trasnforms',
-        'common' : {
-            'Comment_UseExtendedDescription' : '{boolean} Whether to use the extended description option. This combines the descripion and publication data. See the $metadataextendeddescription function',
-        	'UseExtendedDescription' : true,
-            'Comment_ExtendedDescriptionEOL' : '{string} The EOL characters to use for the Extended Description. See the $metadataextendeddescription function',
-            'ExtendedDescriptionEOL' : '\r\n',
-            'Comment_IncludeContentTypeInTitle' : '{boolean} Whether to include contentType.displayLabel as prefix to title. See the $metadatatitle function',
-            'IncludeContentTypeInTitle' : true,
-            'Comment_IncludeTechnologyDetailsInTitle' : '{boolean} Whether to include technologies[0].title and version as prefix to title. See the $metadatatitle function',
-            'IncludeTechnologyDetailsInTitle': true,
-            'Comment_ShareLinkParametersLookup' : '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link. default option to handle unknown types. Returned value (right side) is the string to append to the link',
-            'ShareLinkParametersLookup' : {
-                'audiobook': '',
-                'book': '',
-                'channel': '',
-                'course': '',
-                'linked_content': '',
-                'video': '',
-                'journey': '',
-                'default': ''
-            },
-            'Comment_MobileShareLinkParametersLookup' : '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link for Mobile. default option to handle unknown types. Returned value (right side) is the string to append to the link',
-            'MobileShareLinkParametersLookup' : {
-                'audiobook': '',
-                'book': '',
-                'channel': '',
-                'course': '',
-                'linked_content': '',
-                'video': '',
-                'journey': '',
-                'default': ''
-            }
-        },
-        'comment_degreed' : '{object} Degreed specific settings for metadata transforms',
-        'degreed' : {
-            'comment_contenttypelookup' : 'The MAPPING between Percipio contentType.percipioType lowercase and the DEGREED content type. default option to handle unknown types',
-            'contenttypelookup' : {
-                'audiobook': 'Book',
-                'book': 'Book',
-                'channel': 'Article',
-                'course': 'Course',
-                'linked_content': 'Article',
-                'video': 'Video',
-                'journey': 'Article',
-                'default' : 'Article'
-            },
-            'comment_maxtopics' : 'The number of TOPICn values to include set to 0 to not return any. For more information see the $degreedtopicsobject function',
-            'maxtopics' : 10
-        }
-	};
 
+    $override := {
+    'comment_common': '{object} Common shared settings for metadata trasnforms',
+    'common': {
+        'Comment_UseExtendedDescription': '{boolean} Whether to use the extended description option. This combines the descripion and publication data. See the $metadataextendeddescription function',
+        'UseExtendedDescription': true,
+        'Comment_ExtendedDescriptionEOL': '{string} The EOL characters to use for the Extended Description. See the $metadataextendeddescription function',
+        'ExtendedDescriptionEOL': '\r\n',
+        'Comment_IncludeContentTypeInTitle': '{boolean} Whether to include contentType.displayLabel as prefix to title. See the $metadatatitle function',
+        'IncludeContentTypeInTitle': true,
+        'Comment_IncludeTechnologyDetailsInTitle': '{boolean} Whether to include technologies[0].title and version as prefix to title. See the $metadatatitle function',
+        'IncludeTechnologyDetailsInTitle': true,
+        'Comment_ShareLinkParametersLookup': '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link. default option to handle unknown types. Returned value (right side) is the string to append to the link',
+        'ShareLinkParametersLookup': {
+            'audiobook': '',
+            'book': '',
+            'channel': '',
+            'course': '',
+            'linked_content': '',
+            'video': '',
+            'journey': '',
+            'default': ''
+        },
+        'Comment_MobileShareLinkParametersLookup': '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link for Mobile. default option to handle unknown types. Returned value (right side) is the string to append to the link',
+        'MobileShareLinkParametersLookup': {
+            'audiobook': '',
+            'book': '',
+            'channel': '',
+            'course': '',
+            'linked_content': '',
+            'video': '',
+            'journey': '',
+            'default': ''
+        }
+    },
+    'comment_degreed': '{object} Degreed specific settings for metadata transforms',
+    'degreed': {
+        'comment_contenttypelookup': 'The MAPPING between Percipio contentType.percipioType lowercase and the DEGREED content type. default option to handle unknown types',
+        'contenttypelookup': {
+            'audiobook': 'Book',
+            'book': 'Book',
+            'channel': 'Course',
+            'course': 'Course',
+            'linked_content': 'Course',
+            'video': 'Video',
+            'journey': 'Course',
+            'default': 'Article'
+        },
+        'comment_maxtopics': 'The number of TOPICn values to include set to 0 to not return any. For more information see the $degreedtopicsobject function',
+        'maxtopics': 10
+    }
+};
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -79,7 +79,8 @@ $.(
     $comment := '* @param {string} $source';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $plainstring := function ($source) {(
+    $plainstring := function ($source) {
+    (
         $htmltags := /<\/?([a-z0-9]*)\b[^>]*>?/;
         $dash := /[\u2010\u2013\u2014\u2015]|&(#8210;|#8211;|#8212;|#8213;|hyphen|dash|ndash;|mdash;|horbar;)/;
         $apos := /&(#8217;|apos;|rsquo;)|[\u2019|\u8217]/;
@@ -102,8 +103,8 @@ $.(
         $result := $replace($result, $curylydoublequotes, '\u0022');
         $result := $replace($result, $nbsp, ' ');
         $result := $replace($result, $otherentities, '');
-        $result; 
-    )};
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Shortens a string at a word boundary to the specified length, option to';
@@ -114,7 +115,8 @@ $.(
     $comment := '* @param {string} $ellipsisString - The suffix to use';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $ellipsis := function ($source, $maxlength, $ellipsisString) {(
+    $ellipsis := function ($source, $maxlength, $ellipsisString) {
+    (
         $wordboundary := /\s(\w+)$/;
         $trimlength := $maxlength - $length($ellipsisString);
 
@@ -122,16 +124,17 @@ $.(
         $trimmedSource := $needtrim ? $trim($substring($source, 0, $trimlength));
 
         $trimmedSource := $replace($trimmedSource, $wordboundary, '') & $ellipsisString;
-        $needtrim ? $trimmedSource : $source;
-    )};
+        $needtrim ? $trimmedSource : $source; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
     $comment := '* to a numeric value of total seconds';
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';    
-    $isodurationtoseconds := function ($isoduration) {(
+    $comment := '*******************************************************';
+    $isodurationtoseconds := function ($isoduration) {
+    (
         $input := $isoduration = null ? '' : $isoduration;
         $time := $substringAfter($input, 'T');
         $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '0';
@@ -140,8 +143,8 @@ $.(
         $remainder := $substringAfter($remainder, 'M');
         $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '0';
         $result := (($number($hours) * 3600) + ($number($minutes) * 60) + $number($seconds));
-        $result;
-    )};
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
@@ -149,13 +152,14 @@ $.(
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @param {number} [$precision=2] - The precision';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';  
-    $isodurationtominutes := function ($isoduration, $precision) {(
+    $comment := '*******************************************************';
+    $isodurationtominutes := function ($isoduration, $precision) {
+    (
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
         $result := $seconds = 0 ? 0 : $round($seconds / 60, $prec);
-        $result;
-    )};
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
@@ -163,22 +167,23 @@ $.(
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @param {number} [$precision=2] - The precision';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';  
-    $isodurationtohours := function ($isoduration, $precision) {(
+    $comment := '*******************************************************';
+    $isodurationtohours := function ($isoduration, $precision) {
+    (
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
         $result := $seconds = 0 ? 0 : $round($seconds / 3600, $prec);
-        $result;
-    )};
-
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
     $comment := '* to a string in format hh:mm. No rounding so example would be 01:34';
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-    $isodurationtohhmm := function ($isoduration) {(
+    $comment := '*******************************************************';
+    $isodurationtohhmm := function ($isoduration) {
+    (
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
         $time := $substringAfter($input, 'T');
         $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
@@ -186,16 +191,17 @@ $.(
         $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
         $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
         $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0');
-        $result;
-    )};
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
     $comment := '* to a string in format hh:mm:ss. So example would be 01:34:56';
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-    $isodurationtohhmmss := function ($isoduration) {(
+    $comment := '*******************************************************';
+    $isodurationtohhmmss := function ($isoduration) {
+    (
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
         $time := $substringAfter($input, 'T');
         $hours := $contains($time, 'H') ? $substringBefore($time, 'H') : '00';
@@ -203,9 +209,8 @@ $.(
         $minutes := $contains($remainder, 'M') ? $substringBefore($remainder, 'M') : '00';
         $remainder := $substringAfter($remainder, 'M'); $seconds := $contains($remainder, 'S') ? $substringBefore($remainder, 'S') : '00';
         $result := $pad($hours, -2, '0') & ':' & $pad($minutes, -2, '0') & ':' & $pad($seconds, -2, '0');
-        $result;
-    )};
-
+        $result; )
+};
 
     $comment := '*******************************************************';
     $comment := '* Take an array of objects, and return a JSON object where:';
@@ -217,33 +222,39 @@ $.(
     $comment := '* @param {number} [$maxCount=10] - The number of Keys';
     $comment := '* @param {string} [$delimiter=|] - The delimiter for Object strings';
     $comment := '* @returns {Object}';
-    $comment := '*******************************************************';  
-    $flattenArrayAndObject := function($source, $prefix, $maxCount, $delimiter) {(
+    $comment := '*******************************************************';
+    $flattenArrayAndObject := function ($source, $prefix, $maxCount, $delimiter) {
+    (
         $maxCount := $maxCount ? $maxCount : 10;
         $delimiter := $delimiter ? $delimiter : '|';
 
         $padarray := [1..$maxCount].('');
-        $sourceArray := $count($source)=0 ? [] : [];
+        $sourceArray := $count($source) = 0 ? [] : [];
         $result := '';
-        
-        $sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
-            $model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
-            $needdelimiter:= $count($keys($v)) > 0 ? $delimiter : '';
-            $trimend:= $count($keys($v)) > 0;
-            $kv := $spread($model);
-            $result:= $reduce($kv, function($accum, $val) {(
-                $accum & $each($val, function($val, $key) {$val}) & $needdelimiter;
-            )}, '');
-                $trimend ? $substring($result,0,$length($result)-1) : $result;
-        )})
-        );
+
+        $sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {
+                (
+                    $model := $count($keys($v)) > 0 ? $v : {
+                    'key': $v ? $v : ''
+                };
+                    $needdelimiter := $count($keys($v)) > 0 ? $delimiter : '';
+                    $trimend := $count($keys($v)) > 0;
+                    $kv := $spread($model);
+                    $result := $reduce($kv, function ($accum, $val) {
+                        (
+                            $accum & $each($val, function ($val, $key) {
+                                $val
+                            }) & $needdelimiter; )
+                    }, '');
+                    $trimend ? $substring($result, 0, $length($result) - 1) : $result; )
+            }));
 
         $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
             $v != ''
         });
 
         $sourceArray := $append($sourceArray, $padarray);
-    
+
         $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
             $i < $maxCount
         });
@@ -253,9 +264,9 @@ $.(
         });
 
         $sourceArrayDelimited.{
-            $substringBefore('~|~'): $substringAfter('~|~')
-        }
-    )};
+        $substringBefore('~|~'): $substringAfter('~|~')
+    })
+};
 
     $comment := '*******************************************************';
     $comment := '* Get the language string from a RFC5646 locale';
@@ -265,12 +276,13 @@ $.(
     $comment := '* @param {boolean} [$languageonly=false] - Only check with language code';
     $comment := '* @param {string} [$default=] - Default when no match.';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-    $rfc5646language := function ($locale, $languageonly, $default) {(
-            $defaultLanguage := $default ? $default : '';
-            $checkLanguageOnly := $languageonly ? $languageonly : false;
+    $comment := '*******************************************************';
+    $rfc5646language := function ($locale, $languageonly, $default) {
+    (
+        $defaultLanguage := $default ? $default : '';
+        $checkLanguageOnly := $languageonly ? $languageonly : false;
 
-            $RFC5646_LANGUAGE_TAGS := [{
+        $RFC5646_LANGUAGE_TAGS := [{
                 'af': 'Afrikaans',
                 'af-ZA': 'Afrikaans (South Africa)',
                 'ar': 'Arabic',
@@ -503,15 +515,15 @@ $.(
                 'zh-TW': 'Chinese (T)',
                 'zu': 'Zulu',
                 'zu-ZA': 'Zulu (South Africa)'
-            }];
+            }
+        ];
 
-            $result:= $checkLanguageOnly = true ? null : $lookup($RFC5646_LANGUAGE_TAGS, $trim($locale));
-            
-            $result:= $result ? $result : $lookup($RFC5646_LANGUAGE_TAGS, $trim($split($locale,'-')[0]));
+        $result := $checkLanguageOnly = true ? null : $lookup($RFC5646_LANGUAGE_TAGS, $trim($locale));
 
-            $result ? $result : $defaultLanguage;
-    )};
+        $result := $result ? $result : $lookup($RFC5646_LANGUAGE_TAGS, $trim($split($locale, '-')[0]));
 
+        $result ? $result : $defaultLanguage; )
+};
 
     $comment := 'End of Generic Function Library';
     $comment := '*******************************************************';
@@ -532,14 +544,15 @@ $.(
     $comment := '* technologies[0].version';
     $comment := '* Shortened to $length with ellipsis string of ...';
     $comment := '* @param {boolean} [$includecontenttype=true] - Include';
-    $comment := '*                  the contentype :';        
+    $comment := '*                  the contentype :';
     $comment := '* @param {boolean} [$includetechnology=true] - Include';
     $comment := '*                  the technology and version in title';
     $comment := '*                  if title does not contain :';
     $comment := '* @param {number} [$length=255] - Maximum length';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
-    $metadatatitle := function($includecontenttype, $includetechnology,$length){(
+    $comment := '*******************************************************';
+    $metadatatitle := function ($includecontenttype, $includetechnology, $length) {
+    (
         $maxlength := $exists($length) ? $length : 255;
         $addtechnology := $exists($includetechnology) ? $boolean($includetechnology) : true;
         $addtechnology := $addtechnology ? ($contains(localizedMetadata[0].title, ':') ? false : true) : $addtechnology;
@@ -548,13 +561,12 @@ $.(
 
         $contenttypestring := $addcontenttype ? '(' & contentType.displayLabel & ') ' : '';
 
-        $technologystring := $addtechnology ? (technologies[0].title ? $plainstring(technologies[0].title) & (technologies[0].version? ' ' & $plainstring(technologies[0].version))& ': ');
+        $technologystring := $addtechnology ? (technologies[0].title ? $plainstring(technologies[0].title) & (technologies[0].version ? ' ' & $plainstring(technologies[0].version)) & ': ');
 
         $fulltitle := $contenttypestring & $technologystring & $plainstring(localizedMetadata[0].title);
 
-        $ellipsis($fulltitle, $maxlength, ' ...');
-    )};
-
+        $ellipsis($fulltitle, $maxlength, ' ...'); )
+};
 
     $comment := '*******************************************************';
     $comment := '* Plain text version of the localizedMetadata[0].title.';
@@ -568,20 +580,21 @@ $.(
     $comment := '* @param {string} [$eol=\r\n] - The EOL characters to use';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadataextendeddescription := function($length, $eol){(
-        $maxlength:= $length ? $length : 2000;
-        $myeol:= $eol ? $eol : '\r\n';
-        $by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & $myeol;
-        
-        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ') : '' : '';
-        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
-        $copyright := publication ? $join([$publisher, $year],' ') & $myeol : '';
-        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn],' ') & $myeol : '' : '';
+    $metadataextendeddescription := function ($length, $eol) {
+    (
+        $maxlength := $length ? $length : 2000;
+        $myeol := $eol ? $eol : '\r\n';
+        $by := $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & $myeol;
 
-        $publication := publication ? $join([$copyright,$isbn]) : '';
+        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher], ' ') : '' : '';
+        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)], ' ') : '' : '';
+        $copyright := publication ? $join([$publisher, $year], ' ') & $myeol : '';
+        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn], ' ') & $myeol : '' : '';
 
-        $ellipsis($join([$by,$publication,$plainstring(localizedMetadata[0].description)]), $maxlength, ' ...');
-    )};
+        $publication := publication ? $join([$copyright, $isbn]) : '';
+
+        $ellipsis($join([$by, $publication, $plainstring(localizedMetadata[0].description)]), $maxlength, ' ...'); )
+};
 
     $comment := '*******************************************************';
     $comment := '* Plain text version of the localizedMetadata[0].description.';
@@ -589,11 +602,11 @@ $.(
     $comment := '* @param {number} [$length=2000] - Maximum length';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadatadescription := function($length){(
-        $maxlength:= $length ? $length : 2000;
-        $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...');
-    )};
-
+    $metadatadescription := function ($length) {
+    (
+        $maxlength := $length ? $length : 2000;
+        $ellipsis($plainstring(localizedMetadata[0].description), $maxlength, ' ...'); )
+};
 
     $comment := '*******************************************************';
     $comment := '* Plain text version of the localizedMetadata[0].title.';
@@ -606,19 +619,20 @@ $.(
     $comment := '* @param {number} [$length=2000] - Maximum length';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadataextendeddescription := function($length){(
-        $maxlength:= $length ? $length : 2000;
-        $by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & '\r\n';
-        
-        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ') : '' : '';
-        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
-        $copyright := publication ? $join([$publisher, $year],' ') & '\r\n' : '';
-        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn],' ') & '\r\n' : '' : '';
+    $metadataextendeddescription := function ($length) {
+    (
+        $maxlength := $length ? $length : 2000;
+        $by := $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & '\r\n';
 
-        $publication := publication ? $join([$copyright,$isbn]) : '';
+        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher], ' ') : '' : '';
+        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)], ' ') : '' : '';
+        $copyright := publication ? $join([$publisher, $year], ' ') & '\r\n' : '';
+        $isbn := publication ? publication.isbn ? $join(['ISBN:', publication.isbn], ' ') & '\r\n' : '' : '';
 
-        $ellipsis($join([$by,$publication,$plainstring(localizedMetadata[0].description)]), $maxlength, ' ...');
-    )};
+        $publication := publication ? $join([$copyright, $isbn]) : '';
+
+        $ellipsis($join([$by, $publication, $plainstring(localizedMetadata[0].description)]), $maxlength, ' ...'); )
+};
 
     $comment := '*******************************************************';
     $comment := '* Enhanced sharelink combining the link and any query';
@@ -626,18 +640,17 @@ $.(
     $comment := '* in lowercase lookup against $lookupValues';
     $comment := '* @returns {string}';
     $comment := '*******************************************************';
-    $metadatasharelink := function($lookupValues){(
-        $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : null;
-        $urlparameter := $urlparameter ? $urlparameter : $exists( $lookupValues) ? $lookup( $lookupValues, 'default') : '';
-        
-        link & $urlparameter;
-    )};
+    $metadatasharelink := function ($lookupValues) {
+    (
+        $urlparameter := $exists($lookupValues) ? $lookup($lookupValues, $lowercase(contentType.percipioType)) : null;
+        $urlparameter := $urlparameter ? $urlparameter : $exists($lookupValues) ? $lookup($lookupValues, 'default') : '';
+
+        link & $urlparameter; )
+};
 
     $comment := 'End of Metadata Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -666,38 +679,35 @@ $.(
     $comment := '* and any additions to the link. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
-    $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup ) ? $override.common.ShareLinkParametersLookup : {
-        'audiobook': '',
-        'book': '',
-        'channel': '',
-        'course': '',
-        'linked_content': '',
-        'video': '',
-        'journey': '',
-        'default': ''
-    };
+    $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup) ? $override.common.ShareLinkParametersLookup : {
+    'audiobook' : '',
+    'book' : '',
+    'channel' : '',
+    'course' : '',
+    'linked_content': '',
+    'video': '',
+    'journey': '',
+    'default': ''
+};
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
     $comment := '* and any additions to the link for MOBILE. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
-    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup ) ? $override.common.MobileShareLinkParametersLookup : {
-        'audiobook': '',
-        'book': '',
-        'channel': '',
-        'course': '',
-        'linked_content': '',
-        'video': '',
-        'journey': '',
-        'default': ''
-    };
+    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup) ? $override.common.MobileShareLinkParametersLookup : {
+    'audiobook': '',
+    'book': '',
+    'channel': '',
+    'course': '',
+    'linked_content': '',
+    'video': '',
+    'journey': '',
+    'default': ''
+};
 
     $comment := 'End of Common Metadata Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
-
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -715,39 +725,40 @@ $.(
     $comment := '* @param {string} [$otherKeyword=] - Additional Keyword to include';
     $comment := '* @returns {string[]}';
     $comment := '*******************************************************';
-    $degreedkeywordsarray := function($otherKeyword){(
+    $degreedkeywordsarray := function ($otherKeyword) {
+    (
         $keywords := [];
 
-        $keywords :=  $lowercase(contentType.percipioType) = 'channel' ? $append($keywords,[localizedMetadata[0].title]) : $keywords;
+        $keywords := $lowercase(contentType.percipioType) = 'channel' ? $append($keywords, [localizedMetadata[0].title]) : $keywords;
 
-        $keywords :=  $lowercase(contentType.percipioType) = 'journey' ? $append($keywords,[localizedMetadata[0].title]) : $keywords;
+        $keywords := $lowercase(contentType.percipioType) = 'journey' ? $append($keywords, [localizedMetadata[0].title]) : $keywords;
 
-        $keywords := keywords ? $append($keywords,keywords) : $keywords;
+        $keywords := keywords ? $append($keywords, keywords) : $keywords;
 
-        $keywords := $append($keywords, $map(associations.areas, function($v, $i, $a) {
-            $v ? $trim($v) : ''
-        }));
-          
-        $keywords := $append($keywords, $map(associations.subjects, function($v, $i, $a) {
-            $v ? $trim($v) : ''
-        }));
+        $keywords := $append($keywords, $map(associations.areas, function ($v, $i, $a) {
+                $v ? $trim($v) : ''
+            }));
 
-        $keywords := $append($keywords, $map(associations.channels, function($v, $i, $a) {
-            $v.title ? $trim($v.title) : ''
-        }));
+        $keywords := $append($keywords, $map(associations.subjects, function ($v, $i, $a) {
+                $v ? $trim($v) : ''
+            }));
 
-        $keywords := $otherKeyword ? $append($keywords, [ $otherKeyword]) : $keywords;
-        
-        $keywords := $map($sort($keywords),function($v, $i, $a){
-            $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
-        );
-      
-        $keywords := $filter($keywords, function($v, $i, $a) {
+        $keywords := $append($keywords, $map(associations.channels, function ($v, $i, $a) {
+                $v.title ? $trim($v.title) : ''
+            }));
+
+        $keywords := $otherKeyword ? $append($keywords, [$otherKeyword]) : $keywords;
+
+        $keywords := $map($sort($keywords), function ($v, $i, $a) {
+            $i != 0 ? (($v = $a[$i - 1]) ? '' : $v) : $v
+        });
+
+        $keywords := $filter($keywords, function ($v, $i, $a) {
             $v != ''
         });
 
-        $sort($distinct($keywords))
-    )};
+        $sort($distinct($keywords)))
+};
 
     $comment := '*******************************************************';
     $comment := '* Create JSON object with TOPICn keys for populating TOPICS in Degreed';
@@ -757,60 +768,60 @@ $.(
     $comment := '* @param {number} [$maxCount=10] - The max number of TAGn keys';
     $comment := '* @returns {Object}';
     $comment := '*******************************************************';
-    $degreedtopicsobject := function($maxCount){(
-        $topicmaxlength:= 255;
+    $degreedtopicsobject := function ($maxCount) {
+    (
+        $topicmaxlength := 255;
         $maxtopics := $maxCount ? $maxCount : 10;
         $padarray := [1..$maxtopics].('');
 
         $topics := $degreedkeywordsarray();
 
-        $topics := $map($topics, function ($v, $i, $a) {(
-            $badendofline:= /(([&:-]|[\x28])$)/;
-            $result := $v ? $ellipsis($v,$topicmaxlength,'') : '';
-            $result := $replace($result, $badendofline, '');
-            $trim($result)
-        )});
+        $topics := $map($topics, function ($v, $i, $a) {
+            (
+                $badendofline := /(([&:-]|[\x28])$)/;
+                $result := $v ? $ellipsis($v, $topicmaxlength, '') : '';
+                $result := $replace($result, $badendofline, '');
+                $trim($result))
+        });
 
         $topics := $append($topics, $padarray);
 
         $topics := $filter($topics, function ($v, $i, $a) {
             $i < $maxtopics
         });
-        
-         $convert_to_TOPICn_values := $map($topics, function ($v, $i, $a) {
-            { 'TOPIC' & ($i + 1) : $v }
-        });
-        
-        $convert_to_TOPICn_values
-    )};
 
+        $convert_to_TOPICn_values := $map($topics, function ($v, $i, $a) { {
+                'TOPIC' & ($i + 1): $v
+            }
+        });
+
+        $convert_to_TOPICn_values)
+};
 
     $comment := '*******************************************************';
     $comment := '* Converts and ISO8601 format duration string such as PT1H34M56S';
     $comment := '* to the relevant numeric value needed for the different Degreed content';
     $comment := '* types.';
     $comment := '* @returns {number|string}';
-    $comment := '*******************************************************';  
-    $degreedduration := function () {(
+    $comment := '*******************************************************';
+    $degreedduration := function () {
+    (
         $seconds := $isodurationtoseconds(duration);
         $prec := 1;
 
         $degreedType := $lookup($degreedContentTypeLookup, $lowercase(contentType.percipioType));
 
         $result := $lookup([{
-                'course': $round($seconds / 3600, $prec),
-                'video': $round($seconds / 60, $prec)
-        }], $lowercase($degreedType));
-        $result ? $result : ''
-    )};
-
+                    'course': $round($seconds / 3600, $prec),
+                    'video': $round($seconds / 60, $prec)
+                }
+            ], $lowercase($degreedType));
+        $result ? $result : '')
+};
 
     $comment := 'End of Degreed/Customer Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
-
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -820,24 +831,23 @@ $.(
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
     $comment := '* and the DEGREED content type. default option to handle unknown types';
     $degreedContentTypeLookup := $exists($override.degreed.contenttypelookup) ? $override.degreed.contenttypelookup : {
-        'audiobook': 'Book',
-        'book': 'Book',
-        'channel': 'Article',
-        'course': 'Course',
-        'linked_content': 'Article',
-        'video': 'Video',
-        'journey': 'Article',
-        'default' : 'Article'
-    };
+    'audiobook': 'Book',
+    'book': 'Book',
+    'channel': 'Course',
+    'course': 'Course',
+    'linked_content': 'Course',
+    'video': 'Video',
+    'journey': 'Course',
+    'default': 'Article'
+};
 
     $comment := '* The number of TOPICn values to include set to 0 to not return any';
     $comment := '* For more information see the $degreedtopicsobject function above';
-    $degreedMaxTopics :=  $exists($override.degreed.maxtopics) ? $override.degreed.maxtopics : 10;
-   
+    $degreedMaxTopics := $exists($override.degreed.maxtopics) ? $override.degreed.maxtopics : 10;
+
     $comment := 'End of Degreed/Customer Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -848,23 +858,21 @@ $.(
 
     $transformed_data := (
         $.{
-            'ContentType': (
-                $localType := $lookup($degreedContentTypeLookup, $lowercase(contentType.percipioType));
-                $localType := $localType ? $localType : $lookup($degreedContentTypeLookup, 'default');
+        'ContentType': (
+            $localType := $lookup($degreedContentTypeLookup, $lowercase(contentType.percipioType));
+            $localType := $localType ? $localType : $lookup($degreedContentTypeLookup, 'default');
 
-                $localType ? $localType : ''
-            ),
-            'ContentID': xapiActivityId,
-            'URL': $metadatasharelink($commonShareLinkParametersLookup),
-            'Delete': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
-            'Title': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
-            'Summary': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
-            'ImageURL': imageUrl ? imageUrl : '',
-            'Duration' : $degreedduration(),
-            'Language': localeCodes[0] ? $substringBefore(localeCodes[0], '-') : 'en',
-            'Provider': ''
-        }
-    );
+            $localType ? $localType : ''),
+        'ContentID': xapiActivityId,
+        'URL': $metadatasharelink($commonShareLinkParametersLookup),
+        'Delete': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
+        'Title': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
+        'Summary': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+        'ImageURL': imageUrl ? imageUrl : '',
+        'Duration': $degreedduration(),
+        'Language': localeCodes[0] ? $substringBefore(localeCodes[0], '-') : 'en',
+        'Provider': ''
+    });
 
     $comment := '*******************************************************';
     $comment := 'Combine the :';
@@ -872,7 +880,7 @@ $.(
     $comment := '   $degreedtopicsobject - The TOPICn data derived from the function';
     $comment := '                        if $degreedMaxTopics != 0';
 
-    $topics :=  $degreedMaxTopics  = 0 ? [] : $degreedtopicsobject($degreedMaxTopics);
+    $topics := $degreedMaxTopics = 0 ? [] : $degreedtopicsobject($degreedMaxTopics);
 
     $results := $merge([$transformed_data, $topics]);
     $results;
