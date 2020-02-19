@@ -16,6 +16,85 @@ $.(
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
+    $comment := 'Start of Common Metadata Specific Variables';
+    $comment := 'These are the values that can change the metadata specific';
+    $comment := 'functions';
+
+    $comment := '* Whether to use the extended description option';
+    $comment := '* This combines the descripion and publication data';
+    $comment := '* See the $metadataextendeddescription function below';
+    $commonUseExtendedDescription := $exists($override.common.UseExtendedDescription) ? $override.common.UseExtendedDescription : true;
+
+    $comment := '* The EOL characters to use for the Extended Description';
+    $comment := '* See the $metadataextendeddescription function below';
+    $commonExtendedDescriptionEOL := $exists($override.common.ExtendedDescriptionEOL) ? $override.common.ExtendedDescriptionEOL : '\r\n';
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link. default option to handle unknown types';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $comment := '* so for example to make a link chromeless include ?chromeless';
+    $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup) ? $override.common.ShareLinkParametersLookup : {
+        'audiobook' : '',
+        'book' : '',
+        'channel' : '',
+        'course' : '',
+        'linked_content': '',
+        'video': '',
+        'journey': '',
+        'default': ''
+    };
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and any additions to the link for MOBILE. default option to handle unknown types';
+    $comment := '* Returned value (right side) is the string to append to the link';
+    $comment := '* so for example to make a link chromeless include ?chromeless';
+    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup) ? $override.common.MobileShareLinkParametersLookup : {
+        'audiobook': '',
+        'book': '',
+        'channel': '',
+        'course': '',
+        'linked_content': '',
+        'video': '',
+        'journey': '',
+        'default': ''
+    };
+
+    $comment := 'End of Common Metadata Specific Variables';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Degreed/Customer Specific Variables';
+    $comment := 'These are the values that can be changed per customer';
+
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* and the DEGREED content type. default option to handle unknown types';
+    $degreedContentTypeLookup := $exists($override.degreed.contenttypelookup) ? $override.degreed.contenttypelookup : {
+        'audiobook': 'Book',
+        'book': 'Book',
+        'channel': 'Course',
+        'course': 'Course',
+        'linked_content': 'Course',
+        'video': 'Video',
+        'journey': 'Course',
+        'default': 'Course'
+    };
+
+    $comment := '* The number of TOPICn values to include set to 0 to not return any';
+    $comment := '* For more information see the $degreedtopicsobject function above';
+    $degreedMaxTopics := $exists($override.degreed.maxtopics) ? $override.degreed.maxtopics : 10;
+
+    $comment := '* The default provider value';
+    $degreedProvider := $exists($override.degreed.provider) ? $override.degreed.provider : 'Skillsoft';
+
+    $comment := 'End of Degreed/Customer Specific Variables';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
     $comment := 'Start of Generic Function Library';
 
     $comment := '*******************************************************';
@@ -174,55 +253,6 @@ $.(
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-    $comment := 'Start of Common Metadata Specific Variables';
-    $comment := 'These are the values that can change the metadata specific';
-    $comment := 'functions';
-
-    $comment := '* Whether to use the extended description option';
-    $comment := '* This combines the descripion and publication data';
-    $comment := '* See the $metadataextendeddescription function above';
-    $commonUseExtendedDescription := $exists($override.common.UseExtendedDescription) ? $override.common.UseExtendedDescription : true;
-
-    $comment := '* The EOL characters to use for the Extended Description';
-    $comment := '* See the $metadataextendeddescription function above';
-    $commonExtendedDescriptionEOL := $exists($override.common.ExtendedDescriptionEOL) ? $override.common.ExtendedDescriptionEOL : '\r\n';
-
-    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link. default option to handle unknown types';
-    $comment := '* Returned value (right side) is the string to append to the link';
-    $comment := '* so for example to make a link chromeless include ?chromeless';
-    $commonShareLinkParametersLookup := $exists($override.common.ShareLinkParametersLookup) ? $override.common.ShareLinkParametersLookup : {
-        'audiobook' : '',
-        'book' : '',
-        'channel' : '',
-        'course' : '',
-        'linked_content': '',
-        'video': '',
-        'journey': '',
-        'default': ''
-    };
-
-    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and any additions to the link for MOBILE. default option to handle unknown types';
-    $comment := '* Returned value (right side) is the string to append to the link';
-    $comment := '* so for example to make a link chromeless include ?chromeless';
-    $commonMobileShareLinkParametersLookup := $exists($override.common.MobileShareLinkParametersLookup) ? $override.common.MobileShareLinkParametersLookup : {
-        'audiobook': '',
-        'book': '',
-        'channel': '',
-        'course': '',
-        'linked_content': '',
-        'video': '',
-        'journey': '',
-        'default': ''
-    };
-
-    $comment := 'End of Common Metadata Specific Variables';
-    $comment := '*******************************************************';
-    $comment := '*******************************************************';
-
-    $comment := '*******************************************************';
-    $comment := '*******************************************************';
     $comment := 'Start of Degreed/Customer Specific Functions';
 
     $comment := '*******************************************************';
@@ -330,35 +360,6 @@ $.(
     )};
 
     $comment := 'End of Degreed/Customer Specific Functions';
-    $comment := '*******************************************************';
-    $comment := '*******************************************************';
-
-    $comment := '*******************************************************';
-    $comment := '*******************************************************';
-    $comment := 'Start of Degreed/Customer Specific Variables';
-    $comment := 'These are the values that can be changed per customer';
-
-    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
-    $comment := '* and the DEGREED content type. default option to handle unknown types';
-    $degreedContentTypeLookup := $exists($override.degreed.contenttypelookup) ? $override.degreed.contenttypelookup : {
-        'audiobook': 'Book',
-        'book': 'Book',
-        'channel': 'Course',
-        'course': 'Course',
-        'linked_content': 'Course',
-        'video': 'Video',
-        'journey': 'Course',
-        'default': 'Course'
-    };
-
-    $comment := '* The number of TOPICn values to include set to 0 to not return any';
-    $comment := '* For more information see the $degreedtopicsobject function above';
-    $degreedMaxTopics := $exists($override.degreed.maxtopics) ? $override.degreed.maxtopics : 10;
-
-    $comment := '* The default provider value';
-    $degreedProvider := $exists($override.degreed.provider) ? $override.degreed.provider : 'Skillsoft';
-
-    $comment := 'End of Degreed/Customer Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
