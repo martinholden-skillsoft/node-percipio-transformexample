@@ -35,7 +35,7 @@ $.(
 
     $comment := '* Whether to include contentType.displayLabel as prefix to title';
     $comment := '* See the $metadatatitle function above';
-    $commonIncludeContentTypeInTitle := $exists($override.common.IncludeContentTypeInTitle) ? $override.common.IncludeContentTypeInTitle : true;
+    $commonIncludeContentTypeInTitle := $exists($override.common.IncludeContentTypeInTitle) ? $override.common.IncludeContentTypeInTitle : false;
 
     $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
     $comment := '* and any additions to the link. default option to handle unknown types';
