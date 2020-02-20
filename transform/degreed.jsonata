@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR DEGREED METADATA';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 19-FEB-2020';
+    $comment := 'Date: 20-FEB-2020';
     $comment := '*******************************************************';
     $comment := '* 22-NOV-2019 - Deduplicate and sort the output of the';
     $comment := '* $keywordsArray function.';
@@ -12,6 +12,8 @@ $.(
     $comment := '* created functionaly similar $localextendedTitle in transform';
     $comment := '* so can be tested in JSONata Excerciser';
     $comment := '* 19-FEB-2020 - Use Skillsoft as default value for Provider column';
+    $comment := '* 20-FEB-2020 - Refactoring to add $degreedtitle and $degreedsummary';
+    $comment := '* functions to make transform easier to maintain and read.';
     $comment := '*******************************************************';
 
     $comment := '*******************************************************';
@@ -197,7 +199,7 @@ $.(
     )};
 
     $comment := '*******************************************************';
-    $comment := '* Plain text version of the localizedMetadata[0].title.';
+    $comment := '* Plain text version of the localizedMetadata[0].description.';
     $comment := '* and if defined add, delimited by $eol:';
     $comment := '*     Comma Delimited list of Authors from by';
     $comment := '*     Copyright Publisher and date from publication.publisher';
@@ -359,6 +361,35 @@ $.(
         $result ? $result : ''
     )};
 
+
+    $comment := '*******************************************************';
+    $comment := '* Formats the title for Degreed, it uses the';
+    $comment := '* localizedMetadata[0].title and the technologies[0]';
+    $comment := '* values. The length is trimmed to 254 characters.';
+    $comment := '* It uses the Skillsoft $extendedTitle function if available';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $degreedtitle := function () {(
+        $maxlength := 254;
+        $useSkillsoftLibraryFunction := $exists($extendedTitle);
+        $title := $useSkillsoftLibraryFunction ? $extendedTitle(localizedMetadata[0].title, $) : $localextendedTitle(localizedMetadata[0].title, $);
+        $ellipsis($title, $maxlength, ' ...');
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Formats the summary for Degreed, it uses the';
+    $comment := '* localizedMetadata[0].description. The length is trimmed';
+    $comment := '* to 2000 characters and any HTML converted to plaintext';
+    $comment := '* If $commonUseExtendedDescription=true and publication != null';
+    $comment := '* it will include the publication information and author';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';
+    $degreedsummary := function () {(
+        $maxlength := 2000;
+        $summary := localizedMetadata[0].description ? ($commonUseExtendedDescription ? $metadataextendeddescription( $maxlength, $commonExtendedDescriptionEOL) : $metadatadescription( $maxlength)) :'';
+        $summary;
+    )};
+
     $comment := 'End of Degreed/Customer Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -381,8 +412,8 @@ $.(
         'ContentID': xapiActivityId,
         'URL': $metadatasharelink($commonShareLinkParametersLookup),
         'Delete': lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
-        'Title': localizedMetadata[0].title ? $substring($trim($exists($extendedTitle) ? $extendedTitle(localizedMetadata[0].title, $) : $localextendedTitle(localizedMetadata[0].title, $)),0, 254) : '',
-        'Summary': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000, $commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+        'Title': $degreedtitle(),
+        'Summary': $degreedsummary(),
         'ImageURL': imageUrl ? imageUrl : '',
         'Duration': $degreedduration(),
         'Language': localeCodes[0] ? $substringBefore(localeCodes[0], '-') : 'en',
