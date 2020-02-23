@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SABA RELEASE 45 and later';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 20-FEB-2020';
+    $comment := 'Date: 23-FEB-2020';
     $comment := '*******************************************************';
     $comment := '* 19-FEB-2020 - Use the new $extendedtitle function if available';
     $comment := '* created functionaly similar $localextendedTitle in transform';
@@ -16,6 +16,9 @@ $.(
     $comment := '* to determine whether to return URL option or the filename like in';
     $comment := '* previous transforms that use plugin : saba in scheduler. Default is false';
     $comment := '* so operates as previous transforms did.';
+    $comment := '* 23-FEB-2020 - Includes the Channel info in the categories, and';
+    $comment := '* increased max tags to 10 from 5, and categories to 15 from 5';
+    $comment := '* 23-FEB-2020 - Deuplicated and sorted the tags generated in $sabatagsobject';
     $comment := '*******************************************************';
 
     $comment := '*******************************************************';
@@ -146,11 +149,11 @@ $.(
 
     $comment := '* The number of TAGSn values to include set to 0 to not return any';
     $comment := '* For more information see the $sabatagsobject function above';
-    $saba_MAXTAGS := $exists($override.saba.maxtags) ? $override.saba.maxtags : 5;
+    $saba_MAXTAGS := $exists($override.saba.maxtags) ? $override.saba.maxtags : 10;
     
     $comment := '* The number of CATEGORYn values to include set to 0 to not return any';
     $comment := '* For more information see the $sabacategoriesobject function above';
-    $saba_MAXCATEGORIES := $exists($override.saba.maxcategories) ? $override.saba.maxcategories : 5;
+    $saba_MAXCATEGORIES := $exists($override.saba.maxcategories) ? $override.saba.maxcategories : 15;
     
     $comment := '* The base Category value to use in the $sabacategoriesobject function above';
     $saba_BASECATEGORY := $exists($override.saba.basecategory) ? $override.saba.basecategory : 'Skillsoft';
@@ -409,6 +412,19 @@ $.(
         link & $urlparameter;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Returns all the channels from the metadata this item';
+    $comment := '* belongs to. This is combinations of:';
+    $comment := '* associations.channels[]';
+    $comment := '* If contentType.percipioType = Channel or Journey';
+    $comment := '* The returned objects have id, title, link';
+    $comment := '* @returns {array[object]}';
+    $comment := '*******************************************************';
+    $getchannels := function() {(
+        $ischannelorjourney := ($lowercase(contentType.percipioType) = 'channel') or ($lowercase(contentType.percipioType) = 'journey');
+        $channels := associations.channels ? associations.channels : [];
+        $channels :=  $ischannelorjourney ? $append($channels, {'id': id, 'title': localizedMetadata[0].title, 'link': link }) : $channels;
+    )};
 
     $comment := 'End of Metadata Specific Functions';
     $comment := '*******************************************************';
@@ -486,7 +502,15 @@ $.(
             $trim($result)
         )});
 
-        $tags := $append($tags, $padarray);
+        $tags := $map($sort($tags),function($v, $i, $a){
+            $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
+        );
+
+        $tags := $filter($tags, function($v, $i, $a) {
+            $v != ''
+        });
+
+        $tags := $append($sort($tags), $padarray);
 
         $tags := $filter($tags, function ($v, $i, $a) {
             $i < $maxtags
@@ -516,13 +540,20 @@ $.(
         $maxcategories := $maxCount ? $maxCount : 10;
         $padarray := [1..$maxcategories].('');
 
+        $channels := $getchannels();
+        
         $categories := [];
-        $categories := $append($categories, $map(associations.areas, function ($v, $i, $a) {(
-            $pathparts := [ $basecategory];
-            $pathparts := $append($pathparts, $v);
-            $pathparts := $append($pathparts, associations.subjects[$i]);
-            $join($pathparts,'\\');
-        )}));
+        $categories := $reduce($append($categories, $map(associations.areas, function ($v, $i, $a) {(
+            $map($channels, function ($vv, $ii, $aa) {(
+                $join([
+                      $basecategory,
+                      $v,associations.subjects[$i],
+                      $vv.title
+                      ],'\\');
+            )});
+        )})), function($acc,$v, $i, $a) {(
+            $append($acc, $v);
+        )});
         
         $categories := $count($categories) = 0 ? [$basecategory] : $categories;
 
@@ -711,7 +742,7 @@ $.(
     $comment := '                        if $saba_MAXCATEGORIES != 0';
 
     $tags :=  $saba_MAXTAGS = 0 ? [] : $sabatagsobject($saba_MAXTAGS);
-    $categories :=  $saba_MAXCATEGORIES = 0 ? [] : $sabacategoriesobject($saba_BASECATEGORY, $saba_MAXTAGS);
+    $categories :=  $saba_MAXCATEGORIES = 0 ? [] : $sabacategoriesobject($saba_BASECATEGORY, $saba_MAXCATEGORIES);
 
     $results := $merge([$transformed_data, $sabaimage(), $tags,  $categories]);
     $results;
