@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SABA RELEASE 45 and later';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 23-FEB-2020';
+    $comment := 'Date: 24-FEB-2020';
     $comment := '*******************************************************';
     $comment := '* 19-FEB-2020 - Use the new $extendedtitle function if available';
     $comment := '* created functionaly similar $localextendedTitle in transform';
@@ -19,6 +19,8 @@ $.(
     $comment := '* 23-FEB-2020 - Includes the Channel info in the categories, and';
     $comment := '* increased max tags to 10 from 5, and categories to 15 from 5';
     $comment := '* 23-FEB-2020 - Deuplicated and sorted the tags generated in $sabatagsobject';
+    $comment := '* 24-FEB-2020 - Changed the function signature for the $reduce function so';
+    $comment := '* that it will work with JSONata 1.6.5';
     $comment := '*******************************************************';
 
     $comment := '*******************************************************';
@@ -543,7 +545,7 @@ $.(
         $channels := $getchannels();
         
         $categories := [];
-        $categories := $reduce($append($categories, $map(associations.areas, function ($v, $i, $a) {(
+        $categories := $append($categories, $map(associations.areas, function ($v, $i, $a) {(
             $map($channels, function ($vv, $ii, $aa) {(
                 $join([
                       $basecategory,
@@ -551,10 +553,11 @@ $.(
                       $vv.title
                       ],'\\');
             )});
-        )})), function($acc,$v, $i, $a) {(
+        )}));
+
+        $categories := $reduce($categories,  function($acc, $v) {(
             $append($acc, $v);
         )});
-        
         $categories := $count($categories) = 0 ? [$basecategory] : $categories;
 
         $categories := $map($sort($categories), function ($v, $i, $a) {
