@@ -440,46 +440,6 @@ $.(
     )};
 
     $comment := '*******************************************************';
-    $comment := '* Convert the supplied string to PascalCase';
-    $comment := '* In Pascal case, all punctuation is removed and';
-    $comment := '* each word begins with a capital as in ThisStringIsPascalCased';
-    $comment := '* @param {string} $source - string value to convert';
-    $comment := '* @returns {string}';
-    $comment := '*******************************************************';
-    $topascalcase := function($source) {(
-        $words := $match($lowercase($source), /[A-Z0-9]+/i );
-        $pascalWords := $map($words, function($v, $i, $a) {
-           $uppercase($substring($v.match,0,1)) & $substring($v.match,1)
-        });
-        $join($pascalWords,'')
-    )};
-
-    $comment := '*******************************************************';
-    $comment := '* Convert the supplied string to camelCase';
-    $comment := '* Depends on $topascalcase function';
-    $comment := '* In Camel case, all punctuation is removed and';
-    $comment := '* each word begins with a capital except the first';
-    $comment := '* as in thisStringIsCamelCased';
-    $comment := '* @param {string} $source - string value to convert';    
-    $comment := '* @param {string} $source - string value to convert';
-    $comment := '* @returns {string}';
-    $comment := '*******************************************************';
-    $tocamelcase := function($source) {(
-        $pascalcase := $topascalcase($source);
-        $lowercase($substring($pascalcase,0,1)) & $substring($pascalcase,1)
-    )};
-
-
-    $camelCase := function($source) {(
-        $words := $match($lowercase($source), /[A-Z0-9]+/i );
-        $camelWords := $map($words, function($v, $i, $a) {
-            $i = 0 ? $v.match : $uppercase($substring($v.match,0,1)) & $substring($v.match,1)
-        });
-        $join($camelWords,'')
-    )};
-
-
-    $comment := '*******************************************************';
 
     $localeLongHand := [];
     $localeLongHand := $append($localeLongHand,$map(localeCodes, function ($v, $i, $a) {(

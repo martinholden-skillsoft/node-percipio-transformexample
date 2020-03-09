@@ -3,7 +3,7 @@ $.(
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR SABA RELEASE 45 and later';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 24-FEB-2020';
+    $comment := 'Date: 09-MAR-2020';
     $comment := '*******************************************************';
     $comment := '* 19-FEB-2020 - Use the new $extendedtitle function if available';
     $comment := '* created functionaly similar $localextendedTitle in transform';
@@ -21,6 +21,8 @@ $.(
     $comment := '* 23-FEB-2020 - Deuplicated and sorted the tags generated in $sabatagsobject';
     $comment := '* 24-FEB-2020 - Changed the function signature for the $reduce function so';
     $comment := '* that it will work with JSONata 1.6.5';
+    $comment := '* 09-MAR-2020 - Set all content to mark MARK_COMPLETE_EXTERNALLY=true, as not possible to change from';
+    $comment := '* option in bulk import, and eventually they will be completable.';    
     $comment := '*******************************************************';
 
     $comment := '*******************************************************';
@@ -132,11 +134,11 @@ $.(
     $saba_MARKCOMPLETEEXTERNALMAP := $exists($override.saba.markcompleteexternalmap) ? $override.saba.markcompleteexternalmap : {
                 'audiobook': 'TRUE',
                 'book': 'TRUE',
-                'channel': 'FALSE',
+                'channel': 'TRUE',
                 'course': 'TRUE',
                 'linked_content': 'TRUE',
                 'video': 'TRUE',
-                'journey': 'FALSE'
+                'journey': 'TRUE'
               };
 
     $comment := '* The PREFIX combined with contentType.displayLabel that is used';
