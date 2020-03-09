@@ -69,6 +69,10 @@ config.textoptions.delimiter = ',';
 config.textoptions.header = true;
 config.textoptions.newline = '\r\n';
 
+// Local file, leave null to call percipio
+// provide full path to load JSON from file.
+config.localjsonfile = null;
+
 // Request
 config.request = {};
 // Bearer Token

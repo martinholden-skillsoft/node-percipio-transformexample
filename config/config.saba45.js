@@ -40,6 +40,10 @@ config.textoptions.delimiter = ',';
 config.textoptions.header = true;
 config.textoptions.newline = '\r\n';
 
+// Local file, leave null to call percipio
+// provide full path to load JSON from file.
+config.localjsonfile = process.env.LOCALFILE || null;
+
 // Request
 config.request = {};
 // Bearer Token
@@ -63,9 +67,16 @@ config.request.query = {};
  * Name: typeFilter
  * Description : Array of types to restrict results to
  * Type: string[]
- * Enum: COURSE,VIDEO,BOOK,AUDIOBOOK,CHANNEL,LINKED_CONTENT
+ * Enum: COURSE,VIDEO,BOOK,AUDIOBOOK,JOURNEY,CHANNEL,LINKED_CONTENT
  */
-config.request.query.typeFilter = 'CHANNEL';
+config.request.query.typeFilter = [
+  'COURSE',
+  'BOOK',
+  'AUDIOBOOK',
+  'JOURNEY',
+  'CHANNEL',
+  'LINKED_CONTENT'
+];
 /**
  * Name: licensePoolIds
  * Description : Array of License pool IDs to which to restrict content.

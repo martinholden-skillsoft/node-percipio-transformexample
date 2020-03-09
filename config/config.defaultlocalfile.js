@@ -1,6 +1,6 @@
 const config = require('./config.global');
 
-config.customer = 'degreed';
+config.customer = 'defaultlocalfile';
 
 // Debug logging
 // One of the supported default logging levels for winston - see https://github.com/winstonjs/winston#logging-levels
@@ -19,9 +19,6 @@ config.debug.logFile = `${config.customer}.log`;
 
 // Output path
 config.outputpath = `results/${config.customer}`;
-config.outputfilename = 'degreedlive_percipio_content';
-
-// JSONata Bindings
 
 // Formatting options for the flat file exported using papaparse
 // See https://github.com/mholt/PapaParse
@@ -32,6 +29,10 @@ config.textoptions.escapeChar = '"';
 config.textoptions.delimiter = ',';
 config.textoptions.header = true;
 config.textoptions.newline = '\r\n';
+
+// Local file, leave null to call percipio
+// provide full path to load JSON from file.
+config.localjsonfile = 'input/response_1582297474241.json';
 
 // Request
 config.request = {};
@@ -74,7 +75,7 @@ config.request.query.licensePoolIds = null;
  * Type: string
  * Format: date-time
  */
-config.request.query.updatedSince = '2020-02-10T00:00:00Z';
+config.request.query.updatedSince = null;
 /**
  * Name: offset
  * Description : Used in conjunction with 'max' to specify which set of 'max' content items
