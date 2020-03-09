@@ -20,6 +20,30 @@ const bpcsvtransform = require('./lib/streams/backpressuretransform.csv');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 /**
+ * Load a local JSON file
+ *
+ * @param {*} fileName
+ * @param {*} type
+ */
+const loadJsonFromFile = async options =>
+  new Promise((resolve, reject) => {
+    const loggingOptions = {
+      label: 'loadJsonFromFile'
+    };
+    logger.info(`Loading JSON from ${options.localjsonfile}`, loggingOptions);
+    fs.readFile(options.localjsonfile, 'utf8', (err, data) => {
+      // if has error reject, otherwise resolve
+      let response = null;
+      try {
+        response = JSON.parse(data);
+      } catch (error) {
+        reject(err);
+      }
+      return err ? reject(err) : resolve(response);
+    });
+  });
+
+/**
  * Call Percipio API
  *
  * @param {*} options
@@ -141,52 +165,66 @@ const getAllMetadataAndTransformAndExportToCSV = async options => {
       logger.error(`Error. Path: ${stringify(error)}`, loggingOptions);
     });
 
-    while (keepGoing) {
-      let response = null;
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        response = await callPercipio(opts);
+    if (_.isNull(opts.localjsonfile)) {
+      while (keepGoing) {
+        let response = null;
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          response = await callPercipio(opts);
 
-        if (reportCount) {
-          totalRecords = parseInt(response.headers['x-total-count'], 10);
+          if (reportCount) {
+            totalRecords = parseInt(response.headers['x-total-count'], 10);
 
-          logger.info(
-            `Total Records to download as reported in header['x-total-count'] ${totalRecords.toLocaleString()}`,
-            loggingOptions
-          );
-          reportCount = false;
+            logger.info(
+              `Total Records to download as reported in header['x-total-count'] ${totalRecords.toLocaleString()}`,
+              loggingOptions
+            );
+            reportCount = false;
+          }
+        } catch (err) {
+          logger.error('ERROR: trying to download results', loggingOptions);
+          keepGoing = false;
+          reject(err);
         }
-      } catch (err) {
-        logger.error('ERROR: trying to download results', loggingOptions);
-        keepGoing = false;
-        reject(err);
-      }
 
-      downloadedRecords += response.data.length;
+        downloadedRecords += response.data.length;
 
-      // Stream the results
-      // Iterate over the records and write EACH ONE to the  stream individually.
-      // Each one of these records will become a line in the output file.
-      response.data.forEach(record => {
-        step1.write(JSON.stringify(record));
-      });
+        // Stream the results
+        // Iterate over the records and write EACH ONE to the  stream individually.
+        // Each one of these records will become a line in the output file.
+        response.data.forEach(record => {
+          step1.write(JSON.stringify(record));
+        });
 
-      logger.info(
-        `Records Downloaded ${downloadedRecords.toLocaleString()} of ${totalRecords.toLocaleString()}`,
-        loggingOptions
-      );
+        logger.info(
+          `Records Downloaded ${downloadedRecords.toLocaleString()} of ${totalRecords.toLocaleString()}`,
+          loggingOptions
+        );
 
-      // Set offset - number of records in response
-      opts.request.query.offset += response.data.length;
+        // Set offset - number of records in response
+        opts.request.query.offset += response.data.length;
 
-      if (opts.request.query.offset >= totalRecords) {
-        keepGoing = false;
-      }
+        if (opts.request.query.offset >= totalRecords) {
+          keepGoing = false;
+        }
 
-      /*       if (response.data.length < opts.request.query.max) {
+        /*       if (response.data.length < opts.request.query.max) {
         keepGoing = false;
       } */
+      }
+    } else {
+      // Load JSON file
+      let response = null;
+      // eslint-disable-next-line no-await-in-loop
+      response = await loadJsonFromFile(opts);
+
+      logger.info(`Records Read from file ${response.length.toLocaleString()}`, loggingOptions);
+
+      response.forEach(record => {
+        step1.write(JSON.stringify(record));
+      });
     }
+
     step1.end();
     step3.on('finish', () => {
       logger.info(`Records Saved. Path: ${outputFile}`, loggingOptions);
