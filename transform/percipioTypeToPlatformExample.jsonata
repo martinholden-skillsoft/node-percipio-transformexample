@@ -648,6 +648,8 @@ $.(
     'linked_content~~wintellect': 'COURSE',
     'linked_content~course~': 'COURSE',
     'linked_content~course~course': 'COURSE',
+    'linked_content~video~': 'VIDEO',
+    'linked_content~video~video': 'VIDEO',
     'video~~': 'VIDEO',
     'video~video~': 'VIDEO',
     'video~video~video': 'VIDEO',
