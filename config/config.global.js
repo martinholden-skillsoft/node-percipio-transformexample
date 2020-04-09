@@ -4,9 +4,7 @@ const config = {};
 
 // Indicates a name for the configuration
 config.customer = 'none';
-config.startTimestamp = moment()
-  .utc()
-  .format('YYYYMMDD_HHmmss');
+config.startTimestamp = moment().utc().format('YYYYMMDD_HHmmss');
 
 // DEBUG Options - Enables the check for Fiddler, if running the traffic is routed thru Fiddler
 config.debug = {};
@@ -46,7 +44,7 @@ config.jsonataBinding.override.common.ShareLinkParametersLookup = {
   channel: '',
   course: '',
   linked_content: '',
-  video: ''
+  video: '',
 };
 
 // Whether to include technologies[0].title and version as prefix to title

@@ -55,7 +55,7 @@ const exampleSchedulerConfig = {
             linked_content: '',
             video: '',
             journey: '',
-            default: ''
+            default: '',
           },
           Comment_MobileShareLinkParametersLookup:
             '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link for Mobile. default option to handle unknown types. Returned value (right side) is the string to append to the link',
@@ -67,8 +67,8 @@ const exampleSchedulerConfig = {
             linked_content: '?chromeless=true&preventAppDownload=true',
             video: '?chromeless=true&preventAppDownload=true',
             journey: '?chromeless=true&preventAppDownload=true',
-            default: '?chromeless=true&preventAppDownload=true'
-          }
+            default: '?chromeless=true&preventAppDownload=true',
+          },
         },
         comment_successfactors: '{object} Successfactors specific settings for metadata trasnforms',
         successfactors: {
@@ -81,7 +81,7 @@ const exampleSchedulerConfig = {
             course: 'Y',
             linked_content: 'Y',
             video: 'Y',
-            journey: 'Y'
+            journey: 'Y',
           },
           comment_onlinestatuslookup:
             'The MAPPING between Percipio contentType.percipioType lowercase and the ONLINE status. Y = ONLINE, N = OFFLINE. This can be used to hide contentTypes if necessary.',
@@ -92,7 +92,7 @@ const exampleSchedulerConfig = {
             course: 'Y',
             linked_content: 'Y',
             video: 'Y',
-            journey: 'Y'
+            journey: 'Y',
           },
           comment_languagelookup:
             'The MAPPING between Percipio localeCode to SuccessFactors locales. The PERCIPIO (left side) value is the RFC5646 Language Tag',
@@ -104,7 +104,7 @@ const exampleSchedulerConfig = {
             'de-DE': 'German',
             es: 'Spanish',
             'es-ES': 'Spanish',
-            'es-DO': 'Spanish'
+            'es-DO': 'Spanish',
           },
           comment_defaultlanguage:
             'The default SuccessFactors locale string to use if the map does not succeed',
@@ -124,7 +124,7 @@ const exampleSchedulerConfig = {
             'linked_content~~wintellect': 'LINKED CONTENT',
             'linked_content~course~course': 'LINKED CONTENT',
             'video~video~video': 'VIDEO',
-            'journey~curriculum~journey': 'JOURNEY'
+            'journey~curriculum~journey': 'JOURNEY',
           },
           comment_completionlookup:
             'The MAPPING between Percipio contentType.percipioType, contentType.category, contentType.displayLabel in lowercase combined with ~ delimiter to the SuccessFactors Completion Types',
@@ -141,7 +141,7 @@ const exampleSchedulerConfig = {
             'linked_content~~wintellect': 'LINKED-CTNT-COMPL',
             'linked_content~course~course': 'LINKED-CTNT-COMPL',
             'video~video~video': 'VIDEO-COMPL',
-            'journey~curriculum~journey': 'JOURNEY-COMPL'
+            'journey~curriculum~journey': 'JOURNEY-COMPL',
           },
           comment_defaultcatalog:
             'The default CATALOG that content will be created in within SuccessFactors, the CATALOG must already exist. This is used for the CATALOG_1 column.',
@@ -166,30 +166,30 @@ const exampleSchedulerConfig = {
           enablerating: 'Y',
           comment_selfrecordlrngevt:
             'The SELF_RECORD_LRNGEVT option. This enables a user to self-record completion of this item. Y =	Allow users to self-record a learning event N =	Do not allow users to self-record a learning event',
-          selfrecordlrngevt: 'N'
-        }
+          selfrecordlrngevt: 'N',
+        },
       },
       filename: {
         outputPath: 'Skillsoft/itemconn/sf',
         includeDate: false,
         filenamePrefix: 'item_data_CLAQ1NA',
-        filenameSuffix: 'csv'
+        filenameSuffix: 'csv',
       },
       sftp: {
-        sftpConfigUuid: 'fa20850f-71a2-462c-973c-9f30e6f4a961'
+        sftpConfigUuid: 'fa20850f-71a2-462c-973c-9f30e6f4a961',
       },
       csvOptions: {
         delimiter: '|',
         header: true,
-        newline: '!##!\r\n'
-      }
-    }
+        newline: '!##!\r\n',
+      },
+    },
   },
   startAt: '2019-01-28T11:01:00.000Z',
   jobConfig: {
     type: 'ASYNC',
-    maxRetryCount: 5
-  }
+    maxRetryCount: 5,
+  },
 };
 
 // Show example of overriding

@@ -75,7 +75,7 @@ config.request.query.typeFilter = [
   'AUDIOBOOK',
   'JOURNEY',
   'CHANNEL',
-  'LINKED_CONTENT'
+  'LINKED_CONTENT',
 ];
 /**
  * Name: licensePoolIds

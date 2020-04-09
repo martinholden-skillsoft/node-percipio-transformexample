@@ -25,10 +25,10 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
  * @param {*} fileName
  * @param {*} type
  */
-const loadJsonFromFile = async options =>
+const loadJsonFromFile = async (options) =>
   new Promise((resolve, reject) => {
     const loggingOptions = {
-      label: 'loadJsonFromFile'
+      label: 'loadJsonFromFile',
     };
     logger.info(`Loading JSON from ${options.localjsonfile}`, loggingOptions);
     fs.readFile(options.localjsonfile, 'utf8', (err, data) => {
@@ -49,10 +49,10 @@ const loadJsonFromFile = async options =>
  * @param {*} options
  * @returns
  */
-const callPercipio = async options => {
+const callPercipio = async (options) => {
   return promiseRetry(async (retry, numberOfRetries) => {
     const loggingOptions = {
-      label: 'callPercipio'
+      label: 'callPercipio',
     };
 
     const requestUri = options.request.uri;
@@ -72,9 +72,9 @@ const callPercipio = async options => {
     const axiosConfig = {
       url: requestUri,
       headers: {
-        Authorization: `Bearer ${options.request.bearer}`
+        Authorization: `Bearer ${options.request.bearer}`,
       },
-      method: options.request.method
+      method: options.request.method,
     };
 
     if (!_.isEmpty(requestBody)) {
@@ -121,11 +121,11 @@ const callPercipio = async options => {
  * @param {*} options
  * @returns {string} ndjson file path
  */
-const getAllMetadataAndTransformAndExportToCSV = async options => {
+const getAllMetadataAndTransformAndExportToCSV = async (options) => {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     const loggingOptions = {
-      label: 'getAllMetadata'
+      label: 'getAllMetadata',
     };
 
     const opts = options;
@@ -153,15 +153,15 @@ const getAllMetadataAndTransformAndExportToCSV = async options => {
       logger.info(`Outputstream Finish. Path: ${outputFile}`, loggingOptions);
     });
 
-    step1.on('error', error => {
+    step1.on('error', (error) => {
       logger.error(`Error. Path: ${stringify(error)}`, loggingOptions);
     });
 
-    step2.on('error', error => {
+    step2.on('error', (error) => {
       logger.error(`Error. Path: ${stringify(error)}`, loggingOptions);
     });
 
-    step3.on('error', error => {
+    step3.on('error', (error) => {
       logger.error(`Error. Path: ${stringify(error)}`, loggingOptions);
     });
 
@@ -192,7 +192,7 @@ const getAllMetadataAndTransformAndExportToCSV = async options => {
         // Stream the results
         // Iterate over the records and write EACH ONE to the  stream individually.
         // Each one of these records will become a line in the output file.
-        response.data.forEach(record => {
+        response.data.forEach((record) => {
           step1.write(JSON.stringify(record));
         });
 
@@ -220,7 +220,7 @@ const getAllMetadataAndTransformAndExportToCSV = async options => {
 
       logger.info(`Records Read from file ${response.length.toLocaleString()}`, loggingOptions);
 
-      response.forEach(record => {
+      response.forEach((record) => {
         step1.write(JSON.stringify(record));
       });
     }
@@ -239,9 +239,9 @@ const getAllMetadataAndTransformAndExportToCSV = async options => {
  * @param {*} options
  * @returns
  */
-const main = async configOptions => {
+const main = async (configOptions) => {
   const loggingOptions = {
-    label: 'main'
+    label: 'main',
   };
 
   const options = configOptions || null;
@@ -277,8 +277,8 @@ const main = async configOptions => {
     new transports.File({
       filename: Path.join(options.debug.logpath, options.debug.logFile),
       options: {
-        flags: 'w'
-      }
+        flags: 'w',
+      },
     })
   );
 
@@ -303,7 +303,7 @@ const main = async configOptions => {
 
       globalTunnel.initialize({
         host: options.debug.fiddlerAddress,
-        port: options.debug.fiddlerPort
+        port: options.debug.fiddlerPort,
       });
     }
   } else {
@@ -325,7 +325,7 @@ const main = async configOptions => {
   }
 
   logger.info('Calling Percipio', loggingOptions);
-  await getAllMetadataAndTransformAndExportToCSV(options).catch(err => {
+  await getAllMetadataAndTransformAndExportToCSV(options).catch((err) => {
     logger.error(`Error:  ${err}`, loggingOptions);
   });
   logger.info(`End ${module.exports.name}`, loggingOptions);
