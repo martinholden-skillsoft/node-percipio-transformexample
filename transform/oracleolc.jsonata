@@ -1,0 +1,17 @@
+$.(
+    $transformed_data := (
+        $.{
+        'METADATA': 'MERGE',
+        'LegacyLearningItem': 'LegacyLearningItem',
+        'EffectiveStartDate': lifecycle.publishDate ? $replace($substringBefore(lifecycle.publishDate, 'T'), '-', '/') : '2000/01/01',
+        'LearningItemNumber': $shortenUuid(id),
+        'Title': $truncate($join([$shortenUuid(id), localizedMetadata[0].title], '-'), 250, '…'),
+        'ShortDescription': (
+            $shortdesc := localizedMetadata[0].description ? localizedMetadata[0].description : localizedMetadata[0].title;
+            $plainString($shortdesc, 4000)
+        ),
+        'OwnedByPersonNumber': 'Need this value from customer'
+    });
+
+    $results := $merge([$transformed_data]);
+    $results; )

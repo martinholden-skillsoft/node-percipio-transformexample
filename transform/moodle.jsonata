@@ -2,9 +2,9 @@ $.(
     $comment := '*******************************************************';
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR MOODLE 3.x Percipio Course Import';
-    $comment := 'See https://github.com/martinholden-skillsoft/moodle-tool_uploadpercipio';
+    $comment := 'See https://github.com/lushonline/moodle-tool_uploadpage';
     $comment := 'Author: Martin Holden';
-    $comment := 'Date: 22-OCT-2019';
+    $comment := 'Date: 18-JUN-2020';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
@@ -659,6 +659,18 @@ $.(
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Moodle/Customer Specific Variables';
+    $comment := 'These are the values that can be changed per customer';
+
+    $comment := '* The number of tags values to include set to 0 to not return any';
+    $comment := '* For more information see the $moodletagsarray function above';
+    $moodleMaxTags := $exists($override.moodle.maxtags) ? $override.moodle.maxtags : 10;
+    
+    $comment := 'End of Moodle/Customer Specific Variables';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -680,98 +692,62 @@ $.(
     $moodletagsarray := function($otherTag, $maxCount){(
         $maxtags := $maxCount ? $maxCount : 10;
         $padarray := [1..$maxtags].('');
-
         $tags := [];
-
         $tags :=  $lowercase(contentType.percipioType) = 'channel' ? $append($tags,[localizedMetadata[0].title]) : $tags;
-
         $tags :=  $lowercase(contentType.percipioType) = 'journey' ? $append($tags,[localizedMetadata[0].title]) : $tags;
-
         $tags := keywords ? $append($tags,keywords) : $tags;
-
         $tags := $append($tags, $map(associations.areas, function($v, $i, $a) {
             $v ? $trim($v) : ''
         }));
-          
         $tags := $append($tags, $map(associations.subjects, function($v, $i, $a) {
             $v ? $trim($v) : ''
         }));
-
         $tags := $append($tags, $map(associations.channels, function($v, $i, $a) {
             $v.title ? $trim($v.title) : ''
         }));
-
         $tags := $otherKeyword ? $append($tags, [ $otherTag]) : $tags;
-        
         $tags := $map($sort($tags),function($v, $i, $a){
             $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
         );
-      
         $tags := $append($tags, $padarray);
-
         $tags := $filter($tags, function ($v, $i, $a) {
             $i < $maxtags
         });
-
         $tags := $filter($tags, function($v, $i, $a) {
             $v != ''
         });
-
         $tags
     )};
 
     $comment := '*******************************************************';
-    $comment := '* Create JSON object with CHANNEL Title and UUID. The value is either:';
-    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel';
-    $comment := '*   associations.channels[0].title';
-    $comment := '* @returns {{Channel: string, ChannelUUID: string}} object';
+    $comment := '* Create a HTML description for the page, each of these';
+    $comment := '* is surrounded by <p></p>';
+    $comment := '*     Comma Delimited list of Authors from by';
+    $comment := '*     Copyright Publisher and date from publication.publisher';
+    $comment := '*     and publication.copyrightYear';
+    $comment := '*     ISBN from publication.isbn';
+    $comment := '*     imageUrl is added as a hyperlink';
+    $comment := '*     localizedMetadata[0].description';
+    $comment := '*     Launch text is added as a hyperlink';
+    $comment := '* @param {object} $row - The object to process';
+    $comment := '* @returns {string} object';
     $comment := '*******************************************************';
-    $moodlechannelobject := function(){(
-        $channelTitle := $lookup([{
-            'audiobook': associations.channels[0].title,
-            'book': associations.channels[0].title,
-            'channel': localizedMetadata[0].title,
-            'course': associations.channels[0].title,
-            'linked_content': associations.channels[0].title,
-            'video': associations.channels[0].title,
-            'journey': localizedMetadata[0].title
-        }], $lowercase(contentType.percipioType));
-
-        $channelUUID := $lookup([{
-            'audiobook': associations.channels[0].id,
-            'book': associations.channels[0].id,
-            'channel': id,
-            'course': associations.channels[0].id,
-            'linked_content': associations.channels[0].id,
-            'video': associations.channels[0].id,
-            'journey': localizedMetadata[0].id
-        }], $lowercase(contentType.percipioType));
-
-
-
-        $result:= { 'Channel': $channelTitle ? $channelTitle : '', 'ChannelUUID': $channelUUID ? $channelUUID : '' };
-        $result;
+    $moodledescriptionobject := function($row){(
+        $launchpathstart := '<a href="' & $row.link & '" target="_blank">';
+        $thumbnail := $row.imageUrl ? '<p>' & $launchpathstart & '<img src="' & $row.imageUrl & '?width=400" alt="' & $row.localizedMetadata[0].title & '" class="img-responsive"></a></p>' : '';
+        $by := $count($row.by) = 0 ? '' : '<p>By: ' & $join($row.by, ', ') & '</p>';
+        $publisher := $row.publication ? $row.publication.publisher ? $join(['Copyright:', $row.publication.publisher],' ')  : '' : '';
+        $year := $row.publication ? $row.publication.copyrightYear ? $join(['(c)', $string($row.publication.copyrightYear)],' ') : '' : '';
+        $copyright := $row.publication ? '<p>' & $join([$publisher, $year],' ') & '</p>' : '';
+        $isbn := $row.publication ? $row.publication.isbn ? '<p>' & $join(['ISBN:', $row.publication.isbn],' ') & '</p>' : '' : '';
+        $launchlink := $launchpathstart ? '<p>' & $launchpathstart & 'Launch</a></p>' : '';        
+        $publication := $row.publication ? $join([$copyright,$isbn]) : '';
+		$description := $row.localizedMetadata[0].description ? '<p>' & $row.localizedMetadata[0].description & '</p>' : '';
+        $join([$by,$publication,$thumbnail,$description,$launchlink])
     )};
-
     $comment := 'End of Moodle/Customer Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
-
-
-    $comment := '*******************************************************';
-    $comment := '*******************************************************';
-    $comment := 'Start of Moodle/Customer Specific Variables';
-    $comment := 'These are the values that can be changed per customer';
-
-    $comment := '* The number of tags values to include set to 0 to not return any';
-    $comment := '* For more information see the $moodletagsarray function above';
-    $moodleMaxTags := $exists($override.moodle.maxtags) ? $override.moodle.maxtags : 10;
-    
-    $comment := 'End of Moodle/Customer Specific Variables';
-    $comment := '*******************************************************';
-    $comment := '*******************************************************';
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -782,42 +758,52 @@ $.(
 
     $transformed_data := (
         $.{
-            'ContentUUID': id ? id : '',
-            'Title':  localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
-            'Description': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
-            'ShareLinkURL': link ? $metadatasharelink($commonShareLinkParametersLookup) : '',
-            'ThumbnailImageURL' : imageUrl ? imageUrl : '',
-            'PercipioType' : contentType ? contentType.displayLabel : '',
-            'Duration': duration ? $isodurationtohhmmss(duration) : '00:00:00',
-            'Tags': (
-                $tags := $moodleMaxTags = 0 ? null : $moodletagsarray();
+            'COURSE_IDNUMBER': id ? id : '',
+            'COURSE_SHORTNAME': localizedMetadata[0].title ? $join([$metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 215),'(' & id &')'],' ') : '',
+            'COURSE_FULLNAME': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
+            'COURSE_SUMMARY': $plainString(localizedMetadata[0].description, 2000),
+            'COURSE_TAGS': (
+                $tags := $moodletagsarray();
                 $tags ? $join($tags,'|') : ''
              ),
-            'Modality': (
-                modalities ? $join(modalities,'|') : ''
+            'COURSE_VISIBLE': lifecycle.status = 'ACTIVE' ? 1 : 0,
+            'COURSE_THUMBNAIL': lifecycle.status = 'ACTIVE' ? 1 : 0,
+            'COURSE_CATEGORYIDNUMBER': (
+                $idnumber := $lookup([{
+                    'audiobook': associations.channels[0].id,
+                    'book': associations.channels[0].id,
+                    'channel': id,
+                    'course': associations.channels[0].id,
+                    'linked_content': associations.channels[0].id,
+                    'video': associations.channels[0].id,
+                    'journey': id
+                }], $lowercase(contentType.percipioType));
+                
+                $idnumber ? $idnumber: ''
             ),
-            'Visible': lifecycle.status = 'ACTIVE' ? 1 : 0
+            'COURSE_CATEGORYNAME': (
+                $catname := $lookup([{
+                    'audiobook': associations.channels[0].title,
+                    'book': associations.channels[0].title,
+                    'channel': localizedMetadata[0].title,
+                    'course': associations.channels[0].title,
+                    'linked_content': associations.channels[0].title,
+                    'video': associations.channels[0].title,
+                    'journey': localizedMetadata[0].title
+                }], $lowercase(contentType.percipioType));
+                
+                $catname ? $catname : ''
+            ),
+            'PAGE_NAME':localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
+            'PAGE_INTRO': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+            'PAGE_CONTENT': $moodledescriptionobject($)
           }
-    );
-
-    $comment := 'Transform the extra data, uses the CONSTANTS specified above';
-    $comment := 'We tranform these seperately so we can make sure the file output';
-    $comment := 'column order matches the deafult Percipio Import Tool for Moodle order';
-    $extra_data := (
-         $.{
-            'Language': localeCodes[0] ? $rfc5646language(localeCodes[0]) : '',
-            'Locale': localeCodes[0] ? localeCodes[0] : ''
-        }
     );
 
     $comment := '*******************************************************';
     $comment := 'Combine the :';
     $comment := '   $transformed_data - Basic transfomed data';
-    $comment := '   $moodlechannelobject - The Channel Title and UUID data derived from';
-    $comment := '                        this function';
-    $comment := '   $extra_data - The extra data, we do it this way so the file column order';
-    $comment := '                    matches the Moodle Import tool defaults.';
 
-    $results := $merge([$transformed_data, $moodlechannelobject(), $extra_data]);
+    $results := $transformed_data;
     $results;
 )

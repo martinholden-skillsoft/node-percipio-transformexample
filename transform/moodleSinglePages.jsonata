@@ -1,8 +1,8 @@
 $.(
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-    $comment := 'TRANSFORM FOR MOODLE 3.x Single Page Course Importer';
-    $comment := 'See https://github.com/lushonline/moodle-tool_uploadpage';
+    $comment := 'TRANSFORM FOR MOODLE 3.x Percipio Course Import';
+    $comment := 'See https://github.com/martinholden-skillsoft/moodle-tool_uploadpercipio';
     $comment := 'Author: Martin Holden';
     $comment := 'Date: 22-OCT-2019';
     $comment := '*******************************************************';
@@ -499,6 +499,26 @@ $.(
             $result ? $result : $defaultLanguage;
     )};
 
+    $comment := '*******************************************************';
+    $comment := '* Remove any query string or hash parameters from a URL';
+    $comment := '* @param {string} $url - The URL string';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+	$stripQueryStringandHash := function($url){(
+    	$myurl := $url ? $url : '';
+    	$split( $myurl , /\#|\?/)[0];
+    )};
+    
+    $comment := '*******************************************************';
+    $comment := '* Get the document extension from a URL';
+    $comment := '* @param {string} $url - The URL string';
+    $comment := '* @returns {string}';
+    $comment := '*******************************************************';  
+    $getDocumentExtension := function($url){(
+    	$myurl := $url ? $url : '';
+        $mydocument := $reverse($split($myurl,'/'))[0];
+        $contains($mydocument, '.') ? $reverse($split($mydocument, '.'))[0] : ''
+    )};
 
     $comment := 'End of Generic Function Library';
     $comment := '*******************************************************';
@@ -625,7 +645,7 @@ $.(
     $comment := '* See the $metadatatitle function above';
     $commonIncludeTechnologyDetailsInTitle := $exists($override.common.IncludeTechnologyDetailsInTitle) ? $override.common.IncludeTechnologyDetailsInTitle : true;
 
-   $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
+    $comment := '* The MAPPING between Percipio contentType.percipioType lowercase';
     $comment := '* and any additions to the link. default option to handle unknown types';
     $comment := '* Returned value (right side) is the string to append to the link';
     $comment := '* so for example to make a link chromeless include ?chromeless';
@@ -659,6 +679,18 @@ $.(
     $comment := '*******************************************************';
     $comment := '*******************************************************';
 
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Moodle/Customer Specific Variables';
+    $comment := 'These are the values that can be changed per customer';
+
+    $comment := '* The number of tags values to include set to 0 to not return any';
+    $comment := '* For more information see the $moodletagsarray function above';
+    $moodleMaxTags := $exists($override.moodle.maxtags) ? $override.moodle.maxtags : 10;
+    
+    $comment := 'End of Moodle/Customer Specific Variables';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -680,43 +712,30 @@ $.(
     $moodletagsarray := function($otherTag, $maxCount){(
         $maxtags := $maxCount ? $maxCount : 10;
         $padarray := [1..$maxtags].('');
-
         $tags := [];
-
         $tags :=  $lowercase(contentType.percipioType) = 'channel' ? $append($tags,[localizedMetadata[0].title]) : $tags;
-
         $tags :=  $lowercase(contentType.percipioType) = 'journey' ? $append($tags,[localizedMetadata[0].title]) : $tags;
-
         $tags := keywords ? $append($tags,keywords) : $tags;
-
         $tags := $append($tags, $map(associations.areas, function($v, $i, $a) {
             $v ? $trim($v) : ''
         }));
-          
         $tags := $append($tags, $map(associations.subjects, function($v, $i, $a) {
             $v ? $trim($v) : ''
         }));
-
         $tags := $append($tags, $map(associations.channels, function($v, $i, $a) {
             $v.title ? $trim($v.title) : ''
         }));
-
         $tags := $otherKeyword ? $append($tags, [ $otherTag]) : $tags;
-        
         $tags := $map($sort($tags),function($v, $i, $a){
             $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
         );
-      
         $tags := $append($tags, $padarray);
-
         $tags := $filter($tags, function ($v, $i, $a) {
             $i < $maxtags
         });
-
         $tags := $filter($tags, function($v, $i, $a) {
             $v != ''
         });
-
         $tags
     )};
 
@@ -727,56 +746,28 @@ $.(
     $comment := '*     Copyright Publisher and date from publication.publisher';
     $comment := '*     and publication.copyrightYear';
     $comment := '*     ISBN from publication.isbn';
-    $comment := '*     imageUrl is added as a hyperlink to $metadatasharelink()';
+    $comment := '*     imageUrl is added as a hyperlink';
     $comment := '*     localizedMetadata[0].description';
-    $comment := '*     Launch text is added as a hyperlink to $metadatasharelink()';
+    $comment := '*     Launch text is added as a hyperlink';
+    $comment := '* @param {object} $row - The object to process';
     $comment := '* @returns {string} object';
     $comment := '*******************************************************';
-    $moodledescriptionobject := function(){(
-
-        $launchpathstart := $metadatasharelink() ? '<a href="' & $metadatasharelink() & '" target="_blank">' : '';
-
-        $thumbnail := imageUrl ? '<p>' & $launchpathstart & '<img src="' & imageUrl & '?width=400" alt="' & localizedMetadata[0].title & '" class="img-responsive"></a></p>' : '';
-        
-        $by := $count(by) = 0 ? '' : '<p>By: ' & $join(by, ', ') & '</p>';
-        
-        $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ')  : '' : '';
-        
-        $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
-        
-        $copyright := publication ? '<p>' & $join([$publisher, $year],' ') & '</p>' : '';
-        
-        $isbn := publication ? publication.isbn ? '<p>' & $join(['ISBN:', publication.isbn],' ') & '</p>' : '' : '';
-
+    $moodledescriptionobject := function($row){(
+        $launchpathstart := '<a href="' & $row.link & '" target="_blank">';
+        $thumbnail := $row.imageUrl ? '<p>' & $launchpathstart & '<img src="' & $row.imageUrl & '?width=400" alt="' & $row.localizedMetadata[0].title & '" class="img-responsive"></a></p>' : '';
+        $by := $count($row.by) = 0 ? '' : '<p>By: ' & $join($row.by, ', ') & '</p>';
+        $publisher := $row.publication ? $row.publication.publisher ? $join(['Copyright:', $row.publication.publisher],' ')  : '' : '';
+        $year := $row.publication ? $row.publication.copyrightYear ? $join(['(c)', $string($row.publication.copyrightYear)],' ') : '' : '';
+        $copyright := $row.publication ? '<p>' & $join([$publisher, $year],' ') & '</p>' : '';
+        $isbn := $row.publication ? $row.publication.isbn ? '<p>' & $join(['ISBN:', $row.publication.isbn],' ') & '</p>' : '' : '';
         $launchlink := $launchpathstart ? '<p>' & $launchpathstart & 'Launch</a></p>' : '';        
-
-        $publication := publication ? $join([$copyright,$isbn]) : '';
-
-		$description := localizedMetadata[0].description ? '<p>' & localizedMetadata[0].description & '</p>' : '';
-
+        $publication := $row.publication ? $join([$copyright,$isbn]) : '';
+		$description := $row.localizedMetadata[0].description ? '<p>' & $row.localizedMetadata[0].description & '</p>' : '';
         $join([$by,$publication,$thumbnail,$description,$launchlink])
-        
     )};
-
     $comment := 'End of Moodle/Customer Specific Functions';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
-
-
-
-    $comment := '*******************************************************';
-    $comment := '*******************************************************';
-    $comment := 'Start of Moodle/Customer Specific Variables';
-    $comment := 'These are the values that can be changed per customer';
-
-    $comment := '* The number of tags values to include set to 0 to not return any';
-    $comment := '* For more information see the $moodletagsarray function above';
-    $moodleMaxTags := $exists($override.moodle.maxtags) ? $override.moodle.maxtags : 10;
-    
-    $comment := 'End of Moodle/Customer Specific Variables';
-    $comment := '*******************************************************';
-    $comment := '*******************************************************';
-
 
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -788,14 +779,15 @@ $.(
     $transformed_data := (
         $.{
             'COURSE_IDNUMBER': id ? id : '',
-            'COURSE_SHORTNAME': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 215) & ' (' & id & ')' : '',
+            'COURSE_SHORTNAME': localizedMetadata[0].title ? $join([$metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 215),'(' & id &')'],' ') : '',
             'COURSE_FULLNAME': localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
-            'COURSE_SUMMARY': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+            'COURSE_SUMMARY': $plainstring(localizedMetadata[0].description, 2000),
             'COURSE_TAGS': (
-                $tags := $moodleMaxTags = 0 ? null : $moodletagsarray();
+                $tags := $moodletagsarray();
                 $tags ? $join($tags,'|') : ''
              ),
             'COURSE_VISIBLE': lifecycle.status = 'ACTIVE' ? 1 : 0,
+            'COURSE_THUMBNAIL': imageUrl ? $stripQueryStringandHash(imageUrl) : '',
             'COURSE_CATEGORYIDNUMBER': (
                 $idnumber := $lookup([{
                     'audiobook': associations.channels[0].id,
@@ -808,7 +800,6 @@ $.(
                 }], $lowercase(contentType.percipioType));
                 
                 $idnumber ? $idnumber: ''
-                
             ),
             'COURSE_CATEGORYNAME': (
                 $catname := $lookup([{
@@ -823,11 +814,22 @@ $.(
                 
                 $catname ? $catname : ''
             ),
-            'PAGE_NAME': (
-            	localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : ''
-            ),
-            'PAGE_INTRO': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
-            'PAGE_CONTENT': $moodledescriptionobject()
+            'EXTERNAL_NAME':localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
+            'EXTERNAL_INTRO': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
+            'EXTERNAL_CONTENT': $moodledescriptionobject($),
+            'EXTERNAL_MARKCOMPLETEEXTERNALLY': (
+                $external := $lookup([{
+                    'audiobook': 1,
+                    'book': 1,
+                    'channel': 0,
+                    'course': 1,
+                    'linked_content': 1,
+                    'video': 1,
+                    'journey': 1
+                }], $lowercase(contentType.percipioType));
+                
+                $external ? $external : 0
+            )
           }
     );
 

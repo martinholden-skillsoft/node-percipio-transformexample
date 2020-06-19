@@ -1,0 +1,142 @@
+$.(
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'TRANSFORM FOR MOODLE 3.x Single Page Course Importer';
+    $comment := 'See https://github.com/lushonline/moodle-tool_uploadpage';
+    $comment := 'Author: Martin Holden';
+    $comment := 'Date: 16-JUN-2020';
+    $comment := 'Transform uses Skilsoft Core and Saba library functions';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'Start of Moodle/Customer Specific Functions';
+
+    $comment := '*******************************************************';
+    $comment := '* Create a string[] that is deduplicated of values that combines these';
+    $comment := '* data values:';
+    $comment := '*   localizedMetadata[0].title if contentType.percipioType is channel';
+    $comment := '*   keywords';
+    $comment := '*   associations.areas';
+    $comment := '*   associations.subjects';
+    $comment := '*   associations.channels[*].title';
+    $comment := '*   localizedMetadata[0].localeCode as ';
+    $comment := '* @param {object} $row - The source object to process';
+    $comment := '* @param {number} [$maxCount=10] - Maximum number of tags';
+    $comment := '* @returns {string[]}';
+    $comment := '*******************************************************';
+    $moodletagsarray := function($row, $maxCount){(
+        $maxtags := $maxCount ? $maxCount : 10;
+        $padarray := [1..$maxtags].('');
+        $tags := [];
+        $tags :=  $lowercase($row.contentType.percipioType) = 'channel' ? $append($tags,[$row.localizedMetadata[0].title]) : $tags;
+        $tags :=  $lowercase($row.contentType.percipioType) = 'journey' ? $append($tags,[$row.localizedMetadata[0].title]) : $tags;
+        $tags := $row.keywords ? $append($tags,$row.keywords) : $tags;
+        $tags := $append($tags, $map($row.associations.areas, function($v, $i, $a) {
+            $v ? $trim($v) : ''
+        }));
+        $tags := $append($tags, $map($row.associations.subjects, function($v, $i, $a) {
+            $v ? $trim($v) : ''
+        }));
+        $tags := $append($tags, $map($row.associations.channels, function($v, $i, $a) {
+            $v.title ? $trim($v.title) : ''
+        }));
+        $tags := $append($tags, [$localeLanguage($row.localizedMetadata[0].localeCode)]);
+        $tags := $map($sort($tags),function($v, $i, $a){
+            $i != 0 ? (( $v = $a[$i-1] ) ? '': $v) : $v }
+        );
+        $tags := $append($tags, $padarray);
+        $tags := $filter($tags, function ($v, $i, $a) {
+            $i < $maxtags
+        });
+        $tags := $filter($tags, function($v, $i, $a) {
+            $v != ''
+        });
+        $tags
+    )};
+
+    $comment := '*******************************************************';
+    $comment := '* Create a HTML description for the page, each of these';
+    $comment := '* is surrounded by <p></p>';
+    $comment := '*     Comma Delimited list of Authors from by';
+    $comment := '*     Copyright Publisher and date from publication.publisher';
+    $comment := '*     and publication.copyrightYear';
+    $comment := '*     ISBN from publication.isbn';
+    $comment := '*     imageUrl is added as a hyperlink';
+    $comment := '*     localizedMetadata[0].description';
+    $comment := '*     Launch text is added as a hyperlink';
+    $comment := '* @param {object} $row - The source object to process';
+    $comment := '* @returns {string} object';
+    $comment := '*******************************************************';
+    $moodledescriptionobject := function($row){(
+        $launchpathstart := '<a href="' & $row.link & '" target="_blank">';
+        $thumbnail := $row.imageUrl ? '<p>' & $launchpathstart & '<img src="' & $row.imageUrl & '?width=400" alt="' & $row.localizedMetadata[0].title & '" class="img-responsive"></a></p>' : '';
+        $by := $count($row.by) = 0 ? '' : '<p>By: ' & $join($row.by, ', ') & '</p>';
+        $publisher := $row.publication ? $row.publication.publisher ? $join(['Copyright:', $row.publication.publisher],' ')  : '' : '';
+        $year := $row.publication ? $row.publication.copyrightYear ? $join(['(c)', $string($row.publication.copyrightYear)],' ') : '' : '';
+        $copyright := $row.publication ? '<p>' & $join([$publisher, $year],' ') & '</p>' : '';
+        $isbn := $row.publication ? $row.publication.isbn ? '<p>' & $join(['ISBN:', $row.publication.isbn],' ') & '</p>' : '' : '';
+        $launchlink := $launchpathstart ? '<p>' & $launchpathstart & 'Launch</a></p>' : '';        
+        $publication := $row.publication ? $join([$copyright,$isbn]) : '';
+		$description := $row.localizedMetadata[0].description ? '<p>' & $row.localizedMetadata[0].description & '</p>' : '';
+        $join([$by,$publication,$thumbnail,$description,$launchlink])
+    )};
+    $comment := 'End of Moodle/Customer Specific Functions';
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+
+    $comment := '*******************************************************';
+    $comment := '*******************************************************';
+    $comment := 'START OF TRANSFORM';
+
+    $comment := '*******************************************************';
+    $comment := 'Transform the basic data, uses the CONSTANTS specified above';
+
+    $transformed_data := (
+        $.{
+            'COURSE_IDNUMBER': id ? id : '',
+            'COURSE_SHORTNAME': $join([$formatTitle($titleFormat, $externalLmsType($types,$), 215, $), '(' & id &')'],' '),
+            'COURSE_FULLNAME': $formatTitle($titleFormat, $externalLmsType($types,$), 254, $),
+            'COURSE_SUMMARY': $sabaDescription($descriptionType,$),
+            'COURSE_TAGS': (
+                $tags := $moodletagsarray($);
+                $tags ? $join($tags,'|') : ''
+             ),
+            'COURSE_VISIBLE': lifecycle.status = 'ACTIVE' ? 1 : 0,
+            'COURSE_CATEGORYIDNUMBER': (
+                $idnumber := $lookup([{
+                    'audiobook': associations.channels[0].id,
+                    'book': associations.channels[0].id,
+                    'channel': id,
+                    'course': associations.channels[0].id,
+                    'linked_content': associations.channels[0].id,
+                    'video': associations.channels[0].id,
+                    'journey': id
+                }], $lowercase(contentType.percipioType));
+                
+                $idnumber ? $idnumber: ''
+            ),
+            'COURSE_CATEGORYNAME': (
+                $catname := $lookup([{
+                    'audiobook': associations.channels[0].title,
+                    'book': associations.channels[0].title,
+                    'channel': localizedMetadata[0].title,
+                    'course': associations.channels[0].title,
+                    'linked_content': associations.channels[0].title,
+                    'video': associations.channels[0].title,
+                    'journey': localizedMetadata[0].title
+                }], $lowercase(contentType.percipioType));
+                
+                $catname ? $catname : ''
+            ),
+            'PAGE_NAME': $formatTitle($titleFormat, $externalLmsType($types,$), 254, $),
+            'PAGE_INTRO': $sabaDescription($descriptionType,$),
+            'PAGE_CONTENT': $moodledescriptionobject($)
+          }
+    );
+
+    $comment := '*******************************************************';
+    $results := $transformed_data;
+    $results;
+)
