@@ -30,7 +30,7 @@
 		"global-tunnel-ng": "^2.7.1",
 		"json-stringify-safe": "^5.0.1",
 		"jsonata": "^1.8.2",
-		"lodash": "^4.17.15",
+		"lodash": "^4.17.19",
 		"moment": "^2.24.0",
 		"papaparse": "^5.2.0",
 		"pkginfo": "^0.4.1",
