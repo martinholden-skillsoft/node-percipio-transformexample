@@ -2,7 +2,7 @@ $.(
     $comment := '*******************************************************';
     $comment := '*******************************************************';
     $comment := 'TRANSFORM FOR MOODLE 3.x Percipio Course Import';
-    $comment := 'See https://github.com/martinholden-skillsoft/moodle-tool_uploadpercipio';
+    $comment := 'See https://moodle.org/plugins/tool_uploadexternalcontent';
     $comment := 'Author: Martin Holden';
     $comment := 'Date: 22-OCT-2019';
     $comment := '*******************************************************';
@@ -14,7 +14,7 @@ $.(
     $comment := 'The example below defines overrides that match the defaults';
     $comment := 'You actually only need to define the Overides needed, search for';
     $comment := '$override. in this file to see the definition of each option';
-    
+
     $override := {
         'comment_common' : '{object} Common shared settings for metadata trasnforms',
         'common' : {
@@ -89,7 +89,7 @@ $.(
         $result := $replace($result, $curylydoublequotes, '\u0022');
         $result := $replace($result, $nbsp, ' ');
         $result := $replace($result, $otherentities, '');
-        $result; 
+        $result;
     )};
 
     $comment := '*******************************************************';
@@ -117,7 +117,7 @@ $.(
     $comment := '* to a numeric value of total seconds';
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';    
+    $comment := '*******************************************************';
     $isodurationtoseconds := function ($isoduration) {(
         $input := $isoduration = null ? '' : $isoduration;
         $time := $substringAfter($input, 'T');
@@ -136,7 +136,7 @@ $.(
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @param {number} [$precision=2] - The precision';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';  
+    $comment := '*******************************************************';
     $isodurationtominutes := function ($isoduration, $precision) {(
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
@@ -150,7 +150,7 @@ $.(
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @param {number} [$precision=2] - The precision';
     $comment := '* @returns {number}';
-    $comment := '*******************************************************';  
+    $comment := '*******************************************************';
     $isodurationtohours := function ($isoduration, $precision) {(
         $seconds := $isodurationtoseconds($isoduration);
         $prec := $exists($precision) ? $precision : 2;
@@ -164,7 +164,7 @@ $.(
     $comment := '* to a string in format hh:mm. No rounding so example would be 01:34';
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
+    $comment := '*******************************************************';
     $isodurationtohhmm := function ($isoduration) {(
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
         $time := $substringAfter($input, 'T');
@@ -181,7 +181,7 @@ $.(
     $comment := '* to a string in format hh:mm:ss. So example would be 01:34:56';
     $comment := '* @param {string} $isoduration - ISO8601 format duration';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
+    $comment := '*******************************************************';
     $isodurationtohhmmss := function ($isoduration) {(
         $input := $isoduration = null ? 'PT0H0M0S' : $isoduration;
         $time := $substringAfter($input, 'T');
@@ -204,7 +204,7 @@ $.(
     $comment := '* @param {number} [$maxCount=10] - The number of Keys';
     $comment := '* @param {string} [$delimiter=|] - The delimiter for Object strings';
     $comment := '* @returns {Object}';
-    $comment := '*******************************************************';  
+    $comment := '*******************************************************';
     $flattenArrayAndObject := function($source, $prefix, $maxCount, $delimiter) {(
         $maxCount := $maxCount ? $maxCount : 10;
         $delimiter := $delimiter ? $delimiter : '|';
@@ -212,7 +212,7 @@ $.(
         $padarray := [1..$maxCount].('');
         $sourceArray := $count($source)=0 ? [] : [];
         $result := '';
-        
+
         $sourceArray := $append($sourceArray, $map($source, function ($v, $i, $a) {(
             $model := $count($keys($v)) > 0 ? $v : { 'key': $v ? $v : '' };
             $needdelimiter:= $count($keys($v)) > 0 ? $delimiter : '';
@@ -230,7 +230,7 @@ $.(
         });
 
         $sourceArray := $append($sourceArray, $padarray);
-    
+
         $sourceArray := $filter($sourceArray, function ($v, $i, $a) {
             $i < $maxCount
         });
@@ -252,7 +252,7 @@ $.(
     $comment := '* @param {boolean} [$languageonly=false] - Only check with language code';
     $comment := '* @param {string} [$default=] - Default when no match.';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
+    $comment := '*******************************************************';
     $rfc5646language := function ($locale, $languageonly, $default) {(
             $defaultLanguage := $default ? $default : '';
             $checkLanguageOnly := $languageonly ? $languageonly : false;
@@ -493,7 +493,7 @@ $.(
             }];
 
             $result:= $checkLanguageOnly = true ? null : $lookup($RFC5646_LANGUAGE_TAGS, $trim($locale));
-            
+
             $result:= $result ? $result : $lookup($RFC5646_LANGUAGE_TAGS, $trim($split($locale,'-')[0]));
 
             $result ? $result : $defaultLanguage;
@@ -503,17 +503,17 @@ $.(
     $comment := '* Remove any query string or hash parameters from a URL';
     $comment := '* @param {string} $url - The URL string';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
+    $comment := '*******************************************************';
 	$stripQueryStringandHash := function($url){(
     	$myurl := $url ? $url : '';
     	$split( $myurl , /\#|\?/)[0];
     )};
-    
+
     $comment := '*******************************************************';
     $comment := '* Get the document extension from a URL';
     $comment := '* @param {string} $url - The URL string';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
+    $comment := '*******************************************************';
     $getDocumentExtension := function($url){(
     	$myurl := $url ? $url : '';
         $mydocument := $reverse($split($myurl,'/'))[0];
@@ -539,13 +539,13 @@ $.(
     $comment := '* technologies[0].version';
     $comment := '* Shortened to $length with ellipsis string of ...';
     $comment := '* @param {boolean} [$includecontenttype=true] - Include';
-    $comment := '*                  the contentype :';        
+    $comment := '*                  the contentype :';
     $comment := '* @param {boolean} [$includetechnology=true] - Include';
     $comment := '*                  the technology and version in title';
     $comment := '*                  if title does not contain :';
     $comment := '* @param {number} [$length=255] - Maximum length';
     $comment := '* @returns {string}';
-    $comment := '*******************************************************';  
+    $comment := '*******************************************************';
     $metadatatitle := function($includecontenttype, $includetechnology,$length){(
         $maxlength := $exists($length) ? $length : 255;
         $addtechnology := $exists($includetechnology) ? $boolean($includetechnology) : true;
@@ -590,7 +590,7 @@ $.(
         $maxlength:= $length ? $length : 2000;
         $myeol:= $eol ? $eol : '\r\n';
         $by:= $count(by) = 0 ? '' : 'By: ' & $join(by, ', ') & $myeol;
-        
+
         $publisher := publication ? publication.publisher ? $join(['Copyright:', publication.publisher],' ') : '' : '';
         $year := publication ? publication.copyrightYear ? $join(['(c)', $string(publication.copyrightYear)],' ') : '' : '';
         $copyright := publication ? $join([$publisher, $year],' ') & $myeol : '';
@@ -611,7 +611,7 @@ $.(
     $metadatasharelink := function($lookupValues){(
         $urlparameter := $exists( $lookupValues) ? $lookup( $lookupValues, $lowercase(contentType.percipioType)) : null;
         $urlparameter := $urlparameter ? $urlparameter : $exists( $lookupValues) ? $lookup( $lookupValues, 'default') : '';
-        
+
         link & $urlparameter;
     )};
 
@@ -687,7 +687,7 @@ $.(
     $comment := '* The number of tags values to include set to 0 to not return any';
     $comment := '* For more information see the $moodletagsarray function above';
     $moodleMaxTags := $exists($override.moodle.maxtags) ? $override.moodle.maxtags : 10;
-    
+
     $comment := 'End of Moodle/Customer Specific Variables';
     $comment := '*******************************************************';
     $comment := '*******************************************************';
@@ -760,10 +760,10 @@ $.(
         $year := $row.publication ? $row.publication.copyrightYear ? $join(['(c)', $string($row.publication.copyrightYear)],' ') : '' : '';
         $copyright := $row.publication ? '<p>' & $join([$publisher, $year],' ') & '</p>' : '';
         $isbn := $row.publication ? $row.publication.isbn ? '<p>' & $join(['ISBN:', $row.publication.isbn],' ') & '</p>' : '' : '';
-        $launchlink := $launchpathstart ? '<p>' & $launchpathstart & 'Launch</a></p>' : '';        
+        $launchlink := $launchpathstart ? '<p>' & $launchpathstart & 'Launch</a></p>' : '';
         $publication := $row.publication ? $join([$copyright,$isbn]) : '';
 		$description := $row.localizedMetadata[0].description ? '<p>' & $row.localizedMetadata[0].description & '</p>' : '';
-        $join([$by,$publication,$thumbnail,$description,$launchlink])
+        $join([$thumbnail,$by,$publication,$description,$launchlink])
     )};
     $comment := 'End of Moodle/Customer Specific Functions';
     $comment := '*******************************************************';
@@ -787,7 +787,7 @@ $.(
                 $tags ? $join($tags,'|') : ''
              ),
             'COURSE_VISIBLE': lifecycle.status = 'ACTIVE' ? 1 : 0,
-            'COURSE_THUMBNAIL': imageUrl ? $stripQueryStringandHash(imageUrl) : '',
+            'COURSE_THUMBNAIL': imageUrl,
             'COURSE_CATEGORYIDNUMBER': (
                 $idnumber := $lookup([{
                     'audiobook': associations.channels[0].id,
@@ -798,8 +798,8 @@ $.(
                     'video': associations.channels[0].id,
                     'journey': id
                 }], $lowercase(contentType.percipioType));
-                
-                $idnumber ? $idnumber: ''
+
+                $idnumber ? $join([$idnumber, localeCodes[0]],'_') : ''
             ),
             'COURSE_CATEGORYNAME': (
                 $catname := $lookup([{
@@ -811,8 +811,8 @@ $.(
                     'video': associations.channels[0].title,
                     'journey': localizedMetadata[0].title
                 }], $lowercase(contentType.percipioType));
-                
-                $catname ? $catname : ''
+
+                $catname ? $catname & ' [' & $rfc5646language(localeCodes[0]) & ']' : ''
             ),
             'EXTERNAL_NAME':localizedMetadata[0].title ? $metadatatitle($commonIncludeContentTypeInTitle, $commonIncludeTechnologyDetailsInTitle, 254) : '',
             'EXTERNAL_INTRO': localizedMetadata[0].description ? $commonUseExtendedDescription ? $metadataextendeddescription(2000,$commonExtendedDescriptionEOL) : $metadatadescription(2000) : '',
@@ -827,7 +827,7 @@ $.(
                     'video': 1,
                     'journey': 1
                 }], $lowercase(contentType.percipioType));
-                
+
                 $external ? $external : 0
             )
           }

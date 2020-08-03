@@ -61,7 +61,14 @@ config.request.query = {};
  * Type: string[]
  * Enum: COURSE,VIDEO,BOOK,AUDIOBOOK,CHANNEL,LINKED_CONTENT
  */
-config.request.query.typeFilter = ['CHANNEL', 'JOURNEY', 'COURSE', 'BOOK', 'AUDIOBOOK'];
+config.request.query.typeFilter = [
+  'CHANNEL',
+  'JOURNEY',
+  'COURSE',
+  'BOOK',
+  'AUDIOBOOK',
+  'LINKED_CONTENT',
+];
 /**
  * Name: licensePoolIds
  * Description : Array of License pool IDs to which to restrict content.
@@ -77,7 +84,7 @@ config.request.query.licensePoolIds = null;
  * Type: string
  * Format: date-time
  */
-config.request.query.updatedSince = '2020-06-10T00:00:00Z';
+config.request.query.updatedSince = null;
 /**
  * Name: offset
  * Description : Used in conjunction with 'max' to specify which set of 'max' content items
