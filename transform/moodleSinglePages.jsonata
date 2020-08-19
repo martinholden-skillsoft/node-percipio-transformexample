@@ -21,9 +21,9 @@ $.(
             'Comment_UseExtendedDescription' : '{boolean} Whether to use the extended description option. This combines the descripion and publication data. See the $metadataextendeddescription function',
         	'UseExtendedDescription' : true,
             'Comment_ExtendedDescriptionEOL' : '{string} The EOL characters to use for the Extended Description. See the $metadataextendeddescription function',
-            'ExtendedDescriptionEOL' : '\r\n',
+            'ExtendedDescriptionEOL' : '\n',
             'Comment_IncludeContentTypeInTitle' : '{boolean} Whether to include contentType.displayLabel as prefix to title. See the $metadatatitle function',
-            'IncludeContentTypeInTitle' : true,
+            'IncludeContentTypeInTitle' : false,
             'Comment_IncludeTechnologyDetailsInTitle' : '{boolean} Whether to include technologies[0].title and version as prefix to title. See the $metadatatitle function',
             'IncludeTechnologyDetailsInTitle': true,
             'Comment_ShareLinkParametersLookup' : '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link. default option to handle unknown types. Returned value (right side) is the string to append to the link',
@@ -39,14 +39,14 @@ $.(
             },
             'Comment_MobileShareLinkParametersLookup' : '{object} The MAPPING between Percipio contentType.percipioType lowercase and any additions to the link for Mobile. default option to handle unknown types. Returned value (right side) is the string to append to the link',
             'MobileShareLinkParametersLookup' : {
-                'audiobook': '?chromeless=true&preventAppDownload=true',
-                'book': '?chromeless=true&preventAppDownload=true',
-                'channel': '?chromeless=true&preventAppDownload=true',
-                'course': '?chromeless=true&preventAppDownload=true',
-                'linked_content': '?chromeless=true&preventAppDownload=true',
-                'video': '?chromeless=true&preventAppDownload=true',
-                'journey': '?chromeless=true&preventAppDownload=true',
-                'default': '?chromeless=true&preventAppDownload=true'
+                'audiobook': '',
+                'book': '',
+                'channel': '',
+                'course': '',
+                'linked_content': '',
+                'video': '',
+                'journey': '',
+                'default': ''
             }
         },
         'comment_moodle' : '{object} Moodle specific settings for metadata transforms',
@@ -749,6 +749,7 @@ $.(
     $comment := '*     imageUrl is added as a hyperlink';
     $comment := '*     localizedMetadata[0].description';
     $comment := '*     Launch text is added as a hyperlink';
+    $comment := '*     The content type contentType.displayLabel';
     $comment := '* @param {object} $row - The object to process';
     $comment := '* @returns {string} object';
     $comment := '*******************************************************';
@@ -762,8 +763,10 @@ $.(
         $isbn := $row.publication ? $row.publication.isbn ? '<p>' & $join(['ISBN:', $row.publication.isbn],' ') & '</p>' : '' : '';
         $launchlink := $launchpathstart ? '<p>' & $launchpathstart & 'Launch</a></p>' : '';
         $publication := $row.publication ? $join([$copyright,$isbn]) : '';
-		$description := $row.localizedMetadata[0].description ? '<p>' & $row.localizedMetadata[0].description & '</p>' : '';
-        $join([$thumbnail,$by,$publication,$description,$launchlink])
+        $description := $row.localizedMetadata[0].description ? $contains($row.localizedMetadata[0].description,'<p>') ?$row.localizedMetadata[0].description : '<p>' & $row.localizedMetadata[0].description & '</p>' : '';
+        $contenttype := $row.contentType.displayLabel ? '<p>' & $join(['Type:', $row.contentType.displayLabel],' ') & '</p>' : '';
+
+        $join([$thumbnail,$contenttype,$by,$publication,$description,$launchlink])
     )};
     $comment := 'End of Moodle/Customer Specific Functions';
     $comment := '*******************************************************';

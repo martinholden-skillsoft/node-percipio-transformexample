@@ -61,14 +61,7 @@ config.request.query = {};
  * Type: string[]
  * Enum: COURSE,VIDEO,BOOK,AUDIOBOOK,CHANNEL,LINKED_CONTENT
  */
-config.request.query.typeFilter = [
-  'CHANNEL',
-  'JOURNEY',
-  'COURSE',
-  'BOOK',
-  'AUDIOBOOK',
-  'LINKED_CONTENT',
-];
+config.request.query.typeFilter = ['CHANNEL', 'JOURNEY'];
 /**
  * Name: licensePoolIds
  * Description : Array of License pool IDs to which to restrict content.
