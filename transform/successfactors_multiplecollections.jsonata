@@ -1,0 +1,86 @@
+$.(
+    $comment:= 'Martin Holden - 15th Sept 2020';
+    $comment:= 'Do our normal SuccessFactors base transform';
+    $comment:= 'only changes:';
+    $comment:= 'move CATALOG_1 to end of data';
+    $comment:= 'add empty CATALOG_2 to end of data';
+    $comment:= 'add empty CATALOG_3 to end of data';
+    $comment:= 'Martin Holden - 15th Sept 2020';
+
+    $original_transformed_data := $.{
+        'CPNT_ID': $componentIdPrefix ? $join([$componentIdPrefix, id],'-') : id,
+        'CPNT_TYP_ID': $successFactorsType($types, $),
+        'NOTACTIVE': $.lifecycle.status = 'ACTIVE' ? 'N' : 'Y',
+        'CPNT_TITLE': $formatTitle($titleFormat, $successFactorsType($types, $), 300, $),
+        'DEL_MTH_ID':  $successFactorsType($types, $),
+        'HTML_CPNT_DESC': $plainString($.localizedMetadata[0].description, 3500),
+        'CMPL_STAT_ID': $successFactorsCompletionStat($types, $),
+        'CREDIT_HRS':  $isoDurationToHours($.duration),
+        'SHOW_IN_CATALOG': $successFactorsShowInCatalog($types, $),
+        'APP_ID': $.id,
+        'BUILD_COMPANY': $buildCompany,
+        'CONTENT_ONLINE': 'Y',
+        'LAUNCH_TYPE': 3,
+        'PRIMARY_PARAM': $.link,
+        'ITEM_ONLINE': 'Y',
+        'MODULE_NAME': $formatTitle($titleFormat, $successFactorsType($types, $), 300, $),
+        'THUMBNAIL_URI': imageUrl ? $stripQueryStringandHash(imageUrl) : '',
+        'LAUNCH_IN_A_NEW_BWSR_WINDOW': 'Y',
+        'LOCALE': $successFactorsLocale($.localizedMetadata[0].localeCode),
+        'REV_DTE': $fromMillis($toMillis($.lifecycle.publishDate),'[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01][z]','-0500'),
+        'CPNT_SRC_ID': 'SKILLSOFT',
+        'CREATE_DTE': $fromMillis($toMillis($.lifecycle.publishDate),'[MNn,*-3]-[D01]-[Y0001] [H01]:[m01]:[s01][z]','-0500'),
+        'CHGBCK_METHOD': 1,
+        'ENABLE_MOBILE_ACCESS': 'Y',
+        'MOBILE_PRIMARY_PARAM': $.link,
+        'DMN_ID': $domainId ? $domainId,
+        'CATALOG_1': $catalog,
+        'CATALOG_2': '',
+        'CATALOG_3': ''
+      };
+
+    $merged_transformed_data := $merge([$original_transformed_data, $extraColumns]);
+
+    $comment := '*******************************************************';
+    $comment := '* Converts a single array of collection objects, consisting';
+    $comment := '* of id and title to a grouped array of objects';
+    $comment := '* with $groupsize CATALOG_n values';
+    $comment := '* @param {array} $source';
+    $comment := '* @param {number} [$groupsize=3] - The number of items in each group';
+    $comment := '* @returns {array[]}';
+    $comment := '*******************************************************';
+    $getSuccessFactorsCatalogChunks := function($source, $groupsize) {(
+        $groupsize := $groupsize ? $groupsize : 3;
+        $arrayChunks := $ceil($count($source)/ $groupsize);
+        $map([0..$arrayChunks], function($v, $i) {(
+            $start := $v * $groupsize;
+            $end := $start + $groupsize;
+            $merge($map(
+                $filter($source, function($v, $i) {(
+                    $i >= $start and $i < $end
+                )})
+                , function ($v, $i, $a) {(
+                { 'CATALOG_'& ($i+1) : $v.id }
+            )}));
+        )});
+    )};
+
+    $comment:= 'Martin Holden - 15th Sept 2020';
+    $comment:= 'We use $map to process all items in the getSuccessFactorsCatalogChunks array or arrays';
+    $comment:= 'Martin Holden - 15th Sept 2020';
+
+    $transformed_data := $map(collections ? $getSuccessFactorsCatalogChunks(collections) : [{}] , function ($v, $i, $a){(
+        $comment:= 'Martin Holden - 15th Sept 2020';
+        $comment:= '$v is the object with CATALOG_1 thru CATALOG_3';
+        $comment:= 'Merging this object with the already transformed data overwrites the CATALOG_1 thru CATALOG_3 fields';
+        $comment:= 'Martin Holden - 15th Sept 2020';
+
+        $merge([$merged_transformed_data, $v]);
+    )}
+    );
+
+    $comment:= 'Martin Holden - 15th Sept 2020';
+    $comment:= '$transformed_data is now an array of objects created from the single JSON input';
+    $comment:= 'Martin Holden - 15th Sept 2020';
+    $transformed_data;
+)
